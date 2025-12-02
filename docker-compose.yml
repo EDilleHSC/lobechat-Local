@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  lobe-chat:
+    image: lobehub/lobe-chat:latest  # ✅ Use official prebuilt image
+    container_name: lobe-chat
+    ports:
+      - "3210:3210"
+    depends_on:
+      - postgres
+      - minio
+      - chroma
+    env_file:
+      - .env.local  # ✅ Environment config for server mode
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15
+    container_name: lobe-postgres
+    environment:
+      POSTGRES_USER: lobe
+      POSTGRES_PASSWORD: REDACTED_DB_PASSWORD
+      POSTGRES_DB: lobechat
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: lobe-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: lobe
+      MINIO_ROOT_PASSWORD: REDACTED_MINIO_PASSWORD
+    ports:
+      - "9000:9000"   # MinIO API
+      - "9001:9001"   # MinIO Console
+    volumes:
+      - minio-data:/data
+    restart: unless-stopped
+
+  chroma:
+    image: chromadb/chroma
+    container_name: lobe-chroma
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma-data:/chroma
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  minio-data:
+  chroma-data:
