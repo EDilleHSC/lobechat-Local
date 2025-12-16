@@ -1,0 +1,29 @@
+{
+  "tools": [
+    {
+      "name": "list_inbox",
+      "description": "List all files currently in the Intake Inbox",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "read_file",
+      "description": "Read the content of a specific file",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Full path to the file"
+          }
+        },
+        "required": [
+          "path"
+        ]
+      }
+    }
+  ]
+}

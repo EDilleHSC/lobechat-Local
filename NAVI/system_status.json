@@ -1,0 +1,13 @@
+{
+  "timestamp": "2025-12-15T08:09:32.608749",
+  "inbox_count": 0,
+  "active_count": 0,
+  "waiting_count": 0,
+  "done_count": 0,
+  "total_files": 0,
+  "last_snapshot": "none",
+  "health": "\ud83d\udd34 CRITICAL",
+  "issues": [
+    "\u274c No snapshots found"
+  ]
+}

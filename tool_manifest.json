@@ -1,0 +1,590 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VBoarder Core Tools",
+    "description": "Core tools for VBoarder agents (Navi, Money Penny, AIR)",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3002"
+    }
+  ],
+  "paths": {
+    "/mcp/navi/list_inbox": {
+      "get": {
+        "description": "List all mail items in the inbox organized by priority. Use this to check for new files.",
+        "operationId": "list_inbox",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "file_count": { "type": "integer" },
+                    "files": { 
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "filename": { "type": "string" },
+                          "size_kb": { "type": "number" },
+                          "timestamp": { "type": "string" },
+                          "priority": { "type": "string" },
+                          "status": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcp/navi/get_mail_room_status": {
+      "post": {
+        "description": "Get the current status of all mail room folders",
+        "operationId": "get_mail_room_status",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_messages": { "type": "integer" },
+                    "folders": {
+                      "type": "object",
+                      "additionalProperties": { "type": "integer" }
+                    },
+                    "last_updated": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/process_mail": {
+      "post": {
+        "description": "Process a specific mail item by ID",
+        "operationId": "process_mail",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mail_id": {
+                    "type": "string",
+                    "description": "The ID of the mail item to process"
+                  }
+                },
+                "required": ["mail_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/get_mail_details": {
+      "post": {
+        "description": "Get detailed information about a specific mail item",
+        "operationId": "get_mail_details",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "mail_id": {
+                    "type": "string",
+                    "description": "The ID of the mail item to retrieve"
+                  }
+                },
+                "required": ["mail_id"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/search_contacts": {
+      "post": {
+        "description": "Search for contacts by name, title, or department",
+        "operationId": "search_contacts",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "Search term to find contacts"
+                  }
+                },
+                "required": ["query"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/check_calendar": {
+      "post": {
+        "description": "Check calendar for appointments",
+        "operationId": "check_calendar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "description": "Optional: Specific date to check (YYYY-MM-DD)"
+                  },
+                  "start_date": {
+                    "type": "string",
+                    "description": "Optional: Start of date range (YYYY-MM-DD)"
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "description": "Optional: End of date range (YYYY-MM-DD)"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/schedule_meeting": {
+      "post": {
+        "description": "Schedule a new meeting or appointment",
+        "operationId": "schedule_meeting",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Meeting title"
+                  },
+                  "date": {
+                    "type": "string",
+                    "description": "Date (YYYY-MM-DD)"
+                  },
+                  "time": {
+                    "type": "string",
+                    "description": "Time (HH:MM AM/PM)"
+                  },
+                  "duration": {
+                    "type": "string",
+                    "description": "Duration (e.g., '1 hour')"
+                  },
+                  "attendees": {
+                    "type": "string",
+                    "description": "Comma-separated list of attendees"
+                  }
+                },
+                "required": ["title", "date", "time", "attendees"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/list_tasks": {
+      "post": {
+        "description": "List all tasks on the Kanban board",
+        "operationId": "list_tasks",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "description": "Filter by status (todo, in_progress, done)"
+                  }
+                },
+                "required": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/add_task": {
+      "post": {
+        "description": "Add a new task to the Kanban board",
+        "operationId": "add_task",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Task title"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "Task description"
+                  },
+                  "priority": {
+                    "type": "string",
+                    "description": "Priority (high, medium, low)"
+                  }
+                },
+                "required": ["title", "description"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/update_task_status": {
+      "post": {
+        "description": "Move a task to a different column",
+        "operationId": "update_task_status",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task_id": {
+                    "type": "string",
+                    "description": "The ID of the task to move"
+                  },
+                  "new_status": {
+                    "type": "string",
+                    "description": "The new status (todo, in_progress, done)"
+                  }
+                },
+                "required": ["task_id", "new_status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/take_message": {
+      "post": {
+        "description": "Take a message for someone who is unavailable",
+        "operationId": "take_message",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "for_person": {
+                    "type": "string",
+                    "description": "Person the message is for"
+                  },
+                  "from_person": {
+                    "type": "string",
+                    "description": "Person leaving the message"
+                  },
+                  "message": {
+                    "type": "string",
+                    "description": "The message content"
+                  },
+                  "contact_info": {
+                    "type": "string",
+                    "description": "Contact information for callback"
+                  }
+                },
+                "required": ["for_person", "from_person", "message"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/mcp/navi/classify_file": {
+      "post": {
+        "description": "Classify a file with a specific category and priority based on content",
+        "operationId": "classify_file",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string" },
+                  "content": { "type": "string" }
+                },
+                "required": ["filename"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Successful response" } }
+      }
+    },
+    "/mcp/navi/move_to_priority": {
+      "post": {
+        "description": "Move file to priority-specific folder in Mail Room",
+        "operationId": "move_to_priority",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string" },
+                  "priority": { "type": "string", "enum": ["URGENT", "HIGH", "MEDIUM", "LOW"] }
+                },
+                "required": ["filename", "priority"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Successful response" } }
+      }
+    },
+    "/mcp/navi/extract_entities": {
+      "post": {
+        "description": "Extract important entities from file content",
+        "operationId": "extract_entities",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string" },
+                  "content": { "type": "string" }
+                },
+                "required": ["filename", "content"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Successful response" } }
+      }
+    },
+    "/mcp/navi/log_decision": {
+      "post": {
+        "description": "Log decision to memory",
+        "operationId": "log_decision",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string" },
+                  "decision_data": { "type": "object" }
+                },
+                "required": ["filename", "decision_data"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Successful response" } }
+      }
+    },
+    "/mcp/navi/update_metrics": {
+      "post": {
+        "description": "Update performance metrics",
+        "operationId": "update_metrics",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "success": { "type": "boolean" },
+                  "processing_time": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Successful response" } }
+      }
+    },
+    "/mcp/navi/classify_file": {
+      "post": {
+        "description": "Classify a file with a specific category and priority based on content",
+        "operationId": "classify_file",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string" },
+                  "content": { "type": "string" }
+                },
+                "required": ["filename"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Successful response" } }
+      }
+    },
+    "/mcp/navi/read_file": {
+      "post": {
+        "description": "Read file contents",
+        "operationId": "read_file",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string" }
+                },
+                "required": ["filename"]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Successful response" } }
+      }
+    },
+    "/searchKnowledgeBase": {
+      "post": {
+        "description": "Search the VBoarder Knowledge Base for information using semantic search",
+        "operationId": "searchKnowledgeBase",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "The text string to search for in the knowledge base"
+                  },
+                  "max_results": {
+                    "type": "integer",
+                    "description": "Maximum number of results to return (default: 3)",
+                    "default": 3
+                  },
+                  "min_relevance": {
+                    "type": "number",
+                    "description": "Minimum relevance score (0.0-1.0) to include in results",
+                    "default": 0.0
+                  },
+                  "section_filter": {
+                    "type": "string",
+                    "description": "Filter results to a specific KB section (e.g., '4.1')"
+                  }
+                },
+                "required": ["query"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "section": { "type": "string" },
+                      "title": { "type": "string" },
+                      "content": { "type": "string" },
+                      "relevance_score": { "type": "number" },
+                      "source": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

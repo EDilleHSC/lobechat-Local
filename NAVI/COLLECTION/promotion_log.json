@@ -1,0 +1,14 @@
+# VBoarder Promotion Log
+# Tracks files moved from COLLECTION to INBOX
+
+[
+  // Example entry:
+  // {
+  //   "timestamp": "2025-12-14T22:32:00Z",
+  //   "batch_id": "2025-12-14_bulk_import_001",
+  //   "files_promoted": ["important_doc.pdf", "meeting_notes.txt"],
+  //   "reason": "Executive review required",
+  //   "destination_agent": "CEO_Assistant",
+  //   "promoted_by": "human_operator"
+  // }
+]

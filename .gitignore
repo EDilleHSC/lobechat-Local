@@ -1,0 +1,6 @@
+*.log
+__pycache__/
+*.pyc
+NAVI/archive/
+archives/
+D:/Temp/

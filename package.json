@@ -1,0 +1,17 @@
+{
+  "name": "vboarder_core",
+  "version": "1.0.0",
+  "description": "",
+  "main": "mcp_server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.3",
+    "node-fetch": "^3.3.2"
+  }
+}

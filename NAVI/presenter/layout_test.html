@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVI Layout Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0e27;
+            color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #4a90e2;
+            margin-bottom: 30px;
+        }
+
+        /* THIS IS THE KEY LAYOUT */
+        .content-grid {
+            display: grid !important;
+            grid-template-columns: 300px 1fr !important;
+            gap: 32px;
+            margin-bottom: 40px;
+            border: 2px solid #4a90e2;
+            padding: 20px;
+        }
+
+        /* LEFT COLUMN - VERTICAL BUTTONS */
+        .actions-section {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 16px;
+            border: 2px solid yellow;
+            padding: 10px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            border: 2px solid;
+            border-radius: 8px;
+            background: #0f1433;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .btn-track {
+            border-color: #4ac04a;
+            color: #7cff7c;
+        }
+
+        .btn-hold {
+            border-color: #f5a623;
+            color: #ffc107;
+        }
+
+        .btn-escalate {
+            border-color: #e74c3c;
+            color: #ff6b6b;
+        }
+
+        .action-icon {
+            font-size: 28px;
+        }
+
+        /* RIGHT COLUMN - FILE INFO */
+        .file-card {
+            background: #0f1433;
+            border: 2px solid #f5a623;
+            padding: 28px;
+            border-radius: 8px;
+        }
+
+        .file-card h3 {
+            font-size: 22px;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .debug-info {
+            background: #1e2749;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #4a90e2;
+        }
+
+        .debug-info h2 {
+            color: #4a90e2;
+            margin-bottom: 10px;
+        }
+
+        .debug-info p {
+            margin: 5px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 NAVI Layout Test - Vertical Buttons</h1>
+
+        <div class="content-grid">
+            <!-- LEFT COLUMN: VERTICAL BUTTONS -->
+            <div class="actions-section">
+                <button class="action-btn btn-track">
+                    <div class="action-icon">🟢</div>
+                    <div>Track</div>
+                </button>
+
+                <button class="action-btn btn-hold">
+                    <div class="action-icon">🟡</div>
+                    <div>Hold</div>
+                </button>
+
+                <button class="action-btn btn-escalate">
+                    <div class="action-icon">🔴</div>
+                    <div>Escalate</div>
+                </button>
+            </div>
+
+            <!-- RIGHT COLUMN: FILE INFO -->
+            <div class="file-card">
+                <h3>📄 Client_Notes_Intro.docx</h3>
+                <p><strong>Routed to:</strong> ACTIVE</p>
+                <p><strong>Confidence:</strong> 90% (High)</p>
+                <p><strong>File type:</strong> DOCX</p>
+                <p><strong>Received:</strong> 2025-12-15</p>
+            </div>
+        </div>
+
+        <div class="debug-info">
+            <h2>Expected Layout:</h2>
+            <p>✅ LEFT: Buttons stacked VERTICALLY (green, yellow, red - top to bottom)</p>
+            <p>✅ RIGHT: File info card</p>
+            <p>✅ Grid has YELLOW border around buttons, ORANGE border around file card</p>
+            <p>✅ Entire grid has BLUE border</p>
+            <p></p>
+            <p><strong>If you see buttons HORIZONTAL (side-by-side), the CSS is not loading correctly.</strong></p>
+        </div>
+    </div>
+</body>
+</html>

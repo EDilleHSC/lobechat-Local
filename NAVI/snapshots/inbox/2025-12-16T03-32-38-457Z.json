@@ -1,0 +1,45 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-16T03:32:38.457Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "items": [
+    {
+      "name": "GTD_WORKFLOW_GUIDE.md",
+      "type": "file",
+      "size": 9518,
+      "modified": "2025-11-25T16:45:15.551Z"
+    }
+  ],
+  "status": "air_processed",
+  "processed_at": "2025-12-15T20:32:38.598070",
+  "air_processed_at": "2025-12-15T20:57:49.002837",
+  "air_output": {
+    "agent": "AIR",
+    "action": "route",
+    "summary": "1 incoming requests processed",
+    "items": [
+      {
+        "file": "Client_Notes_Intro.docx",
+        "priority": "HIGH",
+        "destination": "ACTIVE",
+        "reason": "Contains priority keywords (important, urgent, priority)",
+        "confidence": 90,
+        "confidence_label": "High",
+        "signals": [
+          "allowed_extension",
+          "keyword_matches",
+          "keyword_density",
+          "clear_filename",
+          "no_ambiguity"
+        ]
+      }
+    ],
+    "next_steps": [
+      "COLLECTION batches are separate from Inbox - they don't affect daily operations until manually promoted",
+      "Monitor ACTIVE directory for new arrivals",
+      "Archive completed items to DONE"
+    ],
+    "timestamp": "2025-12-15T20:57:49.002837"
+  }
+}

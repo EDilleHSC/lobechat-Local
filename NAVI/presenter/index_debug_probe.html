@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVI Debug Probe</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>pre#navi_debug{position:fixed;right:12px;top:12px;max-width:40%;background:#07102a;color:#cfe6ff;padding:16px;border-radius:8px;z-index:9999;white-space:pre-wrap;font-family:monospace;font-size:13px;border:1px solid #1e2749;}</style>
+</head>
+<body>
+<!-- Debug probe - loads current layout HTML (duplicated for deterministic output) -->
+<div class="container">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-icon">📬</div>
+        <div class="header-content">
+            <h1>NAVI Mail Room Update (debug probe)</h1>
+            <p>Processed (probe)</p>
+        </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary-card">
+        <h2>Summary</h2>
+        <p>1 incoming request processed</p>
+        <p>Items routed to ACTIVE, WAITING, or DONE</p>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="content-grid">
+        <!-- LEFT: ACTIONS (VERTICAL BUTTONS) -->
+        <div class="actions-section">
+            <button class="action-btn btn-track">
+                <div class="action-icon">🟢</div>
+                <div class="action-text">
+                    <div class="action-title">Track</div>
+                    <div class="action-desc">Accept responsibility</div>
+                </div>
+            </button>
+
+            <button class="action-btn btn-hold">
+                <div class="action-icon">🟡</div>
+                <div class="action-text">
+                    <div class="action-title">Hold</div>
+                    <div class="action-desc">Not actionable now</div>
+                </div>
+            </button>
+
+            <button class="action-btn btn-escalate">
+                <div class="action-icon">🔴</div>
+                <div class="action-text">
+                    <div class="action-title">Escalate</div>
+                    <div class="action-desc">Deadlines · Delegation · Fire drills</div>
+                </div>
+            </button>
+        </div>
+
+        <!-- RIGHT: FILE INFO -->
+        <div class="file-card">
+            <h3>📄 Client_Notes_Intro.docx</h3>
+            <div class="file-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Routed to:</span>
+                    <span class="meta-value">ACTIVE</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">Confidence:</span>
+                    <span class="confidence-badge">90% (High)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+(function(){
+  // Probe computed styles for the actions-section
+  var el = document.querySelector('.actions-section');
+  if(!el){ document.documentElement.setAttribute('data-debug','NO_ACTIONS_EL'); return; }
+  var s = getComputedStyle(el);
+  var info = { display: s.display, flexDirection: s.flexDirection, children: el.children.length };
+  for(var i=0;i<el.children.length;i++){
+    var c = getComputedStyle(el.children[i]);
+    info['child'+i] = { display: c.display, marginLeft: c.marginLeft, marginTop: c.marginTop };
+  }
+  var pre = document.createElement('pre');
+  pre.id = 'navi_debug';
+  pre.textContent = JSON.stringify(info, null, 2);
+  document.body.appendChild(pre);
+})();
+</script>
+</body>
+</html>

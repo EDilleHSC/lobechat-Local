@@ -1,0 +1,116 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Navi File System Tools",
+    "description": "Tools for Navi to access the local file system (Inbox, Mail Room)",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8005"
+    }
+  ],
+  "paths": {
+    "/mcp/navi/list_inbox": {
+      "get": {
+        "description": "List all files currently in the inbox folder (D:\\04_PROJECTS-Active\\_INCOMING). Use this to see what needs processing.",
+        "operationId": "list_inbox",
+        "responses": {
+          "200": {
+            "description": "List of files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "file_count": { "type": "integer" },
+                    "files": { 
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "filename": { "type": "string" },
+                          "size_kb": { "type": "number" },
+                          "timestamp": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcp/navi/read_file": {
+      "post": {
+        "description": "Read the content of a specific file.",
+        "operationId": "read_file",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string", "description": "The exact filename to read (e.g. 'team_lunch.txt')" }
+                },
+                "required": ["filename"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "File content" }
+        }
+      }
+    },
+    "/mcp/navi/classify_file": {
+      "post": {
+        "description": "Classify a file based on its content.",
+        "operationId": "classify_file",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string" },
+                  "content": { "type": "string" }
+                },
+                "required": ["filename"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Classification result" }
+        }
+      }
+    },
+    "/mcp/navi/move_to_priority": {
+      "post": {
+        "description": "Move a file to a priority folder.",
+        "operationId": "move_to_priority",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "filename": { "type": "string" },
+                  "priority": { "type": "string", "enum": ["URGENT", "HIGH", "MEDIUM", "LOW"] }
+                },
+                "required": ["filename", "priority"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Move result" }
+        }
+      }
+    }
+  }
+}
