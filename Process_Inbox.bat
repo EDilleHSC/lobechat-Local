@@ -22,6 +22,12 @@ if %errorlevel% equ 0 (
     exit /b 1
 )
 
+REM Auto-open Clara presenter when processing completes successfully
+if %errorlevel% equ 0 (
+    echo [INFO] Opening Clara (presenter)...
+    start "Clara" "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\presenter\index.html"
+)
+
 echo.
 echo [INFO] Processing may take a few moments...
 echo Files will move from inbox → ACTIVE → WAITING or DONE
