@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>NAVI Live MSHTA Probe</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <style>body{font-family:Arial;padding:8px}</style>
+</head>
+<body>
+  <h3>Live Presenter Probe</h3>
+  <iframe id="fr" src="file:///D:/05_AGENTS-AI/01_RUNTIME/VBoarder/NAVI/presenter/index.html" style="width:100%;height:80vh;border:1px solid #ccc"></iframe>
+  <script language="javascript">
+    function writeFile(json) {
+      try {
+        var fso = new ActiveXObject('Scripting.FileSystemObject');
+        var f = fso.CreateTextFile('D:\\Temp\\navi_probe_live.json', true);
+        f.WriteLine(json);
+        f.Close();
+      } catch (e) {
+        document.body.insertAdjacentHTML('beforeend','<div style="color:red">Write failed: '+e.message+'</div>');
+      }
+    }
+    document.getElementById('fr').onload = function(){
+      try {
+        var doc = document.getElementById('fr').contentWindow.document;
+        var el = doc.querySelector('.actions-section');
+        if(!el) { writeFile(JSON.stringify({error:'no element'})); return; }
+        var s = doc.defaultView.getComputedStyle(el);
+        var info = { display: s.display, flexDirection: s.flexDirection, children: el.children.length };
+        for(var i=0;i<el.children.length;i++){
+          var c = doc.defaultView.getComputedStyle(el.children[i]);
+          info['child'+i] = { display: c.display, marginLeft: c.marginLeft, marginTop: c.marginTop };
+        }
+        writeFile(JSON.stringify(info));
+        document.body.insertAdjacentHTML('beforeend','<div style="color:green">Probe written to D:\\Temp\\navi_probe_live.json</div>');
+      } catch (ex) {
+        writeFile(JSON.stringify({error: ex.message}));
+        document.body.insertAdjacentHTML('beforeend','<div style="color:red">Probe exception: '+ex.message+'</div>');
+      }
+      setTimeout(function(){try{window.close();}catch(e){}},800);
+    };
+  </script>
+</body>
+</html>

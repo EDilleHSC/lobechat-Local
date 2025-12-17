@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>NAVI Mail Room Update - Debug</title>
+    <style>
+        /* minimal styles to avoid affecting layout probe */
+    </style>
+</head>
+<body>
+    <!-- injected: original index.html content starts -->
+    
+    <!-- HEADER -->
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">📬</div>
+            <div class="header-content">
+                <h1>NAVI Mail Room Update</h1>
+                <p>Processed (debug)</p>
+            </div>
+        </div>
+        
+        <div class="summary-card">
+            <h2>Summary</h2>
+            <p>1 incoming request processed</p>
+        </div>
+
+        <div class="content-grid">
+            <div class="actions-section">
+                <button class="action-btn btn-track"><div class="action-icon">🟢</div><div class="action-text"><div class="action-title">Track</div><div class="action-desc">Accept</div></div></button>
+                <button class="action-btn btn-hold"><div class="action-icon">🟡</div><div class="action-text"><div class="action-title">Hold</div></div></button>
+                <button class="action-btn btn-escalate"><div class="action-icon">🔴</div><div class="action-text"><div class="action-title">Escalate</div></div></button>
+            </div>
+            <div class="file-card"><h3>📄 Client_Notes_Intro.docx</h3></div>
+        </div>
+
+    </div>
+
+    <!-- probe script -->
+    <script>
+    (function(){
+      var el=document.querySelector('.actions-section');
+      if(!el){ document.documentElement.setAttribute('data-debug','NO_ACTIONS_EL'); return; }
+      var s=getComputedStyle(el);
+      var info = { display: s.display, flexDirection: s.flexDirection, children: el.children.length };
+      for(var i=0;i<el.children.length;i++){
+        var c = getComputedStyle(el.children[i]);
+        info['child'+i] = { display: c.display, marginLeft: c.marginLeft, marginTop: c.marginTop };
+      }
+      var pre = document.createElement('pre');
+      pre.id = 'navi_debug';
+      pre.textContent = JSON.stringify(info);
+      document.body.appendChild(pre);
+    })();
+    </script>
+</body>
+</html>
