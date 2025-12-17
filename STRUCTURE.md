@@ -4,8 +4,7 @@ This document defines the stable, enforceable folder structure for VBoarder (v1)
 
 ROOT (READ-MOSTLY)
 - README.md
-- VBOARDER_CANON.md
-- STRUCTURE.md
+- docs/ (contains VBOARDER_CANON.md, STRUCTURE.md, README_PRODUCTION.md)
 - Process_Inbox.bat (shim only)
 - start_mcp_server.bat (shim only)
 - node_modules/ (ignore)
@@ -56,8 +55,15 @@ _graveyard/ (SACRED TRASH)
 
 ENFORCEMENT
 - Freeze structure for 1–2 days after this commit: no moves, only observations
-- Changes that add runtime or pipeline code to root are disallowed (CI check to follow)
+- Changes that add runtime or pipeline code to root are disallowed (CI guard enforces this)
 - Compatibility shims at root are allowed and must be trivial (forwarders only)
+
+CI GUARD
+- A GitHub Actions workflow (`.github/workflows/root-guard.yml`) runs on push/PR and executes `scripts/check_root_guard.py` to detect disallowed files in root.
+- To allow an intentional exception, add `# ROOT_EXCEPTION_OK` to the file and open a PR with justification in the description.
 
 NEXT ACTION
 - This file is the official v1 lock. Confirm and we will (optionally) add CI checks and documentation that prevent future root mutations.
+
+MIGRATION NOTE
+- Files originally located at root that are processing code have been moved into `pipelines/moved_from_root` and `runtime` as part of an initial cleanup. See git history for original content.

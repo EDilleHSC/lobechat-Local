@@ -1,5 +1,7 @@
 # VBOARDER — System Intent & Operating Canon
 
+> Canon update: top-level docs moved to `docs/`. Root should be navigation-only.
+
 > **READ MODE — CANONICAL DOCUMENT**
 >
 > This file defines what VBoarder *is*, what it *is not*, and how work flows through the system.

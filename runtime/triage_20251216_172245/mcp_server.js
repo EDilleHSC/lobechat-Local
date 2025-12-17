@@ -3,6 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
+// Explicit Python runtime for predictable execution
+const PYTHON = 'D:\\Python312\\python.exe';
+
 // Configuration
 const INBOX_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox";
 const SNAPSHOT_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\snapshots\\inbox";
@@ -141,11 +144,9 @@ const server = http.createServer((req, res) => {
 
             // 2. Run mailroom only (snapshot already taken)
             console.log('[MAILROOM] Running mailroom...');
-            const mailroomPath = path.join(__dirname, '..', 'mailroom_runner.py');
+            const MAILROOM = path.join(__dirname, '..', 'mailroom_runner.py');
 
-            execSync(`python "${mailroomPath}"`, {
-              stdio: 'inherit',
-            });
+            execSync(`"${PYTHON}" "${MAILROOM}"`, { stdio: 'inherit' });
 
             console.log('[MAILROOM] Completed');
 
@@ -159,11 +160,15 @@ const server = http.createServer((req, res) => {
 
         } catch (err) {
             console.error('[ERROR] Pipeline error:', err.message);
+            if (err.stdout) console.error('[PIPELINE STDOUT] ' + err.stdout.toString());
+            if (err.stderr) console.error('[PIPELINE STDERR] ' + err.stderr.toString());
             console.error('Stack:', err.stack);
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 status: 'error',
                 error: err.message,
+                stdout: err.stdout ? err.stdout.toString() : null,
+                stderr: err.stderr ? err.stderr.toString() : null,
                 timestamp: new Date().toISOString()
             }));
         } finally {
