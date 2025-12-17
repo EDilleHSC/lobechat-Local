@@ -1,0 +1,3 @@
+Merge note — Mailroom: enforce destination-path directory invariant
+
+This change adds a deterministic guard to the mailroom routing logic that aborts with a clear, test-covered error when a file exists where the pipeline expects a directory. The patch logs an explicit `MAILROOM_INVARIANT` message, exits with code `2` to signal a precondition failure, and includes a focused pytest that asserts the behavior. No auto-resolution or additional routing behavior was introduced (by design for Beta-0); the change makes filesystem expectations explicit, prevents ambiguous/ destructive moves, and raises the Beta-0 stability bar by providing a clear, testable contract for downstream automation and operators.
