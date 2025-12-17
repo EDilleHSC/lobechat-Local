@@ -139,7 +139,7 @@ const server = http.createServer((req, res) => {
             const snapshotResult = takeSnapshot();
             console.log('[SNAPSHOT] Snapshot taken:', snapshotResult);
 
-            // 2. Run mailroom
+            // 2. Run mailroom only (snapshot already taken)
             console.log('[MAILROOM] Running mailroom...');
             const mailroomPath = path.join(__dirname, '..', 'mailroom_runner.py');
 
@@ -149,26 +149,11 @@ const server = http.createServer((req, res) => {
 
             console.log('[MAILROOM] Completed');
 
-            // 3. Run AIR
-            console.log('[AIR] Running AIR processor...');
-            const airOutput = execSync('python3.12.exe air_processor.py', {
-                cwd: __dirname,
-                encoding: 'utf8'
-            });
-            console.log('[AIR] Processing completed:', airOutput.substring(0, 100) + '...');
-
-            // 4. Run Presenter
-            console.log('[PRESENTER] Running presenter...');
-            const presenterOutput = execSync('python3.12.exe presenter.py', {
-                cwd: __dirname,
-                encoding: 'utf8'
-            });
-            console.log('[PRESENTER] Output generated:', presenterOutput.substring(0, 100) + '...');
-
+            // Return success immediately; AIR and Presenter are handled separately
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
-                status: 'success',
-                message: 'Inbox processed successfully',
+                status: 'ok',
+                message: 'Snapshot taken and mailroom executed',
                 timestamp: new Date().toISOString()
             }));
 
