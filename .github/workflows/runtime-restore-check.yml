@@ -1,14 +1,14 @@
-name: Beta-0 Smoke Test
+name: Runtime Restore Check
 
 on:
-  push:
-    branches: [ main ]
+  pull_request:
+    paths:
+      - 'runtime/**'
   workflow_dispatch:
 
 jobs:
-  beta0-smoke-test:
+  runtime-restore:
     runs-on: windows-latest
-    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -17,6 +17,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+
+      - name: Run runtime restore check
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter runtime_restore_check.js | Select-Object -First 1
+          if (-not $test) { Write-Error "runtime_restore_check.js not found"; exit 2 }
+          Write-Host "Running runtime restore check: $($test.FullName)"
+          node $test.FullName
 
       - name: Install PM2 (optional)
         run: npm install -g pm2
@@ -46,20 +54,28 @@ jobs:
           }
           if (-not $ok) { Write-Error "Server health check failed"; exit 4 }
 
-      - name: Run Beta-0 smoke test
+      - name: Run mailroom smoke test
         shell: pwsh
         run: |
-          $test = Get-ChildItem -Path runtime -Recurse -Filter smoke_presenter.js | Select-Object -First 1
-          if (-not $test) { Write-Error "smoke_presenter.js not found"; exit 5 }
-          Write-Host "Running test: $($test.FullName)"
+          $test = Get-ChildItem -Path runtime -Recurse -Filter mailroom_smoke.js | Select-Object -First 1
+          if (-not $test) { Write-Error "mailroom_smoke.js not found"; exit 5 }
+          Write-Host "Running mailroom smoke test: $($test.FullName)"
           node $test.FullName
 
-      - name: Run Trust Header Count Test
+      - name: Run routing POC smoke test
         shell: pwsh
         run: |
-          $test = Get-ChildItem -Path runtime -Recurse -Filter test_single_trust_header.js | Select-Object -First 1
-          if (-not $test) { Write-Error "test_single_trust_header.js not found"; exit 6 }
-          Write-Host "Running test: $($test.FullName)"
+          $test = Get-ChildItem -Path runtime -Recurse -Filter routing_poc_smoke.js | Select-Object -First 1
+          if (-not $test) { Write-Error "routing_poc_smoke.js not found"; exit 6 }
+          Write-Host "Running routing POC smoke test: $($test.FullName)"
+          node $test.FullName
+
+      - name: Run agent receive smoke test
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter agent_receive_smoke.js | Select-Object -First 1
+          if (-not $test) { Write-Error "agent_receive_smoke.js not found"; exit 7 }
+          Write-Host "Running agent receive smoke test: $($test.FullName)"
           node $test.FullName
 
       - name: Stop server (cleanup)
