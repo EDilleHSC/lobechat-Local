@@ -141,8 +141,12 @@ const server = http.createServer((req, res) => {
 
             // 2. Run mailroom
             console.log('[MAILROOM] Running mailroom...');
-            // Use runtime shim so pipelines stay in pipelines/triage
-            execSync('python runtime/mailroom_runner.py', { stdio: 'inherit' });
+            const mailroomPath = path.join(__dirname, '..', 'mailroom_runner.py');
+
+            execSync(`python "${mailroomPath}"`, {
+              stdio: 'inherit',
+            });
+
             console.log('[MAILROOM] Completed');
 
             // 3. Run AIR
