@@ -1,0 +1,12 @@
+{
+  "filename": "route_smoke.txt",
+  "routing_id": "ad9443a8-c1da-48a3-bc38-e87a03d42350",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-17T21-16-32-555Z.json",
+  "routed_at": "2025-12-17T21:16:33.200Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "d7fe5fd3c1393de302f47ba4f656cece15097bb1f01877bf0b1555cbd276eb7f",
+  "trust_header": "2025-12-17T21-16-32-555Z.json",
+  "rules_applied": ["default-route-agent1"],
+  "contract_version": "1.0"
+}
