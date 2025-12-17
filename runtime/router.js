@@ -58,12 +58,16 @@ function route() {
       rules_applied: ["default-route-agent1"]
     };
 
-    fs.writeFileSync(dst + '.meta.json', JSON.stringify(meta, null, 2), 'utf8');
-    console.log(`[ROUTER] Wrote meta: ${dst}.meta.json`);
+    const metaPath = dst + '.meta.json';
+    const metaTmp = metaPath + '.tmp';
+    fs.writeFileSync(metaTmp, JSON.stringify(meta, null, 2), 'utf8');
+    fs.renameSync(metaTmp, metaPath);
+    console.log(`[ROUTER] Wrote meta: ${metaPath}`);
 
     routed.push(name);
   }
 
+  console.log(`[ROUTER] Completed: routed ${routed.length} files to agent1 (snapshot=${path.basename(snapPath)})`);
   const out = { routed_to: 'agent1', routed_files: routed, snapshot: path.basename(snapPath), timestamp: new Date().toISOString() };
   console.log(JSON.stringify(out));
   return 0;
