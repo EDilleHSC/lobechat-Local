@@ -16,5 +16,9 @@ jobs:
           python-version: '3.x'
       - name: Install requirements
         run: python -m pip install --upgrade pip
+      - name: Install test dependencies
+        run: python -m pip install pytest
+      - name: Run pytest (quiet)
+        run: python -m pytest -q
       - name: Run root guard script
         run: python scripts/check_root_guard.py
