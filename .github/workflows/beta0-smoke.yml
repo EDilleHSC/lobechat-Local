@@ -54,6 +54,14 @@ jobs:
           Write-Host "Running test: $($test.FullName)"
           node $test.FullName
 
+      - name: Run Trust Header Count Test
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter test_single_trust_header.js | Select-Object -First 1
+          if (-not $test) { Write-Error "test_single_trust_header.js not found"; exit 6 }
+          Write-Host "Running test: $($test.FullName)"
+          node $test.FullName
+
       - name: Stop server (cleanup)
         if: always()
         shell: pwsh
