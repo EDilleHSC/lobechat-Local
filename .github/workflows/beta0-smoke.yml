@@ -1,0 +1,68 @@
+name: Beta-0 Smoke Test
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  beta0-smoke-test:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install PM2 (optional)
+        run: npm install -g pm2
+        shell: pwsh
+
+      - name: Find and start MCP server (background)
+        id: start_server
+        shell: pwsh
+        run: |
+          $entry = Get-ChildItem -Path runtime -Recurse -Filter mcp_server.js | Select-Object -First 1
+          if (-not $entry) { Write-Error "mcp_server.js not found under runtime/**"; exit 3 }
+          Write-Host "Starting server: $($entry.FullName)"
+          $p = Start-Process -FilePath node -ArgumentList "`"$($entry.FullName)`"" -PassThru
+          $p.Id | Out-File -FilePath server.pid -Encoding ascii
+          Write-Host "Server started with PID: $($p.Id)"
+
+      - name: Wait for server health
+        shell: pwsh
+        run: |
+          $ok = $false
+          for ($i=0; $i -lt 15; $i++) {
+            try {
+              $r = Invoke-WebRequest -Uri 'http://localhost:8005/health' -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
+              if ($r.StatusCode -eq 200) { $ok = $true; break }
+            } catch {}
+            Start-Sleep -Seconds 2
+          }
+          if (-not $ok) { Write-Error "Server health check failed"; exit 4 }
+
+      - name: Run Beta-0 smoke test
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter smoke_presenter.js | Select-Object -First 1
+          if (-not $test) { Write-Error "smoke_presenter.js not found"; exit 5 }
+          Write-Host "Running test: $($test.FullName)"
+          node $test.FullName
+
+      - name: Stop server (cleanup)
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path server.pid) {
+            $pid = Get-Content server.pid | Select-Object -First 1
+            Write-Host "Stopping PID: $pid"
+            try { Stop-Process -Id $pid -Force -ErrorAction SilentlyContinue } catch {}
+            Remove-Item server.pid -ErrorAction SilentlyContinue
+          } else {
+            Write-Host "server.pid not found; no cleanup needed"
+          }
