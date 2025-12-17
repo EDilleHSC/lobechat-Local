@@ -21,17 +21,22 @@ ROOT (READ-MOSTLY)
 
 RULE: Nothing executes from the project root. Root contains navigation and entrypoint shims only.
 
-runtime/ (ONLY THINGS THAT RUN)
-- Contains processes that bind ports and are managed (e.g. mcp_server.js)
-- PM2 configs live here
-- No data files
-- No HTML renders
+core/ (Primary system logic)
+- core/intake/
+  - pipelines/ (AIR, mailroom, scanners)
+  - NAVI/ is authoritative state and remains at `NAVI/` (do not move without planning)
+  - Entry scripts: `Process_Inbox.bat`, `Process_Collection.bat` (shims remain at root)
 
-pipelines/ (AIR + processing)
-- AIR, mailroom, scanners and pipeline code
-- Reads from NAVI/inbox
-- Writes to NAVI/state and NAVI/DONE/WAITING/ACTIVE
-- Never listens on ports or serves HTML
+- core/presenter/
+  - presenter/ (Clara static renderer)
+
+- core/runtime/
+  - Contains processes that bind ports and are managed (e.g. mcp_server.py/js)
+  - Start scripts and server wrappers
+
+pipelines/ (legacy and moved content)
+- Pipeline source code has been relocated to `core/intake/pipelines/`
+- `pipelines/` at project root now contains placeholders/README only
 
 NAVI/ (GTD state + data)
 - inbox/, ACTIVE/, WAITING/, DONE/, HOLD/, REVIEW/
@@ -40,6 +45,8 @@ NAVI/ (GTD state + data)
 - logs/
 - state/ (e.g. air_output.json, system_status.json)
 - policies/ (operational protocols)
+
+NOTE: Mailroom invariant — destination paths that pipelines route to (e.g. `ACTIVE/`, archive subfolders, `REFERENCE`) must be directories. Files may not share the same path as routing targets.
 
 RULE: NAVI is authoritative state. Nothing may write outside NAVI except pipelines that are explicitly allowed to modify NAVI state.
 

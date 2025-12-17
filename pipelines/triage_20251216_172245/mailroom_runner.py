@@ -5,6 +5,8 @@ import json
 import shutil
 from pathlib import Path
 from datetime import datetime
+import sys
+import logging
 
 # Configuration
 NAVI_DIR = r"D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI"
@@ -29,6 +31,27 @@ def load_processor_config():
     except Exception as e:
         print(f"Warning: could not load processor config: {e}")
     return cfg
+
+
+def ensure_destination_is_directory(dest_path: Path):
+    """
+    Guardrail: destination paths must be directories.
+    Fail loudly if a file exists where a directory is expected.
+    """
+    if dest_path.exists() and dest_path.is_file():
+        msg = (
+            "MAILROOM_INVARIANT: Destination path exists but is a FILE.\n"
+            f"Path: {dest_path}\n\n"
+            "Expected: directory\n"
+            "Found: file\n\n"
+            "Fix:\n"
+            " - Rename or move the file so a directory can exist at this path, or\n"
+            " - Move the file into an appropriate docs/reference folder.\n\n"
+            "Mailroom aborted to prevent ambiguous or destructive behavior."
+        )
+        logging.error(msg)
+        print(msg, file=sys.stderr)
+        sys.exit(2)
 
 PROCESSOR_CONFIG = load_processor_config()
 
@@ -113,6 +136,8 @@ def execute_moves(snapshot):
             # Non-actionable: archive immediately
             subfolder = NON_ACTIONABLE[ext]
             dest_dir = os.path.join(ARCHIVE_DIR, subfolder)
+            # Invariant check: destination must be a directory
+            ensure_destination_is_directory(Path(dest_dir))
             os.makedirs(dest_dir, exist_ok=True)
             dest_path = os.path.join(dest_dir, filename)
 
@@ -128,6 +153,8 @@ def execute_moves(snapshot):
         elif ext not in ALLOWED_EXTENSIONS:
             # Not allowed: reject to REFERENCE
             dest_dir = REFERENCE_DIR
+            # Invariant check: destination must be a directory
+            ensure_destination_is_directory(Path(dest_dir))
             os.makedirs(dest_dir, exist_ok=True)
             dest_path = os.path.join(dest_dir, filename)
 
@@ -143,6 +170,8 @@ def execute_moves(snapshot):
         else:
             # Actionable: move to ACTIVE
             dest_dir = ACTIVE_DIR
+            # Invariant check: destination must be a directory
+            ensure_destination_is_directory(Path(dest_dir))
             os.makedirs(dest_dir, exist_ok=True)
             dest_path = os.path.join(dest_dir, filename)
 
