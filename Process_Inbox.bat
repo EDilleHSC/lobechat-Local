@@ -1,24 +1,6 @@
 @echo off
-chcp 65001 >nul
-setlocal EnableExtensions EnableDelayedExpansion
-echo ========================================
-echo === VBOARDER INBOX PROCESSING STARTED ===
-echo ========================================
-echo.
-
-REM Check if inbox has files
-dir /b "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\inbox" 2>nul | findstr . >nul
-if %errorlevel% neq 0 (
-    echo [ERROR] No files found in inbox.
-    echo.
-    echo [WARNING] Inbox location: D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\inbox
-    echo.
-    echo If you placed a file elsewhere, it will NOT be processed.
-    echo Please add ONE file to the inbox above and run this script again.
-    echo.
-    pause
-    exit /b 1
-)
+rem Compatibility shim — forwards to pipelines triage Process_Inbox
+call "pipelines\triage_20251216_172245\Process_Inbox.bat" %*
 
 echo [INFO] Found files in inbox. Starting NAVI processing...
 echo.
