@@ -1,9 +1,5 @@
-# -*- coding: utf-8 -*-
-#!/usr/bin/env python3
-"""
-VBoarder NAVI Presenter Model
-Converts AIR's structured JSON output into user-friendly UI text
-"""
+# moved to core/presenter/presenter/triage_20251216_172245_presenter.py — original preserved in git history
+# This placeholder indicates the authoritative implementation has moved. Please run the new script from core/presenter if needed.
 
 import json
 import os

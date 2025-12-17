@@ -1,9 +1,5 @@
-#!/usr/bin/env python3
-"""
-VBoarder COLLECTION Scanner
-Bulk intake system for NAVI - creates batches from INCOMING
-"""
-
+# Moved to core/intake/pipelines/triage_20251216_172245/scan_collection.py — original preserved in git history
+# Placeholder file.
 import os
 import json
 import shutil

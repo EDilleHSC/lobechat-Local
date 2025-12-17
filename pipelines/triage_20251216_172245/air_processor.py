@@ -1,10 +1,5 @@
-# -*- coding: utf-8 -*-
-#!/usr/bin/env python3
-"""
-VBoarder AIR (Autonomous Intelligence Runtime) Test
-Demonstrates AIR reading from ACTIVE/ and making decisions
-"""
-
+# Moved to core/intake/pipelines/triage_20251216_172245/air_processor.py — original preserved in git history
+# This placeholder indicates the canonical implementation has moved.
 import os
 import json
 from pathlib import Path

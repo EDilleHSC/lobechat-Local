@@ -1,10 +1,5 @@
-# -*- coding: utf-8 -*-
-#!/usr/bin/env python3
-"""
-VBoarder Mail Room Runner
-Processes NAVI snapshots and executes file movements
-"""
-
+# Moved to core/intake/pipelines/triage_20251216_172245/mailroom_runner.py — original preserved in git history
+# This placeholder indicates the canonical implementation has moved.
 import os
 import json
 import shutil

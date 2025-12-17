@@ -17,7 +17,7 @@ ALLOWED_NAMES = {
     'Process_Inbox.bat', 'start_mcp_server.bat', 'start_servers.bat',
     'mcp_server.js', '.gitignore', '.gitattributes'
 }
-ALLOWED_DIRS = {'docs', 'runtime', 'pipelines', 'presenter', 'NAVI', 'ops', 'configs', 'tests', 'node_modules', '.github'}
+ALLOWED_DIRS = {'docs', 'runtime', 'pipelines', 'presenter', 'NAVI', 'ops', 'configs', 'tests', 'node_modules', '.github', 'core'}
 
 PATTERNS = [re.compile(r'.*_server\..*', re.I),
             re.compile(r'.*_runner\..*', re.I),
