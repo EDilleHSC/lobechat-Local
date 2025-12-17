@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>NAVI MSHTA Probe</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+</head>
+<body>
+  <div class="container">
+    <div class="actions-section" style="display:flex;flex-direction:column">
+      <button class="action-btn">One</button>
+      <button class="action-btn">Two</button>
+    </div>
+  </div>
+  <script language="javascript">
+    function writeProbe(info) {
+      try {
+        var fso = new ActiveXObject("Scripting.FileSystemObject");
+        var file = fso.CreateTextFile("D:\\Temp\\navi_probe.json", true);
+        file.WriteLine(info);
+        file.Close();
+      } catch (e) {
+        document.body.innerText = 'WRITE ERROR: ' + e.message;
+      }
+    }
+    try {
+      var el = document.querySelector('.actions-section');
+      if (!el) { writeProbe(JSON.stringify({error:'no element'})); }
+      else {
+        var s = window.getComputedStyle(el);
+        var info = { display: s.display, flexDirection: s.flexDirection, children: el.children.length };
+        for (var i=0;i<el.children.length;i++){
+          var c = window.getComputedStyle(el.children[i]);
+          info['child'+i] = { display: c.display, marginLeft: c.marginLeft, marginTop: c.marginTop };
+        }
+        writeProbe(JSON.stringify(info));
+      }
+    } catch (ex) {
+      writeProbe(JSON.stringify({error: ex.message}));
+    }
+    // close mshta window after a short delay
+    setTimeout(function(){try{window.close();}catch(e){}}, 500);
+  </script>
+</body>
+</html>
