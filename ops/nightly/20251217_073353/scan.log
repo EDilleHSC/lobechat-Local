@@ -1,0 +1,12 @@
+2025-12-17T07:33:53.6268327-07:00 Starting nightly scan. SpecialNow=True
+2025-12-17T07:33:53.6352879-07:00 Running status_monitor.py
+2025-12-17T07:33:53.7663127-07:00 status_monitor completed
+2025-12-17T07:33:53.7673148-07:00 Checking MCP /health
+2025-12-17T07:33:53.8315486-07:00 MCP health OK
+2025-12-17T07:33:53.8325168-07:00 Running root guard script
+2025-12-17T07:33:53.8976800-07:00 root guard completed
+2025-12-17T07:33:53.8986922-07:00 Gathering NAVI counts
+2025-12-17T07:33:53.9224189-07:00 NAVI counts written
+2025-12-17T07:33:53.9236885-07:00 Capturing disk usage
+2025-12-17T07:33:54.0331562-07:00 Disk info captured
+2025-12-17T07:33:54.0340223-07:00 Nightly scan complete. Logs stored to: D:\05_AGENTS-AI\01_RUNTIME\VBoarder\ops\nightly\20251217_073353
