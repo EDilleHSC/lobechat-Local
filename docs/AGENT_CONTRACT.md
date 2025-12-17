@@ -71,6 +71,37 @@ CI & Tests
 ----------
 - Add tests that simulate mailroom->router->agent flow and assert the agent receives both file and `<file>.meta.json`, verifies checksum, and reads `trust_header`.
 
+### Schema validation
+A JSON Schema is available at `docs/meta.schema.json`. Agent authors and CI can validate metadata with standard validators.
+
+Node.js example (AJV):
+
+```bash
+# Install AJV (optional, required to run the validator script)
+npm install ajv
+
+# Run the included validator (uses docs/meta.schema.json against runtime/triage_20251216_172245/tests/sample.meta.json)
+node runtime/triage_20251216_172245/tests/validate_meta.test.js
+```
+
+Python example (jsonschema):
+
+```python
+# pip install jsonschema
+from jsonschema import validate, ValidationError
+import json
+
+schema = json.load(open('docs/meta.schema.json'))
+meta = json.load(open('runtime/triage_20251216_172245/tests/sample.meta.json'))
+try:
+    validate(instance=meta, schema=schema)
+    print('meta valid')
+except ValidationError as e:
+    print('meta invalid', e)
+```
+
+Add the schema validation step to CI or local linting as desired (e.g., run the Node validator or the Python snippet in a test job).
+
 Versioning & Evolution
 ----------------------
 - This contract is Beta‑1; breaking changes require updated tests and PRs that call out migration steps.

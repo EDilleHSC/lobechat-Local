@@ -9,6 +9,20 @@ const AGENT_INBOX = path.join(ROOT, 'NAVI', 'agents', 'agent1', 'inbox');
 const INDEX_HTML = path.join(ROOT, 'NAVI', 'presenter', 'index.html');
 const PROCESS_URL = 'http://localhost:8005/process';
 
+function ensureNaviDirs() {
+  const navi = path.join(ROOT, 'NAVI');
+  const inbox = path.join(navi, 'inbox');
+  const agentInbox = path.join(navi, 'agents', 'agent1', 'inbox');
+  const presenter = path.join(navi, 'presenter');
+  try {
+    fs.mkdirSync(inbox, { recursive: true });
+    fs.mkdirSync(agentInbox, { recursive: true });
+    fs.mkdirSync(presenter, { recursive: true });
+  } catch (e) {
+    console.warn('Failed to create NAVI dirs:', e.message || e);
+  }
+}
+
 function writeInboxFile(name, content) {
   if (!fs.existsSync(INBOX)) fs.mkdirSync(INBOX, { recursive: true });
   fs.writeFileSync(path.join(INBOX, name), content, 'utf8');
@@ -42,7 +56,8 @@ function postProcess() {
   const fname = 'smoke_mail.txt';
   const content = 'smoke test ' + Date.now();
 
-  // ensure agent inbox clean
+  // ensure NAVI dirs exist and agent inbox clean
+  ensureNaviDirs();
   if (!fs.existsSync(AGENT_INBOX)) fs.mkdirSync(AGENT_INBOX, { recursive: true });
   rmAgentFile(fname);
 
