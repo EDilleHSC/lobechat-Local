@@ -14,5 +14,7 @@ Status: In progress — reinforced on 2025-12-17 where noted
 - [ ] Clara trust loop: verify deterministic presenter generation and timestamping
   - Owner: TBD
 
-- [ ] Formal Beta-0 freeze checklist & signoff
+- [x] Formal Beta-0 freeze checklist & signoff — **frozen and tagged**
   - Owner: CTO
+  - Tag: `v0.1.0-beta0` (2025-12-17)
+  - Notes: Beta-0 intake, mailroom invariants, and entrypoints verified and documented on `main`
