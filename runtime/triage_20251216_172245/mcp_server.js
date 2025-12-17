@@ -379,6 +379,14 @@ const server = http.createServer((req, res) => {
             res.writeHead(500, { 'Content-Type': 'text/plain' });
             res.end('Server error');
         }
+    } else if (req.method === 'GET' && req.url === '/health') {
+        // Minimal health endpoint for monitoring
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            status: 'ok',
+            uptime: process.uptime(),
+            timestamp: new Date().toISOString()
+        }));
     } else {
         res.writeHead(404);
         res.end('Not found');
