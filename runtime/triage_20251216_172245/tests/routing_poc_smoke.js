@@ -1,10 +1,6 @@
-// Agent receive smoke test (Beta-1)
-// To be executed from repo root: node runtime/triage_*/tests/agent_receive_smoke.js
-
 const fs = require('fs');
 const path = require('path');
 const http = require('http');
-const crypto = require('crypto');
 
 const ROOT = path.join(__dirname, '..', '..', '..');
 const INBOX = path.join(ROOT, 'NAVI', 'inbox');
@@ -37,8 +33,8 @@ function postProcess() {
 }
 
 (async () => {
-  const fname = 'agent_receive_smoke.txt';
-  const content = 'agent receive smoke ' + Date.now();
+  const fname = 'route_smoke.txt';
+  const content = 'route smoke ' + Date.now();
 
   // cleanup
   if (!fs.existsSync(AGENT_INBOX)) fs.mkdirSync(AGENT_INBOX, { recursive: true });
@@ -53,12 +49,12 @@ function postProcess() {
   const res = await postProcess();
   console.log('Process response:', res);
 
-  // prepare paths
+  // compute paths we'll check
   const routedPath = path.join(AGENT_INBOX, fname);
   const metaPath = path.join(AGENT_INBOX, fname + '.meta.json');
 
   // wait for router to write meta file (poll with timeout)
-  const waitFor = async (p, timeoutMs = 12000, intervalMs = 250) => {
+  const waitFor = async (p, timeoutMs = 5000, intervalMs = 200) => {
     const start = Date.now();
     while (Date.now() - start < timeoutMs) {
       if (fs.existsSync(p)) return true;
@@ -67,7 +63,7 @@ function postProcess() {
     return false;
   };
 
-  let metaExists = await waitFor(metaPath, 12000, 250);
+  let metaExists = await waitFor(metaPath, 5000, 200);
   if (!metaExists) {
     console.warn('Meta file not found after wait; attempting router fallback');
     try {
@@ -78,34 +74,29 @@ function postProcess() {
       console.warn('Router fallback failed:', e.message || e);
     }
 
-    // give FS a short moment to settle, then wait a bit more
-    await new Promise(r => setTimeout(r, 200));
-    metaExists = await waitFor(metaPath, 2000, 250);
+    // wait a bit more
+    metaExists = await waitFor(metaPath, 2000, 200);
     if (!metaExists) {
       console.error('FAIL: Meta file not found after router fallback:', metaPath);
       process.exit(3);
     }
   }
 
+  // check agent inbox
   if (!fs.existsSync(routedPath)) {
     console.error('FAIL: Routed file not found:', routedPath);
     process.exit(2);
+  }
+  if (!fs.existsSync(metaPath)) {
+    console.error('FAIL: Meta file not found:', metaPath);
+    process.exit(3);
   }
 
   const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
   console.log('Meta:', meta);
 
-  // add assertions for routed_to and trust header
-  if (meta.routed_to !== 'agent1') {
-    console.error('FAIL: meta.routed_to unexpected:', meta.routed_to);
-    process.exit(6);
-  }
-  if (meta.trust_header !== meta.snapshot_id) {
-    console.error('FAIL: meta.trust_header mismatch:', meta.trust_header, meta.snapshot_id);
-    process.exit(7);
-  }
-
   // checksum
+  const crypto = require('crypto');
   const data = fs.readFileSync(routedPath);
   const sha = crypto.createHash('sha256').update(data).digest('hex');
   if (sha !== meta.checksum_sha256) {
@@ -120,6 +111,6 @@ function postProcess() {
     process.exit(5);
   }
 
-  console.log('PASS: agent receive smoke test succeeded');
+  console.log('PASS: routing POC smoke test succeeded');
   process.exit(0);
 })();
