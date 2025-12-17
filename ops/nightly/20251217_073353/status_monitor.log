@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\status_monitor.py", line 135, in <module>
+    main()
+  File "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\status_monitor.py", line 78, in main
+    print("\U0001f4ca VBoarder NAVI System Status")
+  File "encodings\cp1252.py", line 19, in encode
+UnicodeEncodeError: 'charmap' codec can't encode character '\U0001f4ca' in position 0: character maps to <undefined>

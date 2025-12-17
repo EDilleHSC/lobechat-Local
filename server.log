@@ -1,0 +1,9 @@
+🚀 Starting VBoarder MCP Filesystem Server...
+📁 Allowed directories:
+   D:\05_AGENTS
+   D:\05_AGENTS-AI
+   D:\01_SYSTEM
+   D:\02_SOFTWARE\01_AI_MODELS
+🌐 Server will listen on port 8001
+🔗 Configure LobeChat to use: http://localhost:8001/mcp
+✅ MCP server connected and ready!
