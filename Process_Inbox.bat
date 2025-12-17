@@ -22,10 +22,12 @@ if %errorlevel% equ 0 (
     exit /b 1
 )
 
-REM Auto-open Clara presenter when processing completes successfully
+REM Generate Clara static page and auto-open Clara presenter when processing completes successfully
 if %errorlevel% equ 0 (
+    echo [INFO] Generating Clara static page...
+    "D:\Python312\python.exe" "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\scripts\generate_clara.py" >nul 2>&1
     echo [INFO] Opening Clara (presenter)...
-    start "Clara" "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\presenter\index.html"
+    start "Clara" "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\presenter\clara.html"
 )
 
 echo.
