@@ -62,6 +62,22 @@ jobs:
           Write-Host "Running mailroom smoke test: $($test.FullName)"
           node $test.FullName
 
+      - name: Run routing POC smoke test
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter routing_poc_smoke.js | Select-Object -First 1
+          if (-not $test) { Write-Error "routing_poc_smoke.js not found"; exit 6 }
+          Write-Host "Running routing POC smoke test: $($test.FullName)"
+          node $test.FullName
+
+      - name: Run agent receive smoke test
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter agent_receive_smoke.js | Select-Object -First 1
+          if (-not $test) { Write-Error "agent_receive_smoke.js not found"; exit 7 }
+          Write-Host "Running agent receive smoke test: $($test.FullName)"
+          node $test.FullName
+
       - name: Stop server (cleanup)
         if: always()
         shell: pwsh
