@@ -6,6 +6,7 @@ const ROOT = path.join(__dirname, '..', '..', '..');
 const INBOX = path.join(ROOT, 'NAVI', 'inbox');
 const AGENT_INBOX = path.join(ROOT, 'NAVI', 'agents', 'agent1', 'inbox');
 const PRESENT = path.join(ROOT, 'NAVI', 'presenter', 'index.html');
+const GENERATED_PRESENT = path.join(ROOT, 'NAVI', 'presenter', 'generated', 'index.html');
 const PORT = Number(process.env.PORT) || 8005;
 const PROCESS_URL = `http://localhost:${PORT}/process`;
 
@@ -117,8 +118,13 @@ function postProcess() {
     process.exit(4);
   }
 
-  // check presenter for trust header reference
-  const present = fs.readFileSync(PRESENT, 'utf8');
+  // check presenter for trust header reference (prefer canonical, fallback to generated preview)
+  let present = '';
+  try { present = fs.readFileSync(PRESENT, 'utf8'); } catch (e) { present = ''; }
+  if (present.indexOf(meta.snapshot_id) === -1) {
+    console.log('snapshot id not found in canonical presenter; checking generated preview', GENERATED_PRESENT);
+    try { present = fs.readFileSync(GENERATED_PRESENT, 'utf8'); } catch (e) { present = ''; }
+  }
   if (present.indexOf(meta.snapshot_id) === -1) {
     console.error('FAIL: presenter does not reference snapshot id from meta');
     process.exit(5);

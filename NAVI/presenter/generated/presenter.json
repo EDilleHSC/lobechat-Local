@@ -1,11 +1,20 @@
 {
   "trust_header": {
-    "rendered_at": "2025-12-18T12:07:00.520Z",
-    "snapshot_id": "2025-12-18T12-06-59-011Z.json",
-    "items_processed": 3,
+    "rendered_at": "2025-12-18T12:34:58.202Z",
+    "snapshot_id": "2025-12-18T12-34-56-943Z.json",
+    "items_processed": 6,
     "routed_to": "agent1"
   },
   "items": [
+    {
+      "filename": "agent_receive_smoke.txt",
+      "routed_to": "UNKNOWN",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-18",
+      "meta_path": null,
+      "checksum_sha256": "5f0957970a1add47517091eb3c259aa5f086380eca27b6cc5ce51bf1b732dae0"
+    },
     {
       "filename": "Navi_Complete_Personal_Identity.md",
       "routed_to": "UNKNOWN",
@@ -32,7 +41,25 @@
       "received": "2025-12-13",
       "meta_path": null,
       "checksum_sha256": "9c6c56e2f561bc94808c98fbafb6b9b59202be578f9364c91988ca0e2eae59af"
+    },
+    {
+      "filename": "route_smoke.txt",
+      "routed_to": "UNKNOWN",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-18",
+      "meta_path": null,
+      "checksum_sha256": "c53869adb27d4ce70f80586643a19cbe36cab0d053777db18434ddacb76d5666"
+    },
+    {
+      "filename": "smoke_mail.txt",
+      "routed_to": "UNKNOWN",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-18",
+      "meta_path": null,
+      "checksum_sha256": "7b2a6fd77c3c21f23617df98b04d431eadb0b59dffda9ef516e66cb45c9494ab"
     }
   ],
-  "html_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <title>NAVI Mail Room Update (preview)</title>\n    <style>body{font-family:Segoe UI,Arial,sans-serif;padding:24px;background:#0a0e27;color:#f0f0f0}</style>\n</head>\n<body>\n<!-- TRUST_HEADER\nrendered_at: 2025-12-18T12:07:00.520Z\nsnapshot_id: 2025-12-18T12-06-59-011Z.json\nitems_processed: 3\nmailroom_routed_to: agent1\n-->\n<div class=\"container\">\n  <h1>NAVI Mail Room Update (preview)</h1>\n  <p>Snapshot: 2025-12-18T12-06-59-011Z.json</p>\n  <p>Items: 3</p>\n  <p>Routed to: agent1</p>\n</div>\n</body>\n</html>"
+  "html_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <title>NAVI Mail Room Update (preview)</title>\n    <style>body{font-family:Segoe UI,Arial,sans-serif;padding:24px;background:#0a0e27;color:#f0f0f0}</style>\n</head>\n<body>\n<!-- TRUST_HEADER\nrendered_at: 2025-12-18T12:34:58.202Z\nsnapshot_id: 2025-12-18T12-34-56-943Z.json\nitems_processed: 6\nmailroom_routed_to: agent1\n-->\n<div class=\"container\">\n  <h1>NAVI Mail Room Update (preview)</h1>\n  <p>Snapshot: 2025-12-18T12-34-56-943Z.json</p>\n  <p>Items: 6</p>\n  <p>Routed to: agent1</p>\n</div>\n</body>\n</html>"
 }

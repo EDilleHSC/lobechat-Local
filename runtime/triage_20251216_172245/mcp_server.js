@@ -37,6 +37,23 @@ function log(message) {
     console.log(`[${timestamp}] ${message}`);
 }
 
+// PID-file path and helper exposed at module scope so request handlers and signal handlers can access it
+const pidFile = path.join(__dirname, 'mcp_server.pid');
+function removePidFile() {
+    try {
+        if (fs.existsSync(pidFile)) {
+            console.log(`[MCP] removePidFile: attempting to unlink ${pidFile}`);
+            fs.unlinkSync(pidFile);
+            console.log('[MCP] removePidFile: success');
+        } else {
+            console.log('[MCP] removePidFile: pid file not present');
+        }
+    } catch (e) {
+        console.error('[MCP] removePidFile: failed to remove PID file', e);
+        // best-effort cleanup; do not rethrow to avoid disrupting shutdown
+    }
+}
+
 function takeSnapshot() {
     try {
         // Create snapshot of inbox
@@ -657,6 +674,49 @@ const server = http.createServer((req, res) => {
             res.writeHead(500, { 'Content-Type': 'text/plain' });
             res.end('Server error');
         }
+    } else if (process.env.ENABLE_TEST_ADMIN === '1' && req.method === 'POST' && req.url && req.url.indexOf('/__mcp_shutdown') === 0) {
+        try {
+            const u = new URL(req.url, `http://localhost:${PORT}`);
+            const token = u.searchParams.get('token') || '';
+            const expected = process.env.MCP_SHUTDOWN_TOKEN || 'TEST_SHUTDOWN';
+            if (token !== expected) {
+                res.writeHead(403); res.end('Forbidden');
+                return;
+            }
+        } catch (e) {
+            // malformed URL - reject
+            res.writeHead(400); res.end('Bad Request');
+            return;
+        }
+
+        // Respond quickly, then perform graceful shutdown
+        res.writeHead(200); res.end('Shutting down');
+        console.log('[MCP] Shutdown endpoint invoked via admin token');
+        try {
+            if (server && typeof server.close === 'function') {
+                let closed = false;
+                server.close(() => {
+                    closed = true;
+                    console.log('[MCP] server.close complete via admin shutdown');
+                    try { removePidFile(); } catch(e) { console.error('[MCP] PID remove failed during admin shutdown', e); }
+                    process.exit(0);
+                });
+                setTimeout(() => {
+                    if (!closed) {
+                        console.warn('[MCP] admin shutdown fallback: removing PID and exiting');
+                        try { removePidFile(); } catch(e) { console.error('[MCP] PID remove fallback failed', e); }
+                        process.exit(0);
+                    }
+                }, 5000);
+            } else {
+                try { removePidFile(); } catch(e) { console.error('[MCP] PID remove failed during admin shutdown', e); }
+                process.exit(0);
+            }
+        } catch (e) {
+            console.error('[MCP] Error during admin shutdown:', e);
+            try { removePidFile(); } catch(e){}
+            process.exit(1);
+        }
     } else if (req.method === 'GET' && req.url === '/health') {
         // Minimal health endpoint for monitoring
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -718,15 +778,8 @@ function startServer() {
         }
     });
 
-    // PID-file guard — defense in depth against accidental multi-start
-    const pidFile = path.join(__dirname, 'mcp_server.pid');
-    function removePidFile() {
-        try {
-            if (fs.existsSync(pidFile)) fs.unlinkSync(pidFile);
-        } catch (e) {
-            // best-effort cleanup
-        }
-    }
+    // PID-file guard uses module-level helpers (see top of file)
+
 
     // If a pidfile exists and the PID is alive, fail fast to avoid port collisions
     if (fs.existsSync(pidFile)) {
@@ -760,7 +813,36 @@ function startServer() {
     }
 
     process.on('exit', removePidFile);
-    process.on('SIGTERM', () => { log('[MCP] SIGTERM received'); removePidFile(); process.exit(0); });
+    process.on('SIGTERM', () => {
+        console.log('[MCP] SIGTERM received - initiating graceful shutdown');
+        try {
+            if (server && typeof server.close === 'function') {
+                let closed = false;
+                server.close(() => {
+                    closed = true;
+                    console.log('[MCP] server.close complete on SIGTERM');
+                    try { removePidFile(); console.log('[MCP] PID file removed on SIGTERM'); } catch(e) { console.error('[MCP] PID remove on SIGTERM failed', e); }
+                    process.exit(0);
+                });
+                // Fallback timeout in case close hangs
+                setTimeout(() => {
+                    if (!closed) {
+                        console.warn('[MCP] server.close timeout on SIGTERM, removing PID and exiting');
+                        try { removePidFile(); } catch(e) { console.error('[MCP] PID remove fallback failed', e); }
+                        process.exit(0);
+                    }
+                }, 5000);
+            } else {
+                console.log('[MCP] No server to close on SIGTERM; removing PID and exiting');
+                try { removePidFile(); } catch(e){ console.error('[MCP] PID remove failed', e); }
+                process.exit(0);
+            }
+        } catch (e) {
+            console.error('[MCP] Error handling SIGTERM:', e);
+            try { removePidFile(); } catch(e){}
+            process.exit(1);
+        }
+    });
 
     try {
         server.listen(PORT, () => {
@@ -791,11 +873,31 @@ setInterval(() => {
 
 // Handle process termination
 process.on('SIGINT', () => {
-    console.log('[MCP] Shutting down MCP server...');
-    try { if (typeof removePidFile === 'function') removePidFile(); } catch(e){}
-    server.close(() => {
-        console.log('[MCP] Server shut down gracefully');
-        try { if (typeof removePidFile === 'function') removePidFile(); } catch(e){}
-        process.exit(0);
-    });
+    console.log('[MCP] Shutting down MCP server (SIGINT)...');
+    try {
+        if (server && typeof server.close === 'function') {
+            let closed = false;
+            server.close(() => {
+                closed = true;
+                console.log('[MCP] Server shut down gracefully');
+                try { removePidFile(); } catch(e){ console.error('[MCP] PID remove failed', e); }
+                process.exit(0);
+            });
+            setTimeout(() => {
+                if (!closed) {
+                    console.warn('[MCP] server.close timeout on SIGINT, removing PID and exiting');
+                    try { removePidFile(); } catch(e){ console.error('[MCP] PID remove fallback failed', e); }
+                    process.exit(0);
+                }
+            }, 5000);
+        } else {
+            console.log('[MCP] No server to close on SIGINT; removing PID and exiting');
+            try { removePidFile(); } catch(e){ console.error('[MCP] PID remove failed', e); }
+            process.exit(0);
+        }
+    } catch(e) {
+        console.error('[MCP] Error during SIGINT shutdown:', e);
+        try { removePidFile(); } catch(e){}
+        process.exit(1);
+    }
 });
