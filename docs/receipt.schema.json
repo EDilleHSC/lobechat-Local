@@ -1,0 +1,17 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent Receipt Schema",
+  "type": "object",
+  "required": ["receipt_id","routing_id","filename","received_at","received_by","status","contract_version"],
+  "properties": {
+    "receipt_id": {"type":"string","pattern":"^[0-9a-fA-F-]{36,}"},
+    "routing_id": {"type":"string"},
+    "filename": {"type":"string"},
+    "received_at": {"type":"string","format":"date-time"},
+    "received_by": {"type":"string"},
+    "status": {"type":"string","enum":["accepted","rejected","quarantined"]},
+    "notes": {"type":"string"},
+    "contract_version": {"type":"string"}
+  },
+  "additionalProperties": false
+}
