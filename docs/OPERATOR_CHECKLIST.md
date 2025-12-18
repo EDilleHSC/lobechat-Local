@@ -42,3 +42,11 @@ Notes: Snapshot, routing, presenter, and approved UI verified.
 - Prefer persistent approvals: the system exposes a token-gated endpoint `POST /approval` that writes approvals to `NAVI/approvals/YYYY-MM-DD/*.approval.json` and appends `NAVI/approvals/audit.log` for a readable audit trail. Configure `MCP_APPROVAL_TOKEN` in your environment to enable this endpoint.
 - Use for checklist-driven approvals; do not expose the token publicly — require internal network access or token auth for production.
 
+## CI Secrets (Approval tests) 🔐
+To run automated approval tests (integration and negative tests) in CI, define this Actions secret in the repository settings:
+
+- **Name**: `TEST_APPROVAL_TOKEN`
+- **Value**: a test-safe token (e.g., `TEST_APPROVAL`). This value is used by CI to set `MCP_APPROVAL_TOKEN` during test runs.
+
+These tests validate that missing tokens, malformed payloads, and invalid enums are rejected safely by `POST /approval`.
+
