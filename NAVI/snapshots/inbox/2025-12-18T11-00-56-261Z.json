@@ -1,0 +1,27 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-18T11:00:56.261Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "items": [
+    {
+      "name": "Navi_Complete_Personal_Identity.md",
+      "type": "file",
+      "size": 15449,
+      "modified": "2025-12-13T05:48:18.598Z"
+    },
+    {
+      "name": "Navi_KB_00_Master_Index.md",
+      "type": "file",
+      "size": 9794,
+      "modified": "2025-12-13T05:48:18.374Z"
+    },
+    {
+      "name": "Navi_KB_01_Communication_Style.md",
+      "type": "file",
+      "size": 9092,
+      "modified": "2025-12-13T05:48:18.417Z"
+    }
+  ],
+  "status": "unprocessed"
+}

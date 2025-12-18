@@ -6,7 +6,8 @@ const ROOT = path.join(__dirname, '..', '..', '..');
 const INBOX = path.join(ROOT, 'NAVI', 'inbox');
 const AGENT_INBOX = path.join(ROOT, 'NAVI', 'agents', 'agent1', 'inbox');
 const PRESENT = path.join(ROOT, 'NAVI', 'presenter', 'index.html');
-const PROCESS_URL = 'http://localhost:8005/process';
+const PORT = Number(process.env.PORT) || 8005;
+const PROCESS_URL = `http://localhost:${PORT}/process`;
 
 function ensureNaviDirs() {
   const navi = path.join(ROOT, 'NAVI');

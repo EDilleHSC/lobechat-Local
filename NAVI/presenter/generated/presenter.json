@@ -1,0 +1,38 @@
+{
+  "trust_header": {
+    "rendered_at": "2025-12-18T12:07:00.520Z",
+    "snapshot_id": "2025-12-18T12-06-59-011Z.json",
+    "items_processed": 3,
+    "routed_to": "agent1"
+  },
+  "items": [
+    {
+      "filename": "Navi_Complete_Personal_Identity.md",
+      "routed_to": "UNKNOWN",
+      "confidence": null,
+      "file_type": "MD",
+      "received": "2025-12-13",
+      "meta_path": null,
+      "checksum_sha256": "e63276e9392d9173d77058f0fba177b8ef802896cbbd18dda1dc96f72e5309f0"
+    },
+    {
+      "filename": "Navi_KB_00_Master_Index.md",
+      "routed_to": "UNKNOWN",
+      "confidence": null,
+      "file_type": "MD",
+      "received": "2025-12-13",
+      "meta_path": null,
+      "checksum_sha256": "d81d1c89618f73049d1b9ede3c15c97f8dd8b713fda352c124ddfe0c4e8d91b7"
+    },
+    {
+      "filename": "Navi_KB_01_Communication_Style.md",
+      "routed_to": "UNKNOWN",
+      "confidence": null,
+      "file_type": "MD",
+      "received": "2025-12-13",
+      "meta_path": null,
+      "checksum_sha256": "9c6c56e2f561bc94808c98fbafb6b9b59202be578f9364c91988ca0e2eae59af"
+    }
+  ],
+  "html_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <title>NAVI Mail Room Update (preview)</title>\n    <style>body{font-family:Segoe UI,Arial,sans-serif;padding:24px;background:#0a0e27;color:#f0f0f0}</style>\n</head>\n<body>\n<!-- TRUST_HEADER\nrendered_at: 2025-12-18T12:07:00.520Z\nsnapshot_id: 2025-12-18T12-06-59-011Z.json\nitems_processed: 3\nmailroom_routed_to: agent1\n-->\n<div class=\"container\">\n  <h1>NAVI Mail Room Update (preview)</h1>\n  <p>Snapshot: 2025-12-18T12-06-59-011Z.json</p>\n  <p>Items: 3</p>\n  <p>Routed to: agent1</p>\n</div>\n</body>\n</html>"
+}
