@@ -39,5 +39,6 @@ Notes: Snapshot, routing, presenter, and approved UI verified.
 
 ## Design Approval
 - New page: `presenter/design-approval.html` is available to collect operator signoffs and approvals.
-- Use for checklist-driven approvals; to persist approvals reliably, configure server-side persistence (e.g., write `.approval.json` or append to an audit log) rather than relying on client console logging.
+- Prefer persistent approvals: the system exposes a token-gated endpoint `POST /approval` that writes approvals to `NAVI/approvals/YYYY-MM-DD/*.approval.json` and appends `NAVI/approvals/audit.log` for a readable audit trail. Configure `MCP_APPROVAL_TOKEN` in your environment to enable this endpoint.
+- Use for checklist-driven approvals; do not expose the token publicly — require internal network access or token auth for production.
 
