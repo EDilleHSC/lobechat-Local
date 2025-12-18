@@ -69,7 +69,7 @@ function waitForFileGone(filePath, timeoutMs) {
     try { if (fs.existsSync(PID_FILE)) fs.unlinkSync(PID_FILE); } catch (e) {}
 
     console.log('Spawning server process...');
-    const child = spawn(process.execPath, [SERVER], { detached: false, stdio: ['ignore', 'pipe', 'pipe'], env: Object.assign({}, process.env, { PORT: String(PORT) }) });
+    const child = spawn(process.execPath, [SERVER], { detached: false, stdio: ['ignore', 'pipe', 'pipe'], env: Object.assign({}, process.env, { PORT: String(PORT), ENABLE_TEST_ADMIN: '1', MCP_SHUTDOWN_TOKEN: 'TEST_SHUTDOWN' }) });
 
     child.stdout.on('data', (d) => process.stdout.write(`[server] ${d}`));
     child.stderr.on('data', (d) => process.stderr.write(`[server:err] ${d}`));
@@ -90,9 +90,19 @@ function waitForFileGone(filePath, timeoutMs) {
       throw new Error('PID in file does not correspond to a running process: ' + pid);
     }
 
-    // Now kill the child process
-    console.log('Sending SIGTERM to child process...');
-    child.kill();
+    // Request graceful shutdown via admin endpoint (more reliable cross-platform than signals)
+    console.log('Requesting graceful shutdown via admin endpoint...');
+    const shutdownRes = await new Promise((resolve, reject) => {
+      const http = require('http');
+      const req = http.request({ method: 'POST', hostname: 'localhost', port: PORT, path: '/__mcp_shutdown?token=TEST_SHUTDOWN', timeout: 5000 }, (res) => {
+        let body = '';
+        res.on('data', (d) => body += d);
+        res.on('end', () => resolve({ statusCode: res.statusCode, body }));
+      });
+      req.on('error', (e) => reject(e));
+      req.end();
+    });
+    if (!shutdownRes || shutdownRes.statusCode !== 200) throw new Error('Shutdown endpoint returned ' + (shutdownRes && shutdownRes.statusCode));
 
     // wait for child exit
     await new Promise((resolve, reject) => {

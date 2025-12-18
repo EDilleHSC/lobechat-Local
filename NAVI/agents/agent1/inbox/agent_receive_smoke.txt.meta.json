@@ -1,12 +1,12 @@
 {
   "filename": "agent_receive_smoke.txt",
-  "routing_id": "9d3f919c-aa08-47a9-9791-4a0d12120e8e",
+  "routing_id": "0fd64d3c-cc4f-4c8d-af90-408ad3a9a3a1",
   "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
-  "snapshot_id": "2025-12-18T04-03-41-503Z.json",
-  "routed_at": "2025-12-18T04:03:54.437Z",
+  "snapshot_id": "2025-12-18T12-34-56-943Z.json",
+  "routed_at": "2025-12-18T12:34:58.172Z",
   "routed_to": "agent1",
-  "checksum_sha256": "254eb733686468dc01d56ac4e642f6789fbeb4cc472b4dab5631f08f90b3e023",
-  "trust_header": "2025-12-18T04-03-41-503Z.json",
+  "checksum_sha256": "5f0957970a1add47517091eb3c259aa5f086380eca27b6cc5ce51bf1b732dae0",
+  "trust_header": "2025-12-18T12-34-56-943Z.json",
   "rules_applied": [
     "default-route-agent1"
   ]
