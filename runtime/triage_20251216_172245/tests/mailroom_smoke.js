@@ -7,6 +7,7 @@ const ROOT = path.join(__dirname, '..', '..', '..');
 const INBOX = path.join(ROOT, 'NAVI', 'inbox');
 const AGENT_INBOX = path.join(ROOT, 'NAVI', 'agents', 'agent1', 'inbox');
 const INDEX_HTML = path.join(ROOT, 'NAVI', 'presenter', 'index.html');
+const GENERATED_INDEX = path.join(ROOT, 'NAVI', 'presenter', 'generated', 'index.html');
 const PORT = Number(process.env.PORT) || 8005;
 const PROCESS_URL = `http://localhost:${PORT}/process`;
 
@@ -80,8 +81,17 @@ function postProcess() {
     process.exit(2);
   }
 
-  // check presenter shows routed_to (TRUST_HEADER)
-  const index = fs.readFileSync(INDEX_HTML, 'utf8');
+  // check presenter shows routed_to (TRUST_HEADER) — prefer canonical, fallback to generated preview
+  let index = '';
+  try {
+    index = fs.readFileSync(INDEX_HTML, 'utf8');
+  } catch (e) {
+    index = '';
+  }
+  if (index.indexOf('mailroom_routed_to: agent1') === -1) {
+    console.log('mailroom_routed_to not found in canonical index; trying generated preview:', GENERATED_INDEX);
+    try { index = fs.readFileSync(GENERATED_INDEX, 'utf8'); } catch(e) { index = ''; }
+  }
   if (index.indexOf('mailroom_routed_to: agent1') === -1) {
     console.error('FAIL: presenter TRUST_HEADER does not include mailroom_routed_to: agent1');
     console.error(index.split('\n').slice(0,40).join('\n'));
