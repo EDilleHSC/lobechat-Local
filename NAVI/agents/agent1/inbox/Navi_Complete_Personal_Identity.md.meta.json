@@ -1,12 +1,12 @@
 {
   "filename": "Navi_Complete_Personal_Identity.md",
-  "routing_id": "2dd58d81-f1db-4e7c-905e-3e3089d279a1",
+  "routing_id": "36dd13f4-3b13-43f7-96e7-7dd4cc537fe9",
   "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
-  "snapshot_id": "2025-12-18T12-06-59-011Z.json",
-  "routed_at": "2025-12-18T12:07:00.457Z",
+  "snapshot_id": "2025-12-18T12-34-56-943Z.json",
+  "routed_at": "2025-12-18T12:34:58.180Z",
   "routed_to": "agent1",
   "checksum_sha256": "e63276e9392d9173d77058f0fba177b8ef802896cbbd18dda1dc96f72e5309f0",
-  "trust_header": "2025-12-18T12-06-59-011Z.json",
+  "trust_header": "2025-12-18T12-34-56-943Z.json",
   "rules_applied": [
     "default-route-agent1"
   ]
