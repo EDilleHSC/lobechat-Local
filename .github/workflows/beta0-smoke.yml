@@ -9,6 +9,8 @@ jobs:
   beta0-smoke-test:
     runs-on: windows-latest
     timeout-minutes: 10
+    env:
+      PORT: 18005
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,7 +41,7 @@ jobs:
           $ok = $false
           for ($i=0; $i -lt 15; $i++) {
             try {
-              $r = Invoke-WebRequest -Uri 'http://localhost:8005/health' -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
+              $r = Invoke-WebRequest -Uri "http://localhost:$env:PORT/health" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
               if ($r.StatusCode -eq 200) { $ok = $true; break }
             } catch {}
             Start-Sleep -Seconds 2
@@ -60,6 +62,14 @@ jobs:
           $test = Get-ChildItem -Path runtime -Recurse -Filter test_single_trust_header.js | Select-Object -First 1
           if (-not $test) { Write-Error "test_single_trust_header.js not found"; exit 6 }
           Write-Host "Running test: $($test.FullName)"
+          node $test.FullName
+
+      - name: Run PID-file smoke test
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter pidfile_smoke.js | Select-Object -First 1
+          if (-not $test) { Write-Error "pidfile_smoke.js not found"; exit 7 }
+          Write-Host "Running PID-file smoke test: $($test.FullName)"
           node $test.FullName
 
       - name: Stop server (cleanup)
