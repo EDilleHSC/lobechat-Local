@@ -2,6 +2,10 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const Ajv = require('ajv');
+const ajv = new Ajv({ allErrors: true });
+const approvalSchema = require('./schemas/approval.schema.json');
+const validateApproval = ajv.compile(approvalSchema);
 
 // Explicit Python runtime for predictable execution
 const PYTHON = 'D:\\Python312\\python.exe';
@@ -720,7 +724,7 @@ const server = http.createServer((req, res) => {
             process.exit(1);
         }
     } else if (req.method === 'POST' && req.url === '/approval') {
-        // Token-gated approval persistence endpoint
+        // Token-gated approval persistence endpoint (schema-validated via AJV)
         const token = (req.headers['x-mcp-approval-token'] || '').toString();
         const expected = process.env.MCP_APPROVAL_TOKEN || null;
         if (!expected) {
@@ -739,44 +743,85 @@ const server = http.createServer((req, res) => {
         req.on('data', (chunk) => { body += chunk; });
         req.on('end', () => {
             try {
-                const payload = JSON.parse(body);
-                // Basic validation
-                const { approvedBy, date, role, notes, checklist, status } = payload;
-                if (!approvedBy || !status || !checklist) {
+                let payload;
+                try {
+                    payload = JSON.parse(body);
+                } catch (e) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Missing required fields: approvedBy, status, checklist' }));
-                    return;
-                }
-                const allowed = ['approved', 'revision', 'rejected'];
-                if (allowed.indexOf(status) === -1) {
-                    res.writeHead(400, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Invalid status value' }));
+                    res.end(JSON.stringify({ error: 'Invalid JSON payload', message: e.message }));
                     return;
                 }
 
-                // Persist
+                // Validate against JSON schema using AJV
+                const valid = validateApproval(payload);
+                if (!valid) {
+                    const details = (validateApproval.errors || []).map(err => {
+                        const path = err.instancePath || err.dataPath || '';
+                        return `${path} ${err.message}`.trim();
+                    });
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Invalid payload', details }));
+                    return;
+                }
+
+                // Persist (keep atomic write semantics)
                 try {
                     if (!fs.existsSync(APPROVAL_DIR)) fs.mkdirSync(APPROVAL_DIR, { recursive: true });
                     const d = new Date();
                     const dateDir = path.join(APPROVAL_DIR, d.toISOString().slice(0,10));
                     if (!fs.existsSync(dateDir)) fs.mkdirSync(dateDir, { recursive: true });
-                    const safeName = (approvedBy || 'anon').replace(/[^a-z0-9\-\_]/gi, '-').slice(0,40);
+
+                    const record = {
+                        approvedBy: payload.approvedBy,
+                        date: payload.date || d.toISOString(),
+                        role: payload.role || null,
+                        notes: payload.notes || null,
+                        checklist: payload.checklist,
+                        status: payload.status
+                    };
+
+                    const safeName = (record.approvedBy || 'anon').replace(/[^a-z0-9\-\_]/gi, '-').slice(0,40);
                     const fname = `${d.toISOString().replace(/[:.]/g,'-')}-${safeName}.approval.json`;
                     const fpath = path.join(dateDir, fname);
-                    fs.writeFileSync(fpath, JSON.stringify({ approvedBy, date: date || d.toISOString(), role: role || null, notes: notes || null, checklist, status }, null, 2), 'utf8');
-                    const auditLine = `${new Date().toISOString()} \t ${status} \t ${approvedBy} \t ${fpath}\n`;
-                    fs.appendFileSync(path.join(APPROVAL_DIR, 'audit.log'), auditLine, 'utf8');
-                    res.writeHead(201, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ ok: true, file: fpath }));
-                    console.log('[MCP] Approval persisted:', fpath);
+
+                    try {
+                        const tmp = fpath + '.tmp';
+                        fs.writeFileSync(tmp, JSON.stringify(record, null, 2), 'utf8');
+                        fs.renameSync(tmp, fpath);
+
+                        // Rotate audit log if it grows too large (5MB)
+                        const auditPath = path.join(APPROVAL_DIR, 'audit.log');
+                        try {
+                            if (fs.existsSync(auditPath)) {
+                                const st = fs.statSync(auditPath);
+                                if (st.size > 5 * 1024 * 1024) {
+                                    const rot = auditPath + '.' + Date.now();
+                                    fs.renameSync(auditPath, rot);
+                                    console.log('[MCP] Rotated audit log to', rot);
+                                }
+                            }
+                        } catch (e) { console.warn('[MCP] Audit rotation failed', e); }
+
+                        const auditLine = `${new Date().toISOString()}\t${record.status}\t${record.approvedBy}\t${fpath}\n`;
+                        fs.appendFileSync(auditPath, auditLine, 'utf8');
+                        res.writeHead(201, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ ok: true, file: fpath }));
+                        console.log('[MCP] Approval persisted:', fpath);
+                    } catch (e) {
+                        console.error('[MCP] Failed to persist approval (atomic):', e);
+                        try { if (fs.existsSync(fpath + '.tmp')) fs.unlinkSync(fpath + '.tmp'); } catch (e2){}
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({ error: 'Failed to persist approval' }));
+                    }
                 } catch (e) {
                     console.error('[MCP] Failed to persist approval:', e);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ error: 'Failed to persist approval' }));
                 }
             } catch (e) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Invalid JSON payload' }));
+                console.error('[MCP] /approval handler error:', e);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Internal server error' }));
             }
         });
         return;
