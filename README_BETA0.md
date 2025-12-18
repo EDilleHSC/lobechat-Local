@@ -16,7 +16,7 @@ This document records the Beta‑0 trust contract: a minimal, deterministic veri
 - CI (`.github/workflows/beta0-smoke.yml`) runs the smoke test and the header-count test on each push.
 
 ## Snapshot → Presenter flow
-1. POST `http://localhost:8005/process` triggers the pipeline.
+1. POST `http://localhost:8005/process` triggers the pipeline (for test runs you can override the port with the PORT env var and use `http://localhost:$PORT/process`).
 2. MCP writes a snapshot JSON to `NAVI/snapshots/inbox/` (immutable JSON with timestamped filename).
 3. The Presenter regeneration routine writes `index.html` atomically (tmp file → rename) to the canonical path above.
 4. The file includes a `TRUST_HEADER` block indicating provenance and freshness.
