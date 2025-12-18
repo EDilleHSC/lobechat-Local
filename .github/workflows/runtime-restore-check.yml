@@ -78,6 +78,20 @@ jobs:
           Write-Host "Running agent receive smoke test: $($test.FullName)"
           node $test.FullName
 
+      - name: Install AJV (for meta validation)
+        shell: pwsh
+        run: |
+          Write-Host "Installing AJV and formats for metadata validation"
+          npm install ajv ajv-formats
+
+      - name: Run metadata validator
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter validate_meta.test.js | Select-Object -First 1
+          if (-not $test) { Write-Error "validate_meta.test.js not found"; exit 8 }
+          Write-Host "Running metadata validator: $($test.FullName)"
+          node $test.FullName
+
       - name: Stop server (cleanup)
         if: always()
         shell: pwsh

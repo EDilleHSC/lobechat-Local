@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Trust Routing — One-Page Runbook</title>
+  <style>
+    @page { size: A4; margin: 20mm; }
+    body { font-family: Arial, Helvetica, sans-serif; color: #111; line-height: 1.25; font-size: 12px; }
+    h1 { font-size: 16px; margin-bottom: 6px }
+    h2 { font-size: 13px; margin-bottom: 4px }
+    p, li { margin: 4px 0 }
+    ul { margin: 4px 0 8px 18px; }
+    .col { display:flex; gap:12px }
+    .badge { color:#fff; background:#0b5; padding:4px 8px; border-radius:4px; font-weight:bold }
+    .footer { margin-top:12px; font-size:11px; color:#444 }
+    .callout { background:#f3f4f6; border-left:4px solid #3b82f6; padding:6px 8px; margin:6px 0 }
+  </style>
+</head>
+<body>
+  <h1>Trust Routing — One‑Page Case Study Runbook</h1>
+  <div class="col"><div>Opening (30s)</div><div class="badge">Live</div></div>
+  <p><strong>Say:</strong> “This is not a demo of automation. This is a demonstration of trust. Every step you see is observable, verifiable, and fails loudly if trust cannot be proven.”</p>
+
+  <h2>Step 1 — Human Input (Trust Origin)</h2>
+  <p><strong>Say:</strong> “All trust begins with a human action. No black boxes.”</p>
+  <p><strong>Do:</strong> `echo "case study" &gt; NAVI/inbox/case_study_input.txt` — show `ls NAVI/inbox`</p>
+  <div class="callout">Callout: Nothing processed yet.</div>
+
+  <h2>Step 2 — Snapshot Creation (Immutability)</h2>
+  <p><strong>Say:</strong> “The system creates an immutable snapshot — we never forget what it saw.”</p>
+  <p><strong>Show:</strong> `ls -t NAVI/snapshots/inbox | head -n1` and `cat` the JSON. Highlight <em>snapshot_id</em>, <em>timestamp</em>, <em>items</em>.</p>
+
+  <h2>Step 3 — Mailroom + Router (Trust‑carrying)</h2>
+  <p><strong>Say:</strong> “Routing happens only after trust is established. The system records where the file goes and why.”</p>
+  <p><strong>Show:</strong> logs for <code>[MAILROOM]</code> and <code>[ROUTER] Wrote meta</code>, then open <code>NAVI/agents/agent1/inbox/&lt;file&gt;.meta.json</code>. Point to <em>routed_to</em>, <em>snapshot_id</em>, <em>checksum_sha256</em>, <em>trust_header</em>.</p>
+
+  <h2>Step 4 — Presenter (Human Verification)</h2>
+  <p><strong>Say:</strong> “Automation stops here. The human sees exactly what the system believes to be true.”</p>
+  <p><strong>Show:</strong> `NAVI/presenter/index.html` and point to the <em>TRUST_HEADER</em> and <em>rendered_at</em>.</p>
+
+  <h2>Close (15s)</h2>
+  <p><strong>Say:</strong> “This system is not fast by accident. It is slow on purpose where trust matters. Autonomy comes later. Trust comes first.”</p>
+  <p class="footer">Success: snapshot present, meta present, checksum valid, presenter updated. If anything fails, stop and triage — no silent success.</p>
+</body>
+</html>
