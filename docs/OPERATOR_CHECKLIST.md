@@ -37,3 +37,7 @@ Result: Approved
 Reviewer: Eric Dille (Operator)
 Notes: Snapshot, routing, presenter, and approved UI verified.
 
+## Design Approval
+- New page: `presenter/design-approval.html` is available to collect operator signoffs and approvals.
+- Use for checklist-driven approvals; to persist approvals reliably, configure server-side persistence (e.g., write `.approval.json` or append to an audit log) rather than relying on client console logging.
+
