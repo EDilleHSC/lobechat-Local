@@ -12,6 +12,8 @@ const BETA0_TRUST_MODE = (process.env.BETA0_TRUST_MODE || '0') === '1'; // defau
 // Configuration
 const INBOX_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox";
 const SNAPSHOT_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\snapshots\\inbox";
+// Approvals directory for persistent approval objects and audit log
+const APPROVAL_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\approvals";
 // Server port can be overridden with the PORT env var for testing/CI
 const PORT = Number(process.env.PORT) || 8005;
 
@@ -717,6 +719,67 @@ const server = http.createServer((req, res) => {
             try { removePidFile(); } catch(e){}
             process.exit(1);
         }
+    } else if (req.method === 'POST' && req.url === '/approval') {
+        // Token-gated approval persistence endpoint
+        const token = (req.headers['x-mcp-approval-token'] || '').toString();
+        const expected = process.env.MCP_APPROVAL_TOKEN || null;
+        if (!expected) {
+            res.writeHead(503, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Approval endpoint not configured on this instance' }));
+            return;
+        }
+        if (token !== expected) {
+            res.writeHead(403, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Forbidden' }));
+            return;
+        }
+
+        // Read body
+        let body = '';
+        req.on('data', (chunk) => { body += chunk; });
+        req.on('end', () => {
+            try {
+                const payload = JSON.parse(body);
+                // Basic validation
+                const { approvedBy, date, role, notes, checklist, status } = payload;
+                if (!approvedBy || !status || !checklist) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Missing required fields: approvedBy, status, checklist' }));
+                    return;
+                }
+                const allowed = ['approved', 'revision', 'rejected'];
+                if (allowed.indexOf(status) === -1) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Invalid status value' }));
+                    return;
+                }
+
+                // Persist
+                try {
+                    if (!fs.existsSync(APPROVAL_DIR)) fs.mkdirSync(APPROVAL_DIR, { recursive: true });
+                    const d = new Date();
+                    const dateDir = path.join(APPROVAL_DIR, d.toISOString().slice(0,10));
+                    if (!fs.existsSync(dateDir)) fs.mkdirSync(dateDir, { recursive: true });
+                    const safeName = (approvedBy || 'anon').replace(/[^a-z0-9\-\_]/gi, '-').slice(0,40);
+                    const fname = `${d.toISOString().replace(/[:.]/g,'-')}-${safeName}.approval.json`;
+                    const fpath = path.join(dateDir, fname);
+                    fs.writeFileSync(fpath, JSON.stringify({ approvedBy, date: date || d.toISOString(), role: role || null, notes: notes || null, checklist, status }, null, 2), 'utf8');
+                    const auditLine = `${new Date().toISOString()} \t ${status} \t ${approvedBy} \t ${fpath}\n`;
+                    fs.appendFileSync(path.join(APPROVAL_DIR, 'audit.log'), auditLine, 'utf8');
+                    res.writeHead(201, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ ok: true, file: fpath }));
+                    console.log('[MCP] Approval persisted:', fpath);
+                } catch (e) {
+                    console.error('[MCP] Failed to persist approval:', e);
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to persist approval' }));
+                }
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid JSON payload' }));
+            }
+        });
+        return;
     } else if (req.method === 'GET' && req.url === '/health') {
         // Minimal health endpoint for monitoring
         res.writeHead(200, { 'Content-Type': 'application/json' });
