@@ -1,0 +1,39 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-18T04:03:41.502Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "items": [
+    {
+      "name": "agent_receive_smoke.txt",
+      "type": "file",
+      "size": 33,
+      "modified": "2025-12-18T04:03:41.480Z"
+    },
+    {
+      "name": "route_smoke.txt",
+      "type": "file",
+      "size": 25,
+      "modified": "2025-12-18T04:03:29.258Z"
+    },
+    {
+      "name": "smoke_mail.txt",
+      "type": "file",
+      "size": 24,
+      "modified": "2025-12-18T04:03:21.688Z"
+    },
+    {
+      "name": "smoke_test.md",
+      "type": "file",
+      "size": 14,
+      "modified": "2025-12-17T17:43:28.415Z"
+    },
+    {
+      "name": "smoke_test.txt",
+      "type": "file",
+      "size": 14,
+      "modified": "2025-12-17T17:40:57.685Z"
+    }
+  ],
+  "status": "unprocessed"
+}

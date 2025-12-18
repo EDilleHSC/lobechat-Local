@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>NAVI Mail Room Update (Approved UI)</title>
+    <style>
+        /* operator banner */
+        .operator-banner {
+            background: #f3c623;
+            color: #0a0e27;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: inline-block;
+        }
+        .data-failed {
+            margin-top: 18px;
+            padding: 12px;
+            background: rgba(231,76,60,0.08);
+            color: #ff6b6b;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        /* keep the rest of page styling consistent with approved template */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="operator-banner">This UI is operator-approved; data is advisory only.</div>
+
+        <!-- HEADER -->
+        <div class="header">
+            <div class="header-icon">📬</div>
+            <div class="header-content">
+                <h1>NAVI Mail Room Update</h1>
+                <p id="processed-at">Processed at 21:20:50</p>
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-card">
+            <h2>Summary</h2>
+            <p>1 incoming request processed</p>
+            <p>Items routed to ACTIVE, WAITING, or DONE</p>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="content-grid">
+            <!-- LEFT: ACTIONS (VERTICAL BUTTONS) -->
+            <div class="actions-section">
+                <button class="action-btn btn-track">
+                    <div class="action-icon">🟢</div>
+                    <div class="action-text">
+                        <div class="action-title">Track</div>
+                        <div class="action-desc">Accept responsibility</div>
+                    </div>
+                </button>
+
+                <button class="action-btn btn-hold">
+                    <div class="action-icon">🟡</div>
+                    <div class="action-text">
+                        <div class="action-title">Hold</div>
+                        <div class="action-desc">Not actionable now</div>
+                    </div>
+                </button>
+
+                <button class="action-btn btn-escalate">
+                    <div class="action-icon">🔴</div>
+                    <div class="action-text">
+                        <div class="action-title">Escalate</div>
+                        <div class="action-desc">Deadlines · Delegation · Fire drills</div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- RIGHT: FILE INFO -->
+            <div class="file-card">
+                <h3 id="file-name">📄 Client_Notes_Intro.docx</h3>
+                <div class="file-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">Routed to:</span>
+                        <span class="meta-value" id="routed-to">ACTIVE</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Confidence:</span>
+                        <span class="confidence-badge" id="confidence">90% (High)</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">File type:</span>
+                        <span class="meta-value" id="file-type">DOCX</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Received:</span>
+                        <span class="meta-value" id="received">2025-12-15</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- REASONING -->
+        <div class="reasoning">
+            <h4>Why did NAVI think this?</h4>
+            <ul class="reason-list">
+                <li class="reason-item">Matched priority keywords: <strong id="keywords">important, urgent, priority</strong></li>
+                <li class="reason-item">File type allowed for work intake</li>
+                <li class="reason-item">No exclusion rules triggered</li>
+                <li class="reason-item">No conflicting signals detected</li>
+            </ul>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div class="footer-item">✓ Presenter is advisory only</div>
+            <div class="footer-item">✓ No files moved or modified</div>
+            <div class="footer-item">✓ Human decisions applied separately</div>
+            <div class="footer-item">✓ Inbox accepts work items only</div>
+            <div class="footer-item">✓ Review opens file location only</div>
+        </div>
+    </div>
+
+    <script>
+    // Load generated presentation JSON and update the DOM. Approved UI only reads data, it is not overwritten by generator.
+    (async function(){
+        function setText(id, text){ const el = document.getElementById(id); if(el) el.textContent = text; }
+        try {
+            const res = await fetch('./generated/presenter.json',{cache:'no-store'});
+            if (!res.ok) throw new Error('no data');
+            const data = await res.json();
+            const th = data.trust_header || {};
+            if (th.rendered_at) setText('processed-at', 'Processed at ' + new Date(th.rendered_at).toLocaleTimeString());
+            const item = (data.items && data.items[0]) || {};
+            setText('file-name','📄 ' + (item.filename || 'Unknown File'));
+            setText('routed-to', item.routed_to || 'UNKNOWN');
+            setText('confidence', item.confidence || '');
+            setText('file-type', item.file_type || '');
+            setText('received', item.received || '');
+            setText('keywords', item.keywords || '');
+        } catch(e){
+            console.warn('Presenter JSON load failed', e);
+            const note = document.createElement('div'); note.className='data-failed'; note.textContent='Data load failed — showing last generated snapshot';
+            document.querySelector('.container').appendChild(note);
+        }
+    })();
+    </script>
+</body>
+</html>
