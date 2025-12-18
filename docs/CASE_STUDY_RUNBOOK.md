@@ -15,6 +15,7 @@ Step 2 — Snapshot Creation (Immutability)
 - Show: newest snapshot `ls -t NAVI/snapshots/inbox | head -n1` and `cat` the JSON
 - Highlight: `snapshot_id`, `timestamp`, `items`
 - Fallback: if missing, POST /process: `curl -X POST http://localhost:8005/process` and show logs
+- **PORT override:** The MCP server listens on port 8005 by default. For testing or CI, this can be overridden via the `PORT` environment variable.
 
 Step 3 — Mailroom + Router (Trust-Carrying Action)
 - Say: “Routing happens only after trust is established. The system records where the file goes and why.”

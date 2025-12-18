@@ -1,0 +1,21 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-17T21:00:19.386Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "items": [
+    {
+      "name": "smoke_test.md",
+      "type": "file",
+      "size": 14,
+      "modified": "2025-12-17T17:43:28.415Z"
+    },
+    {
+      "name": "smoke_test.txt",
+      "type": "file",
+      "size": 14,
+      "modified": "2025-12-17T17:40:57.685Z"
+    }
+  ],
+  "status": "unprocessed"
+}
