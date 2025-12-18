@@ -9,15 +9,40 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    env:
+      MCP_APPROVAL_TOKEN: ${{ secrets.TEST_APPROVAL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '18'
+      - name: Check TEST_APPROVAL_TOKEN secret present
+        run: |
+          if [ -z "${MCP_APPROVAL_TOKEN:-}" ]; then echo "Missing TEST_APPROVAL_TOKEN secret"; exit 1; fi
       - name: Run design approval smoke test
         run: |
           node runtime/triage_20251216_172245/tests/design_approval_smoke.js
+      - name: Run approval missing-token negative test (explicitly unset token)
+        env:
+          MCP_APPROVAL_TOKEN: ''
+        run: |
+          node runtime/triage_20251216_172245/tests/approval_missing_token.js
       - name: Run approval integration smoke test (writes approval file)
         run: |
           node runtime/triage_20251216_172245/tests/approval_integration_smoke.js
+      - name: Run approval invalid-json test
+        run: |
+          node runtime/triage_20251216_172245/tests/approval_invalid_json.js
+      - name: Run approval invalid-status test
+        run: |
+          node runtime/triage_20251216_172245/tests/approval_invalid_status.js
+      - name: Approval tests summary
+        run: |
+          passed=0; failed=0
+          for t in runtime/triage_20251216_172245/tests/approval_integration_smoke.js runtime/triage_20251216_172245/tests/approval_invalid_json.js runtime/triage_20251216_172245/tests/approval_invalid_status.js; do
+            echo "Running $t";
+            node "$t" && passed=$((passed+1)) || failed=$((failed+1));
+          done
+          echo "Approval tests passed: $passed, failed: $failed"
+          if [ $failed -ne 0 ]; then exit 1; fi
