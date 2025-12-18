@@ -1,0 +1,13 @@
+{
+  "filename": "Navi_KB_00_Master_Index.md",
+  "routing_id": "1d87f379-0558-4eaa-afcd-e21588d3faff",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-18T12-06-59-011Z.json",
+  "routed_at": "2025-12-18T12:07:00.464Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "d81d1c89618f73049d1b9ede3c15c97f8dd8b713fda352c124ddfe0c4e8d91b7",
+  "trust_header": "2025-12-18T12-06-59-011Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}
