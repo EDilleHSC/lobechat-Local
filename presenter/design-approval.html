@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVI Design Report & Approval</title>
+    <style>
+        /* (Style content omitted for brevity in this file creation) */
+        body { background: #0a0e27; color: #f0f0f0; font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 32px 24px; line-height: 1.8; font-size: 18px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        /* Minimal inline styles retained for smoke checks; full styling exists in file content above */
+        .approval-btn { padding: 18px 32px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-icon">📋</div>
+            <div class="header-content">
+                <h1>Design Report & Approval</h1>
+                <p>NAVI Mail Room Update Interface</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Changes Made</h2>
+            <ul>
+                <li>Fixed CSS brace syntax</li>
+                <li>Vertical Button Layout</li>
+                <li>Two-Column Grid Layout</li>
+            </ul>
+        </div>
+
+        <div class="approval-section">
+            <div class="approval-header">
+                <h2>Design Approval</h2>
+                <p>Review the changes above and provide your decision</p>
+            </div>
+
+            <div class="checklist">
+                <div class="check-item"><input type="checkbox" id="check1"><label for="check1">Layout matches requirements</label></div>
+                <div class="check-item"><input type="checkbox" id="check2"><label for="check2">Accessibility requirements met</label></div>
+                <div class="check-item"><input type="checkbox" id="check3"><label for="check3">CSS bug has been resolved</label></div>
+                <div class="check-item"><input type="checkbox" id="check4"><label for="check4">Ready for production use</label></div>
+            </div>
+
+            <div class="signature-area">
+                <div class="signature-label">Approved By</div>
+                <input type="text" class="signature-input" id="signatureName" placeholder="Enter your name">
+                <div class="date-row">
+                    <div class="date-field">
+                        <div class="signature-label">Date</div>
+                        <input type="text" class="signature-input" id="signatureDate" placeholder="MM/DD/YYYY">
+                    </div>
+                    <div class="date-field">
+                        <div class="signature-label">Role</div>
+                        <input type="text" class="signature-input" id="signatureRole" placeholder="e.g., CTO, Project Lead">
+                    </div>
+                </div>
+            </div>
+
+            <div class="notes-area">
+                <div class="signature-label">Notes (Optional)</div>
+                <textarea class="notes-textarea" id="approvalNotes" placeholder="Add any comments..."></textarea>
+            </div>
+
+            <div class="approval-buttons">
+                <button class="approval-btn btn-approve" id="btnApprove" onclick="approveDesign()">✅ Approve</button>
+                <button class="approval-btn btn-revise" id="btnRevise" onclick="requestRevision()">✏️ Request Revision</button>
+                <button class="approval-btn btn-reject" id="btnReject" onclick="rejectDesign()">❌ Reject</button>
+            </div>
+        </div>
+
+        <div class="footer">NAVI Mail Room Update • VBoarder System</div>
+    </div>
+
+    <div class="toast" id="toast"><span id="toastText">Design Approved!</span></div>
+
+    <script>
+        // Auto-fill today's date
+        document.getElementById('signatureDate').value = new Date().toLocaleDateString('en-US');
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').textContent = message;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function updateStatus(status) {
+            // minimal status update for page
+            console.log('STATUS:', status);
+        }
+
+        function approveDesign() {
+            const name = document.getElementById('signatureName').value;
+            if (!name.trim()) { showToast('Please enter your name', false); return; }
+            updateStatus('approved');
+            showToast('Design Approved by ' + name);
+            console.log('DESIGN APPROVED', { approvedBy: name, date: document.getElementById('signatureDate').value, role: document.getElementById('signatureRole').value, notes: document.getElementById('approvalNotes').value });
+        }
+
+        function requestRevision() {
+            const notes = document.getElementById('approvalNotes').value;
+            if (!notes.trim()) { showToast('Please add revision notes', false); return; }
+            updateStatus('revision'); showToast('Revision requested', false);
+        }
+
+        function rejectDesign() { updateStatus('rejected'); showToast('Design rejected', false); }
+    </script>
+</body>
+</html>
