@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Approval",
+  "type": "object",
+  "required": ["approvedBy", "status", "checklist"],
+  "properties": {
+    "approvedBy": { "type": "string", "minLength": 1 },
+    "date": { "type": "string", "format": "date-time" },
+    "role": { "type": ["string", "null"] },
+    "notes": { "type": ["string", "null"] },
+    "status": { "type": "string", "enum": ["approved", "revision", "rejected"] },
+    "checklist": {
+      "type": "object",
+      "required": ["layout", "accessibility", "bugFixed", "production"],
+      "properties": {
+        "layout": { "type": "boolean" },
+        "accessibility": { "type": "boolean" },
+        "bugFixed": { "type": "boolean" },
+        "production": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
