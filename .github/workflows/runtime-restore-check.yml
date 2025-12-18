@@ -9,6 +9,8 @@ on:
 jobs:
   runtime-restore:
     runs-on: windows-latest
+    env:
+      PORT: 18005
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -47,7 +49,7 @@ jobs:
           $ok = $false
           for ($i=0; $i -lt 15; $i++) {
             try {
-              $r = Invoke-WebRequest -Uri 'http://localhost:8005/health' -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
+              $r = Invoke-WebRequest -Uri "http://localhost:$env:PORT/health" -UseBasicParsing -TimeoutSec 3 -ErrorAction Stop
               if ($r.StatusCode -eq 200) { $ok = $true; break }
             } catch {}
             Start-Sleep -Seconds 2
@@ -78,6 +80,14 @@ jobs:
           Write-Host "Running agent receive smoke test: $($test.FullName)"
           node $test.FullName
 
+      - name: Run PID-file smoke test
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter pidfile_smoke.js | Select-Object -First 1
+          if (-not $test) { Write-Error "pidfile_smoke.js not found"; exit 8 }
+          Write-Host "Running PID-file smoke test: $($test.FullName)"
+          node $test.FullName
+
       - name: Install AJV (for meta validation)
         shell: pwsh
         run: |
@@ -92,6 +102,22 @@ jobs:
           Write-Host "Running metadata validator: $($test.FullName)"
           node $test.FullName
 
+      - name: Validate presenter JSON output
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter validate_presenter_json.js | Select-Object -First 1
+          if (-not $test) { Write-Error "validate_presenter_json.js not found"; exit 9 }
+          Write-Host "Running presenter JSON validator: $($test.FullName)"
+          node $test.FullName
+
+      - name: Guard approved UI from overwrite
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter presenter_no_overwrite.test.js | Select-Object -First 1
+          if (-not $test) { Write-Error "presenter_no_overwrite.test.js not found"; exit 10 }
+          Write-Host "Running presenter overwrite guard: $($test.FullName)"
+          node $test.FullName
+
       - name: Stop server (cleanup)
         if: always()
         shell: pwsh
@@ -104,3 +130,32 @@ jobs:
           } else {
             Write-Host "server.pid not found; no cleanup needed"
           }
+
+  presenter-approval-guard:
+    name: Presenter Approval Guard
+    runs-on: windows-latest
+    needs: runtime-restore
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Run presenter JSON validator
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter validate_presenter_json.js | Select-Object -First 1
+          if (-not $test) { Write-Error "validate_presenter_json.js not found"; exit 1 }
+          Write-Host "Running presenter JSON validator: $($test.FullName)"
+          node $test.FullName
+
+      - name: Run presenter overwrite guard
+        shell: pwsh
+        run: |
+          $test = Get-ChildItem -Path runtime -Recurse -Filter presenter_no_overwrite.test.js | Select-Object -First 1
+          if (-not $test) { Write-Error "presenter_no_overwrite.test.js not found"; exit 1 }
+          Write-Host "Running presenter overwrite guard: $($test.FullName)"
+          node $test.FullName

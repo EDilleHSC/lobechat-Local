@@ -7,6 +7,7 @@ FIXED: Better path handling for template discovery
 """
 
 import os
+import json
 from pathlib import Path
 from datetime import datetime
 
@@ -482,23 +483,33 @@ class Presenter:
         elif isinstance(items_data, dict) and isinstance(items_data.get('items'), list):
             items_processed = len(items_data.get('items'))
 
-        trust_header = f"""<!-- TRUST_HEADER
-rendered_at: {rendered_at}
-snapshot_id: {snapshot_id}
-items_processed: {items_processed}
--->"""
+        trust_header = {
+            "rendered_at": rendered_at,
+            "snapshot_id": snapshot_id,
+            "items_processed": items_processed
+        }
 
-        if "<body>" in html:
-            html = html.replace("<body>", "<body>\n" + trust_header, 1)
-        else:
-            html = trust_header + "\n" + html
+        # Prepare generated output directory and JSON payload (approved UI reads this file)
+        gen_dir = self.presenter_dir / "generated"
+        gen_dir.mkdir(parents=True, exist_ok=True)
 
-        # Write to file
-        with open(self.output_path, 'w', encoding='utf-8') as f:
+        data = {
+            "trust_header": trust_header,
+            "items": items_data if isinstance(items_data, list) else ([items_data] if isinstance(items_data, dict) else []),
+            "html_preview": html
+        }
+
+        json_path = gen_dir / "presenter.json"
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2)
+
+        # Also write a preview HTML next to the JSON for convenience (not the approved operator HTML)
+        preview_html_path = gen_dir / "index.html"
+        with open(preview_html_path, 'w', encoding='utf-8') as f:
             f.write(html)
 
-        print(f"[✓ Presenter generated: {self.output_path}]")
-        return self.output_path
+        print(f"[✓ Presenter generated JSON: {json_path}]")
+        return json_path
 
 
 if __name__ == "__main__":
@@ -516,4 +527,4 @@ if __name__ == "__main__":
     }
     
     presenter.generate(sample_data)
-    print("✅ Presenter HTML generated successfully!")
+    print("✅ Presenter JSON generated successfully!")

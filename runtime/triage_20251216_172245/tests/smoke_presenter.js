@@ -2,7 +2,8 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-const PROCESS_URL = 'http://localhost:8005/process';
+const PORT = Number(process.env.PORT) || 8005;
+const PROCESS_URL = `http://localhost:${PORT}/process`;
 const CANONICAL_INDEX = 'D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\presenter\\index.html';
 const TIMEOUT_MS = 30_000;
 
