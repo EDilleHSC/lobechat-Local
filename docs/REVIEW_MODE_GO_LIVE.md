@@ -57,4 +57,10 @@ This document declares the system is entering **Review Mode (Go‑Live)** for op
 
 ---
 
+### Design Approval UI
+- Added `presenter/design-approval.html` as an operator-facing page to capture design approvals and QA signoffs.
+- Smoke test `runtime/triage_20251216_172245/tests/design_approval_smoke.js` verifies presence of required fields and basic client-side validation.
+- CI: `.github/workflows/design-approval-smoke.yml` will run the smoke check on PR and branch pushes to ensure the page is shipped with basic tests.
+- Recommended: wire `approveDesign()` to a secure internal endpoint or persist a `.approval.json` artifact when approvals should be auditable.
+
 _Future work (post-review): enforce receipts as a hard gate; tighten routing confidence thresholds and metrics; define Autonomy Mode graduation criteria._

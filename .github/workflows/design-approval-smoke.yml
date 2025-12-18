@@ -1,0 +1,20 @@
+name: Design Approval smoke
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ feat/design-approval, main ]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Run design approval smoke test
+        run: |
+          node runtime/triage_20251216_172245/tests/design_approval_smoke.js
