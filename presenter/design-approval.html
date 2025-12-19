@@ -17,7 +17,7 @@
         <div class="header">
             <div class="header-icon">📋</div>
             <div class="header-content">
-                <h1>Design Report & Approval</h1>
+                <h1>Design Report — Approval</h1>
                 <p>NAVI Mail Room Update Interface</p>
             </div>
         </div>
@@ -34,7 +34,7 @@
         <div class="approval-section">
             <div class="approval-header">
                 <h2>Design Approval</h2>
-                <p>Review the changes above and provide your decision</p>
+                <p>Review the changes above and confirm your decision — add notes if you request changes.</p>
             </div>
 
             <div class="checklist">
@@ -50,7 +50,7 @@
                 <div class="date-row">
                     <div class="date-field">
                         <div class="signature-label">Date</div>
-                        <input type="text" class="signature-input" id="signatureDate" placeholder="MM/DD/YYYY">
+                        <input type="date" class="signature-input" id="signatureDate" aria-label="Approval date">
                     </div>
                     <div class="date-field">
                         <div class="signature-label">Role</div>
@@ -65,20 +65,26 @@
             </div>
 
             <div class="approval-buttons">
-                <button class="approval-btn btn-approve" id="btnApprove" onclick="approveDesign()">✅ Approve</button>
-                <button class="approval-btn btn-revise" id="btnRevise" onclick="requestRevision()">✏️ Request Revision</button>
-                <button class="approval-btn btn-reject" id="btnReject" onclick="rejectDesign()">❌ Reject</button>
+                <button class="approval-btn btn-approve" id="btnApprove" onclick="approveDesign()" aria-label="Confirm approval" title="Confirm approval">Confirm Approval</button>
+                <button class="approval-btn btn-revise" id="btnRevise" onclick="requestRevision()" aria-label="Request changes" title="Request changes">Request Changes</button>
+                <button class="approval-btn btn-reject" id="btnReject" onclick="rejectDesign()" aria-label="Reject design" title="Reject design">Reject Design</button>
             </div>
         </div>
 
         <div class="footer">NAVI Mail Room Update • VBoarder System</div>
     </div>
 
-    <div class="toast" id="toast"><span id="toastText">Design Approved!</span></div>
+    <div class="toast" id="toast" role="status" aria-live="polite" style="display:none;"><span id="toastText">Status</span></div>
 
     <script>
-        // Auto-fill today's date
-        document.getElementById('signatureDate').value = new Date().toLocaleDateString('en-US');
+        // Auto-fill today's date (works for both text and date inputs)
+        const dateEl = document.getElementById('signatureDate');
+        if (dateEl && dateEl.type === 'date') {
+            const d = new Date();
+            dateEl.value = d.toISOString().split('T')[0]; // yyyy-mm-dd for date inputs
+        } else if (dateEl) {
+            dateEl.value = new Date().toLocaleDateString('en-US');
+        }
 
         function showToast(message, isSuccess = true) {
             const toast = document.getElementById('toast');
@@ -96,17 +102,17 @@
             const name = document.getElementById('signatureName').value;
             if (!name.trim()) { showToast('Please enter your name', false); return; }
             updateStatus('approved');
-            showToast('Design Approved by ' + name);
+            showToast('Approved — Confirmed by ' + name);
             console.log('DESIGN APPROVED', { approvedBy: name, date: document.getElementById('signatureDate').value, role: document.getElementById('signatureRole').value, notes: document.getElementById('approvalNotes').value });
         }
 
         function requestRevision() {
             const notes = document.getElementById('approvalNotes').value;
             if (!notes.trim()) { showToast('Please add revision notes', false); return; }
-            updateStatus('revision'); showToast('Revision requested', false);
+            updateStatus('revision'); showToast('Changes requested — see notes', false);
         }
 
-        function rejectDesign() { updateStatus('rejected'); showToast('Design rejected', false); }
+        function rejectDesign() { updateStatus('rejected'); showToast('Rejected — design marked as rejected', false); }
     </script>
 </body>
 </html>
