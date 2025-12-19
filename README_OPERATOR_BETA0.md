@@ -56,6 +56,7 @@ http://localhost:8005/presenter/index.html
 
 - Reference: `README_BETA0.md`
 - Re-run acceptance flow: `scripts/test_beta_desk1.ps1` (PowerShell) or `scripts/test_beta_desk1.sh` (Bash)
+- 🧠 [Log your feedback](docs/UX_FEEDBACK_TEMPLATE_BETA0.md) after your run — what was clear, what wasn’t, and what you’d change.
 - Ask: `#ops-beta-test` channel or your test coordinator
 
 ---
