@@ -46,6 +46,15 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, requiredToken = process.env.MCP
       return res.status(201).json({ ok: true, logged: line.trim(), file: logPath });
     } catch (err) {
       console.error('Failed to write audit log:', err);
+      // Attempt to write structured error entry to a separate audit.err.log file for ops
+      try {
+        const errLine = JSON.stringify({ ts: new Date().toISOString(), err: err && err.message ? err.message : String(err), payload: req && req.body ? req.body : null }) + '\n';
+        const errPath = path.join(logDir, 'audit.err.log');
+        await fs.appendFile(errPath, errLine, 'utf8');
+      } catch (e2) {
+        // If even error logging fails, at least log to console
+        console.error('Failed to write audit.err.log:', e2);
+      }
       return res.status(500).json({ error: 'Could not write audit log' });
     }
   };
