@@ -66,3 +66,22 @@ jobs:
         with:
           name: mcp_server_log
           path: mcp_server.log
+
+      - name: Collect diagnostic info
+        if: always()
+        shell: pwsh
+        run: |
+          Write-Host "Collecting process list and workspace files"
+          Get-Process | Out-File -FilePath "$env:GITHUB_WORKSPACE\\processes.txt"
+          Get-ChildItem -Path $env:GITHUB_WORKSPACE -Recurse -ErrorAction SilentlyContinue | Select-Object FullName,Length | Out-File -FilePath "$env:GITHUB_WORKSPACE\\workspace-files.txt"
+          if (Test-Path "$env:GITHUB_WORKSPACE\\mcp_server.log") { Get-Content "$env:GITHUB_WORKSPACE\\mcp_server.log" -Tail 200 | Out-File -FilePath "$env:GITHUB_WORKSPACE\\mcp_server_tail.txt" } else { "mcp_server.log not found" | Out-File -FilePath "$env:GITHUB_WORKSPACE\\mcp_server_tail.txt" }
+
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-diagnostics
+          path: |
+            processes.txt
+            workspace-files.txt
+            mcp_server_tail.txt
