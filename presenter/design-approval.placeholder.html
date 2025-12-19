@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Design Approval (Test Placeholder)</title>
+    <title>Design Approval (Placeholder)</title>
     <style>
       body { font-family: Arial, sans-serif; padding: 24px }
       button { padding: 8px 12px; }
@@ -21,8 +21,8 @@
       <button id="btnApprove" onclick="approveDesign()">Confirm Approval</button>
     </div>
 
-    <div id="demoModal" role="dialog" aria-modal="true" aria-labelledby="demoTitle" aria-hidden="true">
-      <h3 id="demoTitle" tabindex="-1">UX Demo Mode</h3>
+    <div id="demoModal">
+      <h3 id="demoTitle">UX Demo Mode</h3>
       <ul id="demoChecklist">
         <li data-step="1">Fill out name & role</li>
         <li data-step="2">Add notes</li>
@@ -32,41 +32,13 @@
       <button onclick="exitDemoMode()">Close</button>
     </div>
 
-    <div id="toast" role="status" aria-live="polite" aria-atomic="true" style="display:none; border:1px solid #ccc; padding:8px; position:fixed; bottom:24px; right:24px; background:#eee"></div>
+    <div id="toast" style="display:none; border:1px solid #ccc; padding:8px; position:fixed; bottom:24px; right:24px; background:#eee"></div>
 
     <script>
-      let demoMode=false; let demoState={steps:{}}; let _previousActiveElement=null; let _trapHandler=null;
+      let demoMode=false; let demoState={steps:{}};
       function toggleDemoMode(){ demoMode?exitDemoMode():enterDemoMode(); }
-      function _trapFocus(e){
-        if(e.key !== 'Tab') return;
-        const modal = document.getElementById('demoModal');
-        const focusable = Array.from(modal.querySelectorAll('button, [href], input, textarea, [tabindex]:not([tabindex="-1"])')).filter(el => !el.hasAttribute('disabled'));
-        if(focusable.length===0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length-1];
-        if(e.shiftKey){ if(document.activeElement === first){ e.preventDefault(); last.focus(); } }
-        else { if(document.activeElement === last){ e.preventDefault(); first.focus(); } }
-      }
-      function enterDemoMode(){
-        demoMode=true;
-        const modal=document.getElementById('demoModal');
-        _previousActiveElement = document.activeElement;
-        modal.classList.add('open');
-        modal.setAttribute('aria-hidden','false');
-        _trapHandler = _trapFocus;
-        modal.addEventListener('keydown', _trapHandler);
-        document.getElementById('demoTitle').focus();
-        showToast('Demo Mode enabled');
-      }
-      function exitDemoMode(){
-        demoMode=false;
-        const modal=document.getElementById('demoModal');
-        modal.classList.remove('open');
-        modal.setAttribute('aria-hidden','true');
-        if(_trapHandler) modal.removeEventListener('keydown', _trapHandler);
-        if(_previousActiveElement && _previousActiveElement.focus) _previousActiveElement.focus();
-        showToast('Demo Mode disabled');
-      }
+      function enterDemoMode(){ demoMode=true; document.getElementById('demoModal').classList.add('open'); showToast('Demo Mode enabled'); }
+      function exitDemoMode(){ demoMode=false; document.getElementById('demoModal').classList.remove('open'); showToast('Demo Mode disabled'); }
       function markDemoStepCompleted(s){ demoState.steps[s]=true; document.querySelectorAll('#demoChecklist li').forEach(li=>{ if(demoState.steps[li.getAttribute('data-step')]) li.classList.add('complete') }) }
       function approveDesign(){ const name=document.getElementById('signatureName').value; if(!name.trim()){ showToast('Please enter your name'); return } if(demoMode){ markDemoStepCompleted('1'); markDemoStepCompleted('3'); showToast('Demo: Approval submitted (no write)'); return } showToast('Approved by '+name) }
       function resetDemo(){ demoState={steps:{}}; document.querySelectorAll('#demoChecklist li').forEach(li=>li.classList.remove('complete')); showToast('Demo reset') }
