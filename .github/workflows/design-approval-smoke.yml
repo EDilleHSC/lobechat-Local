@@ -20,17 +20,6 @@ jobs:
       - name: Check TEST_APPROVAL_TOKEN secret present
         run: |
           if [ -z "${MCP_APPROVAL_TOKEN:-}" ]; then echo "Missing TEST_APPROVAL_TOKEN secret"; exit 1; fi
-      - name: Debug: runner and env sanity (no token printed)
-        run: |
-          echo "DEBUG: runner info"
-          echo "User: $(whoami || echo unknown)"
-          echo "PWD: $(pwd)"
-          echo "Node: $(node -v || echo n/a)"
-          if [ -n "${MCP_APPROVAL_TOKEN:-}" ]; then echo "MCP_APPROVAL_TOKEN: SET"; else echo "MCP_APPROVAL_TOKEN: NOT SET"; fi
-          echo "Workspace listing (top):"
-          ls -la | sed -n '1,40p' || true
-          echo "Tests dir listing (triage tests):"
-          ls -la runtime/triage_20251216_172245/tests || true
       - name: Run design approval smoke test
         run: |
           node runtime/triage_20251216_172245/tests/design_approval_smoke.js
