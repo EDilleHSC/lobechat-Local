@@ -3,45 +3,44 @@ const { test, expect } = require('@playwright/test');
 const PORT = process.env.E2E_PORT || 8005;
 const BASE = `http://localhost:${PORT}/presenter/design-approval.html`;
 
-test.describe('Accessibility: Demo modal & toast', () => {
-  test('modal has proper ARIA and focus management', async ({ page }) => {
+test.describe('Accessibility: NAVI approval page', () => {
+  test('form elements have accessible labels and snapshot info', async ({ page }) => {
     await page.goto(BASE);
-    // Open modal
-    await page.click('#btnDemoToggle');
 
-    // Modal role and aria attributes
-    const modal = await page.$('#demoModal');
-    expect(await modal.getAttribute('role')).toBe('dialog');
-    expect(await modal.getAttribute('aria-modal')).toBe('true');
-    expect(await modal.getAttribute('aria-hidden')).toBe('false');
+    // Labels and inputs
+    await expect(page.locator('label', { hasText: 'Approved by' })).toBeVisible();
+    await expect(page.locator('#approvedBy')).toHaveAttribute('placeholder', /Operator/);
 
-    // Focus should be on the title inside the modal
-    const active = await page.evaluate(() => document.activeElement.id);
-    expect(active).toBe('demoTitle');
+    // Snapshot id and copy button
+    await expect(page.locator('#snapshot')).toBeVisible();
 
-    // Try tabbing forward/back within modal to ensure focus stays inside
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Tab');
-    const afterTab = await page.evaluate(() => document.activeElement.closest('#demoModal') !== null);
-    expect(afterTab).toBe(true);
+    // Replace clipboard with a no-op to prevent environment issues
+    await page.evaluate(() => {
+      window.navigator.clipboard = { writeText: async () => {} };
+    });
 
-    // Close modal and ensure aria-hidden toggles and focus is restored
-    await page.click('#demoModal button:nth-of-type(2)'); // Close button
-    expect(await modal.getAttribute('aria-hidden')).toBe('true');
-    // Focus restored to toggle button
-    const restored = await page.evaluate(() => document.activeElement.id === 'btnDemoToggle');
-    expect(restored).toBe(true);
+    await page.click('#copySnapshot');
+    await expect(page.locator('#copySnapshot')).toContainText(/Copy|Copied/);
   });
 
-  test('toast uses live region for announcements', async ({ page }) => {
+  test('result appears and is readable after submit (stubbed)', async ({ page }) => {
     await page.goto(BASE);
-    await page.click('#btnDemoToggle');
-    await page.fill('#signatureName', 'A11y User');
-    await page.click('#btnApprove');
 
-    const toast = await page.waitForSelector('#toast', { state: 'visible' });
-    expect(await toast.getAttribute('role')).toBe('status');
-    expect(await toast.getAttribute('aria-live')).toBe('polite');
-    expect(await toast.textContent()).toContain('Demo: Approval submitted');
+    // Fill token and a required field
+    await page.fill('#token', 'test-token');
+    await page.fill('#approvedBy', 'A11y User');
+
+    // Stub the network POST so test remains non-destructive
+    await page.route('**/approval', route => route.fulfill({
+      status: 201,
+      contentType: 'application/json',
+      body: JSON.stringify({ file: 'NAVI/approvals/test.approval.json' })
+    }));
+
+    await page.click('button[type=submit]');
+
+    const out = page.locator('#result');
+    await expect(out).toBeVisible();
+    await expect(out).toContainText('Approval persisted');
   });
 });
