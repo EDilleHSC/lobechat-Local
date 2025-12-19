@@ -10,6 +10,19 @@
         .container { max-width: 1100px; margin: 0 auto; }
         /* Minimal inline styles retained for smoke checks; full styling exists in file content above */
         .approval-btn { padding: 18px 32px; border-radius: 8px; }
+
+        /* Demo mode modal & checklist */
+        .demo-toggle { margin-top: 8px; padding: 8px 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.06); color: #fff; border-radius: 6px; cursor: pointer; }
+        .demo-modal { position: fixed; right: 24px; top: 72px; width: 360px; background: #0f1530; border: 1px solid rgba(255,255,255,0.06); padding: 16px; border-radius: 8px; box-shadow: 0 8px 30px rgba(0,0,0,0.6); display: none; z-index: 1200; }
+        .demo-modal.open { display: block; }
+        .demo-modal h3 { margin-top: 0; }
+        .demo-checklist { list-style: none; padding: 0; margin: 8px 0; }
+        .demo-checklist li { display:flex; gap:8px; align-items:center; padding:8px 4px; border-radius:6px; }
+        .demo-checklist li.complete { background: rgba(255,255,255,0.02); text-decoration: line-through; opacity: 0.9; }
+        .demo-actions { display:flex; gap:8px; justify-content: flex-end; margin-top: 12px; }
+        .demo-small { font-size: 13px; opacity: 0.9; }
+        .demo-step-badge { width:20px; height:20px; border-radius:4px; background:rgba(255,255,255,0.04); display:inline-flex; align-items:center; justify-content:center; font-size:12px; }
+        .demo-complete { color: #1ad17b; font-weight:600; }
     </style>
 </head>
 <body>
@@ -19,6 +32,9 @@
             <div class="header-content">
                 <h1>Design Report — Approval</h1>
                 <p>NAVI Mail Room Update Interface</p>
+                <div>
+                    <button id="btnDemoToggle" class="demo-toggle" aria-pressed="false" onclick="toggleDemoMode()">Try UX Demo Mode</button>
+                </div>
             </div>
         </div>
 
@@ -69,6 +85,25 @@
                 <button class="approval-btn btn-revise" id="btnRevise" onclick="requestRevision()" aria-label="Request changes" title="Request changes">Request Changes</button>
                 <button class="approval-btn btn-reject" id="btnReject" onclick="rejectDesign()" aria-label="Reject design" title="Reject design">Reject Design</button>
             </div>
+
+            <!-- Demo Mode Modal -->
+            <div id="demoModal" class="demo-modal" role="dialog" aria-hidden="true" aria-labelledby="demoTitle">
+                <h3 id="demoTitle">UX Demo Mode</h3>
+                <div class="demo-small">Follow the checklist to try the approval flow without committing data.</div>
+                <ul id="demoChecklist" class="demo-checklist">
+                    <li data-step="1"><span class="demo-step-badge">1</span> <span class="demo-label">Fill out name & role</span></li>
+                    <li data-step="2"><span class="demo-step-badge">2</span> <span class="demo-label">Add notes</span></li>
+                    <li data-step="3"><span class="demo-step-badge">3</span> <span class="demo-label">Submit approval (demo)</span></li>
+                    <li data-step="4"><span class="demo-step-badge">4</span> <span class="demo-label">Copy Snapshot ID</span></li>
+                    <li data-step="5"><span class="demo-step-badge">5</span> <span class="demo-label">View audit log</span></li>
+                </ul>
+                <div class="demo-actions">
+                    <button class="demo-toggle" onclick="resetDemo()">Restart Demo</button>
+                    <button class="demo-toggle" onclick="exitDemoMode()">Close</button>
+                </div>
+                <div style="margin-top:8px" class="demo-small">Sandbox: actions are simulated while demo mode is active.</div>
+            </div>
+
         </div>
 
         <div class="footer">NAVI Mail Room Update • VBoarder System</div>
@@ -98,9 +133,48 @@
             console.log('STATUS:', status);
         }
 
+        // DEMO / SANDBOX MODE SUPPORT
+        let demoMode = false;
+        let demoState = { steps: {} };
+
+        function toggleDemoMode() { demoMode ? exitDemoMode() : enterDemoMode(); }
+        function enterDemoMode() {
+            demoMode = true;
+            document.getElementById('btnDemoToggle').setAttribute('aria-pressed', 'true');
+            document.getElementById('demoModal').classList.add('open');
+            document.getElementById('demoModal').setAttribute('aria-hidden', 'false');
+            showToast('Demo Mode enabled — actions are simulated', true);
+            updateDemoUI();
+        }
+        function exitDemoMode() {
+            demoMode = false;
+            document.getElementById('btnDemoToggle').setAttribute('aria-pressed', 'false');
+            document.getElementById('demoModal').classList.remove('open');
+            document.getElementById('demoModal').setAttribute('aria-hidden', 'true');
+            showToast('Demo Mode disabled', true);
+            demoState = { steps: {} };
+            updateDemoUI();
+        }
+        function updateDemoUI(){
+            const items = document.querySelectorAll('#demoChecklist li');
+            items.forEach(li=>{
+                const step = li.getAttribute('data-step');
+                if (demoState.steps[step]) li.classList.add('complete'); else li.classList.remove('complete');
+            });
+        }
+        function markDemoStepCompleted(step) { demoState.steps[step] = true; updateDemoUI(); if (Object.keys(demoState.steps).length >= 5) { document.querySelector('#demoChecklist').insertAdjacentHTML('beforeend', '<div class="demo-complete">Demo Complete — well done!</div>'); } }
+
         function approveDesign() {
             const name = document.getElementById('signatureName').value;
             if (!name.trim()) { showToast('Please enter your name', false); return; }
+            if (demoMode) {
+                // simulate approval without writing
+                markDemoStepCompleted('1');
+                markDemoStepCompleted('3');
+                showToast('Demo: Approval submitted (no write)', true);
+                console.log('DEMO DESIGN APPROVED', { approvedBy: name, date: document.getElementById('signatureDate').value, role: document.getElementById('signatureRole').value, notes: document.getElementById('approvalNotes').value });
+                return;
+            }
             updateStatus('approved');
             showToast('Approved — Confirmed by ' + name);
             console.log('DESIGN APPROVED', { approvedBy: name, date: document.getElementById('signatureDate').value, role: document.getElementById('signatureRole').value, notes: document.getElementById('approvalNotes').value });
@@ -109,10 +183,14 @@
         function requestRevision() {
             const notes = document.getElementById('approvalNotes').value;
             if (!notes.trim()) { showToast('Please add revision notes', false); return; }
+            if (demoMode) { markDemoStepCompleted('2'); showToast('Demo: Revision requested (no write)', false); return; }
             updateStatus('revision'); showToast('Changes requested — see notes', false);
         }
 
-        function rejectDesign() { updateStatus('rejected'); showToast('Rejected — design marked as rejected', false); }
+        function rejectDesign() { if (demoMode) { markDemoStepCompleted('3'); showToast('Demo: Rejected (no write)', false); return; } updateStatus('rejected'); showToast('Rejected — design marked as rejected', false); }
+
+        function resetDemo(){ demoState = { steps: {} }; updateDemoUI(); showToast('Demo reset', true); }
+
     </script>
 </body>
 </html>
