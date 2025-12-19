@@ -1,0 +1,24 @@
+Starting up http-server, serving .
+
+http-server version: 14.1.1
+
+http-server settings: 
+CORS: disabled
+Cache: 3600 seconds
+Connection Timeout: 120 seconds
+Directory Listings: visible
+AutoIndex: visible
+Serve GZIP Files: false
+Serve Brotli Files: false
+Default File Extension: none
+
+Available on:
+  http://10.0.0.2:8005
+  http://127.0.0.1:8005
+  http://172.25.176.1:8005
+  http://172.26.112.1:8005
+Hit CTRL-C to stop the server
+
+[2025-12-19T14:03:41.835Z]  "HEAD /presenter/design-approval.html" "curl/8.9.1"
+[2025-12-19T14:03:47.572Z]  "GET /presenter/design-approval.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/143.0.7499.4 Safari/537.36"
+[2025-12-19T14:04:13.361Z]  "GET /presenter/design-approval.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36"
