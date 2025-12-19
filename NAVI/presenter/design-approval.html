@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Design Approval — NAVI</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <style>
+    body{font-family:Segoe UI,Arial,sans-serif;background:#0a0e27;color:#f0f0f0;padding:24px}
+    .card{background:#0f1433;padding:20px;border-radius:8px;border-left:5px solid #4a90e2;max-width:900px;margin:0 auto}
+    h1{font-size:20px;margin-bottom:8px}
+    label{display:block;margin:10px 0 4px;color:#a0a8c0}
+    input[type=text],textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #27314f;background:#07102a;color:#fff}
+    .checklist{display:flex;gap:12px;flex-wrap:wrap}
+    .check{background:#0f1433;padding:8px;border-radius:6px;border:1px solid #1b2340}
+    .btn{display:inline-block;padding:10px 14px;border-radius:6px;background:#4ac04a;color:#04201a;border:none;cursor:pointer;margin-top:12px}
+    .btn-secondary{background:#1e2749;color:#c8d0e0}
+    .success{background:#0b3f2e;color:#b6f7d2;padding:12px;border-radius:6px;margin-top:12px;display:none}
+    .tooltip{border-bottom:1px dotted #7a8299;cursor:help}
+    .small{font-size:12px;color:#9ea6c0}
+    .actions{display:flex;gap:8px;align-items:center;margin-top:12px}
+    .muted{color:#8b93b0}
+    .link{color:#a0c8ff}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>✅ Design Approval</h1>
+    <p class="small">Submit an operator approval to persist a signed record for this presenter snapshot. The server must be started with an approval token (MCP_APPROVAL_TOKEN).</p>
+
+    <div id="trust" class="small muted">Snapshot: <span id="snapshot">UNKNOWN</span> <button id="copySnapshot" class="btn-secondary">Copy snapshot ID</button></div>
+
+    <form id="approvalForm">
+      <label>Approval token <span class="small muted">(paste token given by operator)</span></label>
+      <input type="text" id="token" placeholder="X-MCP-APPROVAL-TOKEN" required>
+
+      <label>Approved by</label>
+      <input type="text" id="approvedBy" placeholder="Operator name" required>
+
+      <label>Role</label>
+      <input type="text" id="role" placeholder="e.g., UX, Engineering">
+
+      <label>Checklist <span class="small muted">(hover items for details)</span></label>
+      <div class="checklist">
+        <label class="check" title="Layout has been reviewed and matches spec"><input type="checkbox" id="cl_layout"> <span class="tooltip">Layout</span></label>
+        <label class="check" title="Basic accessibility checks performed (contrast, keyboard)"><input type="checkbox" id="cl_accessibility"> <span class="tooltip">Accessibility</span></label>
+        <label class="check" title="Known bugs fixed or documented"><input type="checkbox" id="cl_bug"> <span class="tooltip">Bug fixes</span></label>
+        <label class="check" title="Ready for production release (unstable if unchecked)"><input type="checkbox" id="cl_prod"> <span class="tooltip">Production ready</span></label>
+      </div>
+
+      <label>Notes</label>
+      <textarea id="notes" rows="4" placeholder="Observations or follow-ups"></textarea>
+
+      <label>Status</label>
+      <div>
+        <label><input type="radio" name="status" value="approved" checked> Approved</label>
+        <label style="margin-left:12px"><input type="radio" name="status" value="rejected"> Rejected</label>
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn">Submit approval</button>
+        <button type="button" id="viewAudit" class="btn-secondary">View audit log</button>
+      </div>
+
+      <div id="result" class="success"></div>
+    </form>
+
+    <p class="small muted" style="margin-top:12px">If POST returns 403/503: restart the server ensuring `MCP_APPROVAL_TOKEN` is set in the server process environment.</p>
+  </div>
+
+  <script>
+    (function(){
+      // Extract TRUST_HEADER from the HTML (if present) to show snapshot_id
+      function parseTrustHeader() {
+        try {
+          const html = document.documentElement.innerHTML;
+          const m = html.match(/<!--\s*TRUST_HEADER([\s\S]*?)-->/i);
+          if (m && m[1]) {
+            const lines = m[1].split(/\n/).map(l => l.trim()).filter(Boolean);
+            const map = {};
+            for (const l of lines) {
+              const parts = l.split(':');
+              if (parts.length >= 2) map[parts[0].trim()] = parts.slice(1).join(':').trim();
+            }
+            return map;
+          }
+        } catch (e) { /* ignore */ }
+        return null;
+      }
+
+      const trust = parseTrustHeader();
+      const snapshotSpan = document.getElementById('snapshot');
+      if (trust && trust.snapshot_id) {
+        snapshotSpan.textContent = trust.snapshot_id;
+      }
+
+      document.getElementById('copySnapshot').addEventListener('click', async function(){
+        const id = snapshotSpan.textContent || '';
+        try {
+          await navigator.clipboard.writeText(id);
+          this.textContent = 'Copied!';
+          setTimeout(()=>{ this.textContent = 'Copy snapshot ID'; }, 1500);
+        } catch (e) {
+          alert('Copy failed: ' + (e && e.message));
+        }
+      });
+
+      document.getElementById('viewAudit').addEventListener('click', function(){
+        window.open('/approvals/audit', '_blank');
+      });
+
+      document.getElementById('approvalForm').addEventListener('submit', async function(ev){
+        ev.preventDefault();
+        const token = document.getElementById('token').value.trim();
+        if (!token) { alert('Approval token is required'); return; }
+        const payload = {
+          approvedBy: document.getElementById('approvedBy').value.trim() || 'anon',
+          date: new Date().toISOString(),
+          role: document.getElementById('role').value.trim() || null,
+          notes: document.getElementById('notes').value.trim() || null,
+          checklist: {
+            layout: !!document.getElementById('cl_layout').checked,
+            accessibility: !!document.getElementById('cl_accessibility').checked,
+            bugFixed: !!document.getElementById('cl_bug').checked,
+            production: !!document.getElementById('cl_prod').checked
+          },
+          status: document.querySelector('input[name="status"]:checked').value
+        };
+
+        try {
+          const res = await fetch('/approval', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-MCP-APPROVAL-TOKEN': token
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const text = await res.text();
+          if (res.status === 201) {
+            let info = {};
+            try { info = JSON.parse(text); } catch(e) {}
+            const out = document.getElementById('result');
+            out.style.display = 'block';
+            out.textContent = '✅ Approval persisted: ' + (info.file || 'unknown path');
+            // Show a small link to audit
+            const link = document.createElement('a');
+            link.href = '/approvals/audit';
+            link.target = '_blank';
+            link.className = 'link';
+            link.textContent = ' View audit log';
+            out.appendChild(document.createTextNode(' '));
+            out.appendChild(link);
+            // Also clear token for security
+            document.getElementById('token').value = '';
+          } else {
+            let msg = text || ('HTTP ' + res.status);
+            alert('Approval failed: ' + msg);
+          }
+
+        } catch (e) {
+          alert('Approval request failed: ' + (e && e.message));
+        }
+      });
+
+    })();
+  </script>
+</body>
+</html>
