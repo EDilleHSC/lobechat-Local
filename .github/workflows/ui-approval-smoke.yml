@@ -1,0 +1,58 @@
+name: UI Approval Smoke Test
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  ui-smoke:
+    name: UI smoke (Windows matrix)
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        shell: [pwsh, bash]
+    env:
+      MCP_APPROVAL_TOKEN: ${{ secrets.TEST_APPROVAL_TOKEN }}
+      ENABLE_TEST_ADMIN: "1"
+      MCP_SHUTDOWN_TOKEN: ${{ secrets.TEST_SHUTDOWN_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Start MCP server (background)
+        shell: bash
+        run: |
+          echo "Starting MCP server via pwsh..."
+          pwsh -Command "Start-Process -NoNewWindow -FilePath node -ArgumentList 'runtime\\triage_20251216_172245\\mcp_server.js' -PassThru | Out-Null"
+          # Wait for health endpoint
+          max=30; i=0
+          until curl -sS http://localhost:8005/health | grep -q '"status"' || [ $i -ge $max ]; do sleep 1; i=$((i+1)); done
+          if [ $i -ge $max ]; then echo "Server did not become ready" >&2; exit 1; fi
+
+      - name: Run UI smoke test
+        shell: ${{ matrix.shell }}
+        run: |
+          if [ "${{ matrix.shell }}" = "pwsh" ]; then
+            pwsh -File scripts/test_ui_approval_smoke.ps1 -Token $env:MCP_APPROVAL_TOKEN
+          else
+            bash scripts/test_ui_approval_smoke.sh $MCP_APPROVAL_TOKEN
+          fi
+
+      - name: Shutdown MCP server (best-effort)
+        shell: bash
+        run: |
+          echo "Invoking shutdown endpoint..."
+          curl -sS -X POST "http://localhost:8005/__mcp_shutdown?token=${{ secrets.TEST_SHUTDOWN_TOKEN }}" || true
+          sleep 2
+          # Try health once more to ensure it's down (ignore errors)
+          if curl -sS http://localhost:8005/health >/dev/null 2>&1; then
+            echo "Server still responding after shutdown request" >&2
+          else
+            echo "Server appears stopped"
+          fi
