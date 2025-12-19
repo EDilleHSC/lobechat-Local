@@ -1,76 +1,213 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Design Approval (Test Placeholder)</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>NAVI Design Approval</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <style>
-      body { font-family: Arial, sans-serif; padding: 24px }
-      button { padding: 8px 12px; }
-      #demoModal { display:none; border:1px solid #ddd; padding:12px; position:fixed; right:24px; top:72px; background:#fff }
-      #demoModal.open { display:block }
-      .complete { text-decoration:line-through }
+        * { box-sizing: border-box; }
+        body{font-family:Segoe UI,Arial,sans-serif;background:#0a0e27;color:#f0f0f0;padding:24px}
+        .container{max-width:1100px;margin:0 auto}
+        .header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+        .header h1{font-size:24px;margin:0}
+
+        .content-grid{display:grid;grid-template-columns:320px 1fr;gap:24px}
+        @media (max-width:768px){ .content-grid{grid-template-columns:1fr} }
+
+        .actions-section{display:flex;flex-direction:column;gap:12px}
+        .action-btn{display:flex;align-items:center;gap:12px;padding:16px;border-radius:8px;background:#0f1433;border:2px solid #27314f;color:#fff;cursor:pointer}
+        .action-btn .action-icon{font-size:20px}
+
+        .file-card{background:#0f1433;padding:20px;border-radius:8px;border-left:5px solid #4a90e2}
+        .file-card h3{margin:0 0 12px 0}
+        .file-meta{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+        .meta-label{color:#a0a8c0;min-width:110px}
+
+        /* Approval form inside file-card */
+        .approval-form label{display:block;margin:10px 0 6px;color:#a0a8c0}
+        input[type=text],textarea,select{width:100%;padding:10px;border-radius:6px;border:1px solid #27314f;background:#07102a;color:#fff}
+        .checklist{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}
+        .check{background:#0f1433;padding:8px;border-radius:6px;border:1px solid #1b2340}
+        .btn{display:inline-block;padding:10px 14px;border-radius:6px;background:#4ac04a;color:#04201a;border:none;cursor:pointer;margin-top:12px}
+        .btn-secondary{background:#1e2749;color:#c8d0e0;border:1px solid #27314f}
+        .small{font-size:12px;color:#9ea6c0}
+        .success{background:#0b3f2e;color:#b6f7d2;padding:12px;border-radius:6px;margin-top:12px;display:none}
+
+        .footer{margin-top:24px;background:#0f1433;padding:12px;border-radius:6px;border-top:2px solid #1e2749;color:#7a8299}
     </style>
-  </head>
-  <body>
-    <h1>Design Approval (Placeholder)</h1>
-    <button id="btnDemoToggle" onclick="toggleDemoMode()">Try UX Demo Mode</button>
-
-    <div style="margin-top:16px">
-      <label>Approved By <input id="signatureName"></label><br>
-      <label>Notes <textarea id="approvalNotes"></textarea></label><br>
-      <button id="btnApprove" onclick="approveDesign()">Confirm Approval</button>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div style="font-size:28px">📬</div>
+        <div>
+            <h1>NAVI Design Approval</h1>
+            <div class="small">Operator-facing UI for persisting approvals (MCP_APPROVAL_TOKEN required)</div>
+        </div>
     </div>
 
-    <div id="demoModal" role="dialog" aria-modal="true" aria-labelledby="demoTitle" aria-hidden="true">
-      <h3 id="demoTitle" tabindex="-1">UX Demo Mode</h3>
-      <ul id="demoChecklist">
-        <li data-step="1">Fill out name & role</li>
-        <li data-step="2">Add notes</li>
-        <li data-step="3">Submit approval (demo)</li>
-      </ul>
-      <button onclick="resetDemo()">Restart Demo</button>
-      <button onclick="exitDemoMode()">Close</button>
-    </div>
+    <div class="content-grid">
+        <div class="actions-section">
+            <button class="action-btn btn-track" data-testid="action-track"><div class="action-icon">🟢</div><div>Track</div></button>
+            <button class="action-btn btn-hold" data-testid="action-hold"><div class="action-icon">🟡</div><div>Hold</div></button>
+            <button class="action-btn btn-escalate" data-testid="action-escalate"><div class="action-icon">🔴</div><div>Escalate</div></button>
+        </div>
 
-    <div id="toast" role="status" aria-live="polite" aria-atomic="true" style="display:none; border:1px solid #ccc; padding:8px; position:fixed; bottom:24px; right:24px; background:#eee"></div>
+        <div class="file-card">
+            <h3>Design Approval</h3>
+            <div class="file-meta">
+                <div><span class="meta-label">Snapshot:</span> <span id="snapshot" data-testid="snapshot">UNKNOWN</span> <button id="copySnapshot" class="btn-secondary" data-testid="copy-snapshot">Copy snapshot ID</button></div>
+                <div><span class="meta-label">Context:</span> <span class="small muted">Operator approval form — persist approvals to NAVI/approvals</span></div>
+            </div>
 
-    <script>
-      let demoMode=false; let demoState={steps:{}}; let _previousActiveElement=null; let _trapHandler=null;
-      function toggleDemoMode(){ demoMode?exitDemoMode():enterDemoMode(); }
-      function _trapFocus(e){
-        if(e.key !== 'Tab') return;
-        const modal = document.getElementById('demoModal');
-        const focusable = Array.from(modal.querySelectorAll('button, [href], input, textarea, [tabindex]:not([tabindex="-1"])')).filter(el => !el.hasAttribute('disabled'));
-        if(focusable.length===0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length-1];
-        if(e.shiftKey){ if(document.activeElement === first){ e.preventDefault(); last.focus(); } }
-        else { if(document.activeElement === last){ e.preventDefault(); first.focus(); } }
+            <form id="approvalForm" class="approval-form">
+                <label for="token">Approval token <span class="small muted">(paste token given by operator)</span></label>
+                <input id="token" name="token" data-testid="token-input" aria-label="Approval token" placeholder="X-MCP-APPROVAL-TOKEN">
+                <div id="tokenError" class="small" role="alert" style="display:none;color:#f9b7b7" data-testid="token-error">Approval token is required</div>
+
+                <label for="approvedBy">Approved by</label>
+                <input id="approvedBy" name="approvedBy" data-testid="approvedBy-input" aria-label="Approved by" placeholder="Operator name">
+
+                <label for="role">Role</label>
+                <input id="role" name="role" data-testid="role-input" aria-label="Role" placeholder="e.g., UX, Engineering">
+
+                <label>Checklist <span class="small muted">(hover items for details)</span></label>
+                <div class="checklist">
+                    <label class="check"><input type="checkbox" id="cl_layout" data-testid="check-layout"> Layout</label>
+                    <label class="check"><input type="checkbox" id="cl_accessibility" data-testid="check-accessibility"> Accessibility</label>
+                    <label class="check"><input type="checkbox" id="cl_bug" data-testid="check-bug"> Bug fixes</label>
+                    <label class="check"><input type="checkbox" id="cl_prod" data-testid="check-prod"> Production ready</label>
+                </div>
+
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" rows="4" data-testid="notes-input" placeholder="Observations or follow-ups"></textarea>
+
+                <div style="margin-top:12px">
+                    <button type="submit" class="btn" data-testid="submit-approval">Submit approval</button>
+                    <button type="button" id="viewAudit" class="btn-secondary" data-testid="view-audit">View audit log</button>
+                </div>
+
+                <div id="result" data-testid="result" class="success" role="status" aria-live="polite"></div>
+            </form>
+
+            <p class="small muted" style="margin-top:12px">If POST returns 403/503: restart the server ensuring <code>MCP_APPROVAL_TOKEN</code> is set in the server process environment.</p>
+        </div>
+
+  </div>
+
+  <script>
+    (function(){
+      // Extract TRUST_HEADER from the HTML (if present) to show snapshot_id
+      function parseTrustHeader() {
+        try {
+          const html = document.documentElement.innerHTML;
+          const m = html.match(/<!--\s*TRUST_HEADER([\s\S]*?)-->/i);
+          if (m && m[1]) {
+            const lines = m[1].split(/\n/).map(l => l.trim()).filter(Boolean);
+            const map = {};
+            for (const l of lines) {
+              const parts = l.split(':');
+              if (parts.length >= 2) map[parts[0].trim()] = parts.slice(1).join(':').trim();
+            }
+            return map;
+          }
+        } catch (e) { /* ignore */ }
+        return null;
       }
-      function enterDemoMode(){
-        demoMode=true;
-        const modal=document.getElementById('demoModal');
-        _previousActiveElement = document.activeElement;
-        modal.classList.add('open');
-        modal.setAttribute('aria-hidden','false');
-        _trapHandler = _trapFocus;
-        modal.addEventListener('keydown', _trapHandler);
-        document.getElementById('demoTitle').focus();
-        showToast('Demo Mode enabled');
+
+      const trust = parseTrustHeader();
+      const snapshotSpan = document.getElementById('snapshot');
+      if (trust && trust.snapshot_id) {
+        snapshotSpan.textContent = trust.snapshot_id;
       }
-      function exitDemoMode(){
-        demoMode=false;
-        const modal=document.getElementById('demoModal');
-        modal.classList.remove('open');
-        modal.setAttribute('aria-hidden','true');
-        if(_trapHandler) modal.removeEventListener('keydown', _trapHandler);
-        if(_previousActiveElement && _previousActiveElement.focus) _previousActiveElement.focus();
-        showToast('Demo Mode disabled');
-      }
-      function markDemoStepCompleted(s){ demoState.steps[s]=true; document.querySelectorAll('#demoChecklist li').forEach(li=>{ if(demoState.steps[li.getAttribute('data-step')]) li.classList.add('complete') }) }
-      function approveDesign(){ const name=document.getElementById('signatureName').value; if(!name.trim()){ showToast('Please enter your name'); return } if(demoMode){ markDemoStepCompleted('1'); markDemoStepCompleted('3'); showToast('Demo: Approval submitted (no write)'); return } showToast('Approved by '+name) }
-      function resetDemo(){ demoState={steps:{}}; document.querySelectorAll('#demoChecklist li').forEach(li=>li.classList.remove('complete')); showToast('Demo reset') }
-      function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',3000) }
-    </script>
-  </body>
+
+      document.getElementById('copySnapshot').addEventListener('click', async function(){
+        const id = snapshotSpan.textContent || '';
+        try {
+          await navigator.clipboard.writeText(id);
+          this.textContent = 'Copied!';
+          setTimeout(()=>{ this.textContent = 'Copy snapshot ID'; }, 1500);
+        } catch (e) {
+          alert('Copy failed: ' + (e && e.message));
+        }
+      });
+
+      document.getElementById('viewAudit').addEventListener('click', function(){
+        window.open('/approvals/audit', '_blank');
+      });
+
+      document.getElementById('approvalForm').addEventListener('submit', async function(ev){
+        ev.preventDefault();
+        const token = document.getElementById('token').value.trim();
+        if (!token) {
+          // show inline validation message and focus token
+          const err = document.getElementById('tokenError');
+          if (err) { err.style.display = 'block'; }
+          document.getElementById('token').focus();
+          return;
+        } else {
+          const err = document.getElementById('tokenError');
+          if (err) { err.style.display = 'none'; }
+        }
+
+        const payload = {
+          approvedBy: document.getElementById('approvedBy').value.trim() || 'anon',
+          date: new Date().toISOString(),
+          role: document.getElementById('role').value.trim() || null,
+          notes: document.getElementById('notes').value.trim() || null,
+          checklist: {
+            layout: !!document.getElementById('cl_layout').checked,
+            accessibility: !!document.getElementById('cl_accessibility').checked,
+            bugFixed: !!document.getElementById('cl_bug').checked,
+            production: !!document.getElementById('cl_prod').checked
+          },
+          status: (function(){ const s = document.querySelector('input[name="status"]:checked'); return s ? s.value : 'approved'; })()
+        };
+
+        try {
+          console.log('SUBMITTING approval', payload);
+          const res = await fetch('/approval', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-MCP-APPROVAL-TOKEN': token
+            },
+            body: JSON.stringify(payload)
+          });
+
+          console.log('RESPONSE status', res.status);
+          const text = await res.text();
+          console.log('RESPONSE text', text);
+          if (res.status === 201) {
+            let info = {};
+            try { info = JSON.parse(text); } catch(e) {}
+            const out = document.getElementById('result');
+            out.style.display = 'block';
+            out.textContent = '✅ Approval persisted: ' + (info.file || 'unknown path');
+            // Show a small link to audit
+            const link = document.createElement('a');
+            link.href = '/approvals/audit';
+            link.target = '_blank';
+            link.className = 'link';
+            link.textContent = ' View audit log';
+            out.appendChild(document.createTextNode(' '));
+            out.appendChild(link);
+            // Also clear token for security
+            document.getElementById('token').value = '';
+          } else {
+            let msg = text || ('HTTP ' + res.status);
+            alert('Approval failed: ' + msg);
+          }
+
+        } catch (e) {
+          alert('Approval request failed: ' + (e && e.message));
+        }
+      });
+
+    })();
+  </script>
+</body>
 </html>
