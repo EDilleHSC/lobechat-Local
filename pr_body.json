@@ -1,0 +1,7 @@
+{
+  "title": "chore(ui): polish approval UI copy + accessibility tweaks (WIP)",
+  "head": "feat/polish-approval-ui",
+  "base": "main",
+  "body": "Summary:\n- Improve microcopy and accessibility hints on the Design Approval presenter page (`presenter/design-approval.html`).\n\nChanges made:\n- Clarified header and instruction text\n- Replaced button labels with clearer copy and added ARIA/title attributes\n- Switched date field to `type=date` and added robust autofill\n- Made toast messages accessible (`role=status`, `aria-live=polite`) and improved microcopy\n\nChecklist:\n- [x] Implement copy improvements\n- [ ] Accessibility fixes (follow-up)\n- [ ] Add tests & CI checks (follow-up)\n- [ ] Add accessibility e2e checks to CI (follow-up)\n\nHow to test locally:\n1. Start the server: `node runtime/triage_server/mcp_server.js` (or the usual dev start)\n2. Open `http://localhost:8005/presenter/design-approval.html` and verify labels/ARIA and date input behavior.\n\nNotes: This is a **work-in-progress (WIP)** PR — accessibility fixes and CI checks will be added in follow-up commits. Please review the copy and accessibility notes and suggest reviewers or assign one if you'd like.",
+  "draft": true
+}
