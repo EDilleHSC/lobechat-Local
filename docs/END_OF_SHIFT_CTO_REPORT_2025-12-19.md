@@ -6,11 +6,20 @@ Phase: Beta (Desk v1 – Operator-Led)
 Date: 2025-12-19
 Prepared by: CTO (on behalf of Eric Dille)
 
+Subject: [CTO Report] NAVI Beta Kickoff – Desk v1 Locked (2025-12-19)
+
 1. Executive Summary (CTO View)
 
 NAVI is officially ready to begin Beta testing with real work.
 All critical safety, auditability, and operator-control requirements are met.
 The system has transitioned from engineering stabilization to controlled real-world usage.
+
+### TL;DR
+- ✅ Desk v1 is locked (tag: `desk-v1-operator-locked`)
+- ✅ Approvals are secure and auditable
+- ✅ CI is green
+- 🟢 Beta begins next shift (operator-in-the-loop)
+
 Key milestone achieved:
 
 - ✅ Desk v1 Operator Flow locked and tagged
@@ -22,6 +31,10 @@ Decision:
 - 🟢 Proceed with Beta testing starting next shift (operator start).
 
 2. What Is Live and Locked
+
+📎 README: `README_BETA0.md`
+📎 Approval schema: `runtime/triage_20251216_172245/schemas/approval.schema.json`
+📎 CI dashboard: https://github.com/EDilleHSC/lobechat-Local/actions
 
 2.1 Desk v1 Operator Flow ✅
 
@@ -99,6 +112,18 @@ Approval tokens must be present in the server’s environment, not just the clie
 
 Conclusion: CI is stable and no longer blocking Beta usage.
 
+5. Approved Beta Operating Constraints
+
+To ensure safety and learning quality:
+
+- Batch size: 3–10 files per run
+- Frequency: 1–2 runs per day
+- Mode: Review Mode only
+- Logging: Snapshot ID + approval file recorded per run
+- Rollback: Always possible (snapshots immutable)
+
+Any confusion, hesitation, or friction is considered signal, not failure.
+
 4. Beta Test Scope (Explicit)
 
 4.1 What Beta Includes ✅
@@ -117,18 +142,6 @@ Conclusion: CI is stable and no longer blocking Beta usage.
 - Background approvals
 - Silent file moves
 - Production SLAs
-
-5. Approved Beta Operating Constraints
-
-To ensure safety and learning quality:
-
-- Batch size: 3–10 files per run
-- Frequency: 1–2 runs per day
-- Mode: Review Mode only
-- Logging: Snapshot ID + approval file recorded per run
-- Rollback: Always possible (snapshots immutable)
-
-Any confusion, hesitation, or friction is considered signal, not failure.
 
 6. Readiness Assessment
 
