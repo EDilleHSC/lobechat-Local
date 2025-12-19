@@ -3,7 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 const Ajv = require('ajv');
+const addFormats = require('ajv-formats');
 const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
 const approvalSchema = require('./schemas/approval.schema.json');
 const validateApproval = ajv.compile(approvalSchema);
 

@@ -42,28 +42,11 @@ Notes: Snapshot, routing, presenter, and approved UI verified.
 - Prefer persistent approvals: the system exposes a token-gated endpoint `POST /approval` that writes approvals to `NAVI/approvals/YYYY-MM-DD/*.approval.json` and appends `NAVI/approvals/audit.log` for a readable audit trail. Configure `MCP_APPROVAL_TOKEN` in your environment to enable this endpoint.
 - Use for checklist-driven approvals; do not expose the token publicly — require internal network access or token auth for production.
 
-## Operator Guide — Design Approval (quickstart)
+## CI Secrets (Approval tests) 🔐
+To run automated approval tests (integration and negative tests) in CI, define this Actions secret in the repository settings:
 
-1. Access the approval UI
-   - Open `presenter/design-approval.html` (use `http://<host>:$PORT/presenter/design-approval.html` for local runs)
-2. Fill the form
-   - **approvedBy** (required), **role** (optional), **notes**, checklist booleans (`layout`, `accessibility`, `bugFixed`, `production`) and **status** (`approved` | `revision` | `rejected`)
-3. Submit
-   - Client posts to `POST /approval` with header `x-mcp-approval-token: <TOKEN>`
-   - On success, a file is written:
-     `NAVI/approvals/YYYY-MM-DD/<timestamp>-<sanitized-name>.approval.json`
-   - Audit entry appended to `NAVI/approvals/audit.log` in the form:
-     `ISO_TIMESTAMP<TAB>status<TAB>approvedBy<TAB>filepath`
-4. Verify
-   - Check `NAVI/approvals/` and `NAVI/approvals/audit.log` for the new entry
-   - Example sample file: `docs/examples/approval.example.json`
+- **Name**: `TEST_APPROVAL_TOKEN`
+- **Value**: a test-safe token (e.g., `TEST_APPROVAL`). This value is used by CI to set `MCP_APPROVAL_TOKEN` during test runs.
 
-## Ops / Retention Note
-
-- **Audit rotation**: rotate `NAVI/approvals/audit.log` when it exceeds 5MB (file rotation already implemented in server; consider retention + archival schedule)
-- **Backup strategy**: weekly archive of `NAVI/approvals/` (daily if high volume). Optionally upload archive to an S3 bucket (encrypted) for long-term storage.
-- **Safe deletion policy**: retain `.approval.json` files for **90 days minimum** on disk before eligible for pruning; keep audit archives for 1 year.
-- **Automation**: recommend a scheduled job (cron/Windows scheduled task or GitHub Action) to compress and move approvals older than N days to archival storage and to prune after retention window expiration. Include a dry-run mode and alerts on large prune counts.
-
-For more details and operational runbooks, see the release notes in `docs/RELEASE_NOTES.md`.
+These tests validate that missing tokens, malformed payloads, and invalid enums are rejected safely by `POST /approval`.
 
