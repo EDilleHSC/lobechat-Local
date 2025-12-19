@@ -8,7 +8,6 @@ const os = require('os');
 const REQUIRED_TOKEN = process.env.MCP_APPROVAL_TOKEN;
 
 if (!REQUIRED_TOKEN) {
-  // Skip the whole suite if token not configured
   describe.skip('approval integration (skipped, MCP_APPROVAL_TOKEN not set)', () => {
     test('skipped', () => {});
   });
