@@ -91,6 +91,7 @@
                 </div>
 
                 <div id="result" data-testid="result" class="success" role="status" aria-live="polite"></div>
+                <div id="error" data-testid="error" role="alert" aria-live="assertive" style="display:none;color:#f9b7b7;margin-top:8px"></div>
             </form>
 
             <p class="small muted" style="margin-top:12px">If POST returns 403/503: restart the server ensuring <code>MCP_APPROVAL_TOKEN</code> is set in the server process environment.</p>
@@ -167,7 +168,12 @@
           status: (function(){ const s = document.querySelector('input[name="status"]:checked'); return s ? s.value : 'approved'; })()
         };
 
+        const submitBtn = document.querySelector('[data-testid="submit-approval"]');
+        const out = document.getElementById('result');
+        const errEl = document.getElementById('error');
         try {
+          submitBtn.disabled = true;
+          submitBtn.setAttribute('aria-busy', 'true');
           console.log('SUBMITTING approval', payload);
           const res = await fetch('/approval', {
             method: 'POST',
@@ -184,9 +190,9 @@
           if (res.status === 201) {
             let info = {};
             try { info = JSON.parse(text); } catch(e) {}
-            const out = document.getElementById('result');
             out.style.display = 'block';
             out.textContent = '✅ Approval persisted: ' + (info.file || 'unknown path');
+            out.setAttribute('role','status');
             // Show a small link to audit
             const link = document.createElement('a');
             link.href = '/approvals/audit';
@@ -197,13 +203,19 @@
             out.appendChild(link);
             // Also clear token for security
             document.getElementById('token').value = '';
+            if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
           } else {
             let msg = text || ('HTTP ' + res.status);
-            alert('Approval failed: ' + msg);
+            if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'Approval failed: ' + msg; }
+            if (out) { out.style.display = 'none'; }
           }
 
         } catch (e) {
-          alert('Approval request failed: ' + (e && e.message));
+          if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'Approval request failed: ' + (e && e.message); }
+          if (out) { out.style.display = 'none'; }
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.removeAttribute('aria-busy');
         }
       });
 
