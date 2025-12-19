@@ -31,11 +31,8 @@ jobs:
       - name: Start MCP server (background)
         shell: bash
         run: |
-          echo "Starting MCP server via node in background, writing to $GITHUB_WORKSPACE/mcp_server.log"
-          node runtime/triage_20251216_172245/mcp_server.js > "$GITHUB_WORKSPACE/mcp_server.log" 2>&1 &
-          sleep 1
-          echo "Log file (first 20 lines)"
-          head -n 20 "$GITHUB_WORKSPACE/mcp_server.log" || true
+          echo "Starting MCP server via pwsh Start-Process with redirected output to $GITHUB_WORKSPACE\\mcp_server.log"
+          pwsh -Command "Start-Process -NoNewWindow -FilePath node -ArgumentList 'runtime\\triage_20251216_172245\\mcp_server.js' -RedirectStandardOutput \"$env:GITHUB_WORKSPACE\\mcp_server.log\" -RedirectStandardError \"$env:GITHUB_WORKSPACE\\mcp_server.log\" -PassThru | Out-Null; Start-Sleep -Seconds 1; Write-Host 'Log snippet:'; if (Test-Path \"$env:GITHUB_WORKSPACE\\mcp_server.log\") { Get-Content \"$env:GITHUB_WORKSPACE\\mcp_server.log\" -Tail 20 } else { Write-Host 'Log file not found yet' }"
           # Wait for health endpoint (increased timeout)
           max=60; i=0
           until curl -sS http://localhost:8005/health | grep -q '\"status\"' || [ $i -ge $max ]; do sleep 1; i=$((i+1)); done
