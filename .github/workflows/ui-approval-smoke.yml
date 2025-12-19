@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           echo "Starting MCP server via pwsh Start-Process with redirected output to $GITHUB_WORKSPACE\\mcp_server.log"
-          pwsh -Command "Start-Process -NoNewWindow -FilePath node -ArgumentList 'runtime\\triage_20251216_172245\\mcp_server.js' -RedirectStandardOutput \"$env:GITHUB_WORKSPACE\\mcp_server.log\" -RedirectStandardError \"$env:GITHUB_WORKSPACE\\mcp_server.log\" -PassThru | Out-Null; Start-Sleep -Seconds 1; Write-Host 'Log snippet:'; if (Test-Path \"$env:GITHUB_WORKSPACE\\mcp_server.log\") { Get-Content \"$env:GITHUB_WORKSPACE\\mcp_server.log\" -Tail 20 } else { Write-Host 'Log file not found yet' }"
+          pwsh -Command "$p = Start-Process -NoNewWindow -FilePath node -ArgumentList 'runtime\\triage_20251216_172245\\mcp_server.js' -RedirectStandardOutput \"$env:GITHUB_WORKSPACE\\mcp_server.log\" -RedirectStandardError \"$env:GITHUB_WORKSPACE\\mcp_server.log\" -PassThru; Start-Sleep -Seconds 1; if (Get-Process -Id $p.Id -ErrorAction SilentlyContinue) { Write-Host ('Process running (PID: {0})' -f $p.Id) } else { Write-Host 'Process not running' }; Write-Host 'Log snippet:'; if (Test-Path \"$env:GITHUB_WORKSPACE\\mcp_server.log\") { Get-Content \"$env:GITHUB_WORKSPACE\\mcp_server.log\" -Tail 20 } else { Write-Host 'Log file not found yet' }"
           # Wait for health endpoint (increased timeout)
           max=60; i=0
           until curl -sS http://localhost:8005/health | grep -q '\"status\"' || [ $i -ge $max ]; do sleep 1; i=$((i+1)); done
