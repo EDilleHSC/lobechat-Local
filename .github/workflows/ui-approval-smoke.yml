@@ -31,12 +31,12 @@ jobs:
       - name: Start MCP server (background)
         shell: bash
         run: |
-          echo "Starting MCP server via pwsh..."
-          pwsh -Command "Start-Process -NoNewWindow -FilePath node -ArgumentList 'runtime\\triage_20251216_172245\\mcp_server.js' -PassThru | Out-Null"
-          # Wait for health endpoint
-          max=30; i=0
-          until curl -sS http://localhost:8005/health | grep -q '"status"' || [ $i -ge $max ]; do sleep 1; i=$((i+1)); done
-          if [ $i -ge $max ]; then echo "Server did not become ready" >&2; exit 1; fi
+          echo "Starting MCP server via pwsh (redirecting to mcp_server.log)..."
+          pwsh -Command "Start-Process -NoNewWindow -FilePath node -ArgumentList 'runtime\\triage_20251216_172245\\mcp_server.js' -RedirectStandardOutput 'mcp_server.log' -RedirectStandardError 'mcp_server.log' -PassThru | Out-Null"
+          # Wait for health endpoint (increased timeout)
+          max=60; i=0
+          until curl -sS http://localhost:8005/health | grep -q '\"status\"' || [ $i -ge $max ]; do sleep 1; i=$((i+1)); done
+          if [ $i -ge $max ]; then echo "Server did not become ready"; echo "---- mcp_server.log (tail) ----"; tail -n 200 mcp_server.log || true; exit 1; fi
 
       - name: Run UI smoke test
         shell: ${{ matrix.shell }}
@@ -59,3 +59,10 @@ jobs:
           else
             echo "Server appears stopped"
           fi
+
+      - name: Upload MCP server log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mcp_server_log
+          path: mcp_server.log
