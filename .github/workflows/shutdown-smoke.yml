@@ -1,0 +1,22 @@
+name: Shutdown smoke (manual)
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  shutdown-smoke:
+    name: Shutdown smoke (manual trigger)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Run shutdown smoke (PowerShell)
+        shell: pwsh
+        run: |
+          .\scripts\test_shutdown_smoke.ps1 -Port 8005 -ShutdownToken TEST_SHUTDOWN
