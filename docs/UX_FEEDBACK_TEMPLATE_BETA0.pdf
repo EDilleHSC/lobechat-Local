@@ -1,0 +1,74 @@
+%PDF-1.1
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+5 0 obj
+<< /Length 1279 >>
+stream
+BT
+/F1 12 Tf
+50 780 Td (# >‡ Operator UX Feedback Log  Beta Test) Tj
+50 766 Td () Tj
+50 752 Td (**Date:** YYYY-MM-DD  ) Tj
+50 738 Td (**Operator Name / ID:** \(optional\)  ) Tj
+50 724 Td (**Snapshot ID \(if available\):**  ) Tj
+50 710 Td () Tj
+50 696 Td (---) Tj
+50 682 Td () Tj
+50 668 Td (## 1. >Ì What did you try to do first?) Tj
+50 654 Td () Tj
+50 640 Td (...) Tj
+50 626 Td () Tj
+50 612 Td (## 2. =· Where did you hesitate or feel unsure?) Tj
+50 598 Td () Tj
+50 584 Td (...) Tj
+50 570 Td () Tj
+50 556 Td (## 3.  What felt easy or intuitive?) Tj
+50 542 Td () Tj
+50 528 Td (...) Tj
+50 514 Td () Tj
+50 500 Td (## 4. = Did you trust the systems outputs? Why or why not?) Tj
+50 486 Td () Tj
+50 472 Td (...) Tj
+50 458 Td () Tj
+50 444 Td (## 5. =ƒ Did you find `.approval.json` and `audit.log`?) Tj
+50 430 Td () Tj
+50 416 Td (...) Tj
+50 402 Td () Tj
+50 388 Td (## 6. >Í What did you want to do that the system *didnt* let you?) Tj
+50 374 Td () Tj
+50 360 Td (...) Tj
+50 346 Td () Tj
+50 332 Td (## 7. =¨ Any notes or feedback you want to leave?) Tj
+50 318 Td () Tj
+50 304 Td (...) Tj
+50 290 Td () Tj
+50 276 Td (---) Tj
+50 262 Td () Tj
+50 248 Td (Use this form during blind operator runs or hand it to external testers. Save per run and collect entries for post-run triage.) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000247 00000 n 
+0000000317 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1648
+%%EOF
