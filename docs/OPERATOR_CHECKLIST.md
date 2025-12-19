@@ -67,3 +67,101 @@ Notes: Snapshot, routing, presenter, and approved UI verified.
 
 For more details and operational runbooks, see the release notes in `docs/RELEASE_NOTES.md`.
 
+---
+
+## Desk v1 — Final, Clean Operator Experience ✅
+
+**Mental model (the key)**
+
+- **Folders = state** (what exists)
+- **Buttons = intent** (what you choose to do)
+- Nothing auto-acts — operators always press one button to move forward
+- No hidden processing. No guessing. No leaking implementation details.
+
+**Desktop layout (left → right, top row)**
+
+[ NAVI Inbox ]   [ ▶ Process Inbox ]   [ 👁 Open Review (Clara) ]   [ ✅ Design Approval ]
+
+### 1️⃣ NAVI Inbox (folder shortcut)
+**Icon name:** `NAVI Inbox`
+**Target:** `D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\inbox`
+**Purpose:** Operator drops files here. Nothing happens until a button is pressed.
+
+### 2️⃣ ▶ Process Inbox (the ONLY processing trigger)
+**Icon name:** `▶ Process Inbox`
+**Type:** Windows shortcut → `.bat`
+**Target:** `D:\05_AGENTS-AI\01_RUNTIME\VBoarder\Scripts\process_inbox.bat`
+
+**process_inbox.bat (copy-paste exactly)**
+```
+@echo off
+set PORT=8005
+
+echo =====================================
+echo NAVI — Process Inbox
+echo =====================================
+echo.
+
+curl -s -X POST http://localhost:%PORT%/process
+IF ERRORLEVEL 1 (
+  echo.
+  echo ❌ Processing failed. Check server logs.
+  pause
+  exit /b 1
+)
+
+echo.
+echo ✅ Inbox processed successfully.
+echo You may now open Review.
+pause
+```
+
+**Why this matters:** One intentional action, human-readable result, no background magic.
+
+### 3️⃣ 👁 Open Review (Clara)
+**Important:** Do NOT open Clara by double-clicking an `.html` file — Clara is served by the MCP server.
+
+**Icon name:** `👁 Open Review (Clara)`
+**Type:** Internet Shortcut (`.url`)
+**Target:** `http://localhost:8005/presenter/index.html`
+**Purpose:** Read-only review (TRUST_HEADER, routing output, presenter)
+
+### 4️⃣ ✅ Design Approval
+**Icon name:** `✅ Design Approval`
+**Type:** Internet Shortcut (`.url`)
+**Target:** `http://localhost:8005/presenter/design-approval.html`
+**Purpose:** Explicit human sign-off. Writes `.approval.json` and appends `audit.log` (token-gated).
+
+### FINAL OPERATOR CHECKLIST (Desk-matched, copy-paste)
+**Pre-run**
+- MCP server running
+- Desktop shows 4 icons only
+- Inbox is visible and empty (or reviewed)
+
+**Run (always in this order)**
+1. Drop files
+   - Drag files into `NAVI Inbox`
+
+2. Process
+   - Double-click `▶ Process Inbox`
+   - Wait for: `✅ Inbox processed successfully.`
+
+3. Review
+   - Click `👁 Open Review (Clara)`
+   - Verify: Snapshot exists, routing looks correct, TRUST_HEADER visible
+
+4. Approve (if ready)
+   - Click `✅ Design Approval`
+   - Fill checklist + status, Submit
+
+5. Verify (optional but recommended)
+   - Check `NAVI/approvals/YYYY-MM-DD/*.approval.json`
+   - Check `NAVI/approvals/audit.log`
+
+**If anything feels wrong**
+- STOP — do not re-process, do not approve. Check logs or rerun review only.
+
+**Why this fixes confusion:** Folder = place, Button = action, Browser = view, Approval = decision. Each step is visible and intentional.
+
+**Next:** After 5–10 real runs we can spec Desk v2 (status badges only, NEVER auto-process). For now: Desk v1 is correct.
+
