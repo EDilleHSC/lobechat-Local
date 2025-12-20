@@ -111,3 +111,28 @@ This repository will be tagged `v0.1.0-beta0` to mark the Beta‑0 trust baselin
 
 ---
 For questions or to propose Beta‑1 features (mailroom restoration, routing, richer tests), open an issue or PR referencing this document.
+
+## Playwright E2E Tests ✅
+
+To run the E2E tests locally:
+
+```bash
+# Run all Playwright e2e tests
+npx playwright test tests/e2e
+```
+
+To update visual snapshots locally (rebaseline):
+
+```bash
+# Re-generate failing visual baselines
+npx playwright test --update-snapshots
+```
+
+What GitHub Actions does for these tests:
+
+- Runs `npx playwright test` using the `playwright.yml` workflow on push/PR to `main`.
+- The workflow starts a lightweight static server using `npx http-server . -p 8005 -c-1` (configured via `playwright.config.js:webServer`).
+- Failed snapshot diffs and test artifacts are uploaded as `playwright-report/` and `test-results/` artifacts to the workflow run.
+
+If you see visual differences in CI, download the artifacts from the failing run, validate the diffs locally, and update snapshots locally using `npx playwright test --update-snapshots` if the change is expected.
+
