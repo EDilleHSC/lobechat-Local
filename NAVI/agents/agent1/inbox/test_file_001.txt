@@ -1,4 +1,0 @@
-This is a test file to verify that Navi Receptionist is monitoring the inbox correctly.
-Priority: HIGH
-Sender: User
-Content: Please confirm receipt of this file.
