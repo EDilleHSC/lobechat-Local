@@ -1,0 +1,13 @@
+{
+  "filename": "team_lunch.txt",
+  "routing_id": "376464f2-0682-4d97-9432-b88b4ddbd6fa",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-20T17-39-26-612Z.json",
+  "routed_at": "2025-12-20T17:39:30.678Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "925b6ff2f4c0ef4ae2754d6ceebe76e6502e2550d2abbd3256702958d7c3072f",
+  "trust_header": "2025-12-20T17-39-26-612Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "filename": "WinSCP.lnk",
+  "routing_id": "4afd1b2c-8100-480c-a145-cea62fc7278e",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-20T17-39-26-612Z.json",
+  "routed_at": "2025-12-20T17:39:30.723Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "89c2f82e9197af46c903c82445b56d6638cdf0dd26bae9e803da37fe40610302",
+  "trust_header": "2025-12-20T17-39-26-612Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}

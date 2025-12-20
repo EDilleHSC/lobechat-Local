@@ -9,7 +9,7 @@ Behavior:
 import json
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, timezone
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 SNAPSHOT_DIR = os.path.join(ROOT, 'NAVI', 'snapshots', 'inbox')
@@ -57,7 +57,7 @@ def main():
         'routed_to': 'agent1',
         'routed_files': routed,
         'snapshot': os.path.basename(snap_file),
-        'timestamp': datetime.utcnow().isoformat() + 'Z'
+        'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
     }
     print(json.dumps(out))
 

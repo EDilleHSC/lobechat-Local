@@ -1,0 +1,13 @@
+{
+  "filename": "ES400_EScan2_67821_AM.exe",
+  "routing_id": "374af2d0-1245-410a-9e2d-c0a13abad5dc",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-20T17-39-26-612Z.json",
+  "routed_at": "2025-12-20T17:39:27.937Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "850d3edd7b92c19d5cef1ed22e19d36b684edcdeb92cfdcfbfbb38a093886909",
+  "trust_header": "2025-12-20T17-39-26-612Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}

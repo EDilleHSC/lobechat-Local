@@ -1,0 +1,11 @@
+This PR adds:
+- Playwright webServer config to auto-start a static server for tests
+- GitHub Actions workflow: .github/workflows/playwright.yml
+- README docs for running and rebaselining Playwright visual tests
+
+Checklist:
+- Playwright webServer added
+- GitHub Actions workflow added
+- Local E2E verification done
+
+Please review: @EDilleHSC

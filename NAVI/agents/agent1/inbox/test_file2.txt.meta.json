@@ -1,0 +1,13 @@
+{
+  "filename": "test_file2.txt",
+  "routing_id": "2182bedb-49ea-4fe1-b102-216e50263d53",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-20T17-39-26-612Z.json",
+  "routed_at": "2025-12-20T17:39:30.685Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "7b077bd7470fb38a94a116e525a7f23f2b6e2b371c23ce4b37e14affda359d52",
+  "trust_header": "2025-12-20T17-39-26-612Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}

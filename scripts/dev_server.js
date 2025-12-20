@@ -5,7 +5,7 @@ const { makeHandler } = require('../src/approval-handler');
 const PORT = process.env.PORT || 8005;
 const app = express();
 app.use(express.json());
-app.use('/presenter', express.static(path.join(__dirname, '..', 'presenter')));
+app.use('/presenter', express.static(path.join(__dirname, '..', 'NAVI', 'presenter')));
 app.post('/approval', makeHandler());
 
 // Audit endpoint returns parsed audit log entries as JSON (new)

@@ -1,0 +1,117 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-20T08:26:01.739Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "items": [
+    {
+      "name": ".processed",
+      "type": "file",
+      "size": 0,
+      "modified": "2025-11-26T04:23:37.005Z"
+    },
+    {
+      "name": "agent_receive_smoke.txt",
+      "type": "file",
+      "size": 33,
+      "modified": "2025-12-19T05:31:45.191Z"
+    },
+    {
+      "name": "all-in-one-wp-migration-unlimited-extension (1).zip",
+      "type": "file",
+      "size": 537583,
+      "modified": "2025-11-05T21:13:44.418Z"
+    },
+    {
+      "name": "epson18836.exe",
+      "type": "file",
+      "size": 31991736,
+      "modified": "2025-11-06T04:30:21.649Z"
+    },
+    {
+      "name": "ES400_EScan2_67821_AM.exe",
+      "type": "file",
+      "size": 79358400,
+      "modified": "2025-11-06T04:39:58.286Z"
+    },
+    {
+      "name": "ES400_Lite_AM.exe",
+      "type": "file",
+      "size": 2341432,
+      "modified": "2025-11-06T04:44:14.212Z"
+    },
+    {
+      "name": "Navi_Complete_Personal_Identity.md",
+      "type": "file",
+      "size": 15985,
+      "modified": "2025-12-19T05:31:45.190Z"
+    },
+    {
+      "name": "Navi_KB_00_Master_Index.md",
+      "type": "file",
+      "size": 10142,
+      "modified": "2025-12-19T05:31:45.191Z"
+    },
+    {
+      "name": "Navi_KB_01_Communication_Style.md",
+      "type": "file",
+      "size": 9439,
+      "modified": "2025-12-19T05:31:45.191Z"
+    },
+    {
+      "name": "pygpt-2.6.65.msi",
+      "type": "file",
+      "size": 694087680,
+      "modified": "2025-11-14T16:42:46.058Z"
+    },
+    {
+      "name": "route_smoke.txt",
+      "type": "file",
+      "size": 25,
+      "modified": "2025-12-19T05:31:45.191Z"
+    },
+    {
+      "name": "smoke_mail.txt",
+      "type": "file",
+      "size": 24,
+      "modified": "2025-12-19T05:31:45.192Z"
+    },
+    {
+      "name": "SS_3.7.10_DOC.exe",
+      "type": "file",
+      "size": 311828232,
+      "modified": "2025-11-06T04:27:43.787Z"
+    },
+    {
+      "name": "team_lunch.txt",
+      "type": "file",
+      "size": 158,
+      "modified": "2025-12-12T21:12:28.544Z"
+    },
+    {
+      "name": "test_file.txt",
+      "type": "file",
+      "size": 11,
+      "modified": "2025-12-20T04:23:21.422Z"
+    },
+    {
+      "name": "test_file2.txt",
+      "type": "file",
+      "size": 13,
+      "modified": "2025-12-20T04:29:07.970Z"
+    },
+    {
+      "name": "WinSCP-6.5.4-Setup.exe",
+      "type": "file",
+      "size": 12244608,
+      "modified": "2025-11-05T17:43:17.727Z"
+    },
+    {
+      "name": "WinSCP.lnk",
+      "type": "file",
+      "size": 1147,
+      "modified": "2025-11-05T17:43:32.768Z"
+    }
+  ],
+  "status": "unprocessed"
+}
