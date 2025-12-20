@@ -136,5 +136,26 @@ What GitHub Actions does for these tests:
 
 If you see visual differences in CI, download the artifacts from the failing run, validate the diffs locally, and update snapshots locally using `npx playwright test --update-snapshots` if the change is expected.
 
+## Mail Room & audit log
+
+The Mail Room UI (`presenter/index.html`) reads `NAVI/approvals/audit.log` via the server endpoint `GET /approvals/audit` and renders the latest decision per file.
+
+Use the Track/Hold/Escalate buttons to open a small notes prompt and submit the same payload as the Design Approval page (`POST /approval`). The server appends a line to `NAVI/approvals/audit.log` and the Mail Room will pick it up on its next refresh.
+
+To run the Mail Room UI locally:
+
+```bash
+# Start the dev server with a test token
+$env:MCP_APPROVAL_TOKEN='TEST_APPROVAL'
+node scripts/dev_server.js
+# Open http://localhost:8005/presenter/index.html
+```
+
+To test via Playwright locally:
+
+```bash
+npx playwright test tests/e2e/mailroom.spec.js
+```
+
 <!-- CI trigger: whitespace -->
 
