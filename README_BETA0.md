@@ -1,5 +1,26 @@
 # Beta‑0 Trust Loop — README
 
+---
+
+## NAVI PRODUCT EXECUTION RULES (BETA)
+
+**1. One Screen Rule**
+- There is one primary screen per phase. The Beta primary screen is **NAVI Mail Room Update**. Anything else is supporting infrastructure. If work does not improve the primary screen, stop.
+
+**2. No Shadow UIs**
+- Supporting UIs must embed into the primary UI or be invisible to the user. Standalone pages are temporary only.
+
+**3. Visible State Change Requirement**
+- Every user action must change something on screen within the same flow immediately. Logs without UI reflection = incomplete.
+
+**4. Tests Follow Product, Not Infrastructure**
+- Tests verify what the user sees, not internal-only effects. If tests pass but the UI still looks wrong, the test is lying.
+
+**5. "Stop & Re-anchor" Check**
+- At the start of every day, answer in one sentence: “What will look different in Mail Room tonight?” If the answer is unclear — do not code yet.
+
+---
+
 ## Purpose
 This document records the Beta‑0 trust contract: a minimal, deterministic verification loop that proves the system authoritatively generates the NAVI presenter artifact (`index.html`) and that the artifact contains a deterministic TRUST_HEADER for provenance.
 
