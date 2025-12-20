@@ -1,0 +1,67 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]: 📬
+    - generic [ref=e5]:
+      - heading "NAVI Mail Room Update" [level=1] [ref=e6]
+      - paragraph [ref=e7]: Processed at 6:34:49 PM
+  - generic [ref=e8]:
+    - heading "Summary" [level=2] [ref=e9]
+    - paragraph [ref=e10]: 1 incoming requests processed
+    - paragraph [ref=e11]: Items routed to ACTIVE, WAITING, or DONE
+  - generic [ref=e12]:
+    - generic [ref=e13]:
+      - button "🟢 Track Accept responsibility" [ref=e14] [cursor=pointer]:
+        - generic [ref=e15]: 🟢
+        - generic [ref=e16]:
+          - generic [ref=e17]: Track
+          - generic [ref=e18]: Accept responsibility
+      - button "🟡 Hold Not actionable now" [ref=e19] [cursor=pointer]:
+        - generic [ref=e20]: 🟡
+        - generic [ref=e21]:
+          - generic [ref=e22]: Hold
+          - generic [ref=e23]: Not actionable now
+      - button "🔴 Escalate Deadlines · Delegation · Fire drills" [ref=e24] [cursor=pointer]:
+        - generic [ref=e25]: 🔴
+        - generic [ref=e26]:
+          - generic [ref=e27]: Escalate
+          - generic [ref=e28]: Deadlines · Delegation · Fire drills
+    - generic [ref=e30]:
+      - heading "📄 Client_Notes_Intro.docx" [level=3] [ref=e31]
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: "Routed to:"
+          - generic [ref=e35]: Track
+        - generic [ref=e36]:
+          - generic [ref=e37]: "Confidence:"
+          - generic [ref=e38]: 90% (High)
+        - generic [ref=e39]:
+          - generic [ref=e40]: "File type:"
+          - generic [ref=e41]: DOCX
+        - generic [ref=e42]:
+          - generic [ref=e43]: "Received:"
+          - generic [ref=e44]: 2025-12-20
+      - generic [ref=e45]:
+        - button "Open" [ref=e46]
+        - button "Preview" [ref=e47]
+        - button "Track" [ref=e48]
+        - button "Hold" [ref=e49]
+        - button "Escalate" [ref=e50]
+  - generic [ref=e51]:
+    - heading "Why did NAVI think this?" [level=4] [ref=e52]
+    - list [ref=e53]:
+      - listitem [ref=e54]:
+        - text: "• Matched priority keywords:"
+        - strong [ref=e55]: important, urgent, priority
+      - listitem [ref=e56]: • File type allowed for work intake
+      - listitem [ref=e57]: • No exclusion rules triggered
+      - listitem [ref=e58]: • No conflicting signals detected
+  - generic [ref=e59]:
+    - generic [ref=e60]: ✓ Presenter is advisory only
+    - generic [ref=e61]: ✓ No files moved or modified
+    - generic [ref=e62]: ✓ Human decisions applied separately
+    - generic [ref=e63]: ✓ Inbox accepts work items only
+    - generic [ref=e64]: ✓ Review opens file location only
+```

@@ -1,0 +1,236 @@
+{
+  "trust_header": {
+    "rendered_at": "2025-12-20T16:40:46.114Z",
+    "snapshot_id": "2025-12-20T16-40-42-416Z.json",
+    "items_processed": 25,
+    "routed_to": "agent1"
+  },
+  "items": [
+    {
+      "filename": ".processed",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": null,
+      "received": "2025-11-26",
+      "meta_path": "../agents/agent1/inbox/.processed.meta.json",
+      "checksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "filename": "agent_receive_smoke.txt",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-19",
+      "meta_path": "../agents/agent1/inbox/agent_receive_smoke.txt.meta.json",
+      "checksum_sha256": "5f0957970a1add47517091eb3c259aa5f086380eca27b6cc5ce51bf1b732dae0"
+    },
+    {
+      "filename": "all-in-one-wp-migration-unlimited-extension (1).zip",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "ZIP",
+      "received": "2025-11-05",
+      "meta_path": "../agents/agent1/inbox/all-in-one-wp-migration-unlimited-extension (1).zip.meta.json",
+      "checksum_sha256": "8598785b0b6ded352b3a13c262dbd17bfdbf8500c8f7860984b5cbf971bab2a8"
+    },
+    {
+      "filename": "alpha.txt",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-20",
+      "meta_path": "../agents/agent1/inbox/alpha.txt.meta.json",
+      "checksum_sha256": "4a31f8a329cdbbab944056fc992eeb5ab5c0b4a78c3bc34e6d7c4a59fd6cf3b6"
+    },
+    {
+      "filename": "bravo.txt",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-20",
+      "meta_path": "../agents/agent1/inbox/bravo.txt.meta.json",
+      "checksum_sha256": "f100697af86b0b7e364e94aa589ddcf30ecc0d84da96184cf03485d5f3b94902"
+    },
+    {
+      "filename": "epson18836.exe",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "EXE",
+      "received": "2025-11-06",
+      "meta_path": "../agents/agent1/inbox/epson18836.exe.meta.json",
+      "checksum_sha256": "1bfdf369e97e23ee381fa374eefa3d10c8ee6d3e3834e445213785143def7f56"
+    },
+    {
+      "filename": "ES400_EScan2_67821_AM.exe",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "EXE",
+      "received": "2025-11-06",
+      "meta_path": "../agents/agent1/inbox/ES400_EScan2_67821_AM.exe.meta.json",
+      "checksum_sha256": "850d3edd7b92c19d5cef1ed22e19d36b684edcdeb92cfdcfbfbb38a093886909"
+    },
+    {
+      "filename": "ES400_Lite_AM.exe",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "EXE",
+      "received": "2025-11-06",
+      "meta_path": "../agents/agent1/inbox/ES400_Lite_AM.exe.meta.json",
+      "checksum_sha256": "a6b7df65a301041e4ee02b31bbcafef6cd68a63829540c7d63d681a56a5288fb"
+    },
+    {
+      "filename": "Navi_Complete_Personal_Identity.md",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "MD",
+      "received": "2025-12-19",
+      "meta_path": "../agents/agent1/inbox/Navi_Complete_Personal_Identity.md.meta.json",
+      "checksum_sha256": "efc8a0c8369317718e0422a7dc688a25a86f0cec8de7306bab34dc7683afbbf0"
+    },
+    {
+      "filename": "Navi_KB_00_Master_Index.md",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "MD",
+      "received": "2025-12-19",
+      "meta_path": "../agents/agent1/inbox/Navi_KB_00_Master_Index.md.meta.json",
+      "checksum_sha256": "e59cc334de36474402c631a9853e42438b5bda12bad73218700e4d7029e73f91"
+    },
+    {
+      "filename": "Navi_KB_01_Communication_Style.md",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "MD",
+      "received": "2025-12-19",
+      "meta_path": "../agents/agent1/inbox/Navi_KB_01_Communication_Style.md.meta.json",
+      "checksum_sha256": "4b835b8a0ab519e05448baf11a30bb560393daf25764645d5978b3e13ce712b6"
+    },
+    {
+      "filename": "pygpt-2.6.65.msi",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "MSI",
+      "received": "2025-11-14",
+      "meta_path": "../agents/agent1/inbox/pygpt-2.6.65.msi.meta.json",
+      "checksum_sha256": "3ba888fa09b79405ea805a5a0c89ddaa6b4733a0f20ba445346db95381a4439d"
+    },
+    {
+      "filename": "route_smoke.txt",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-19",
+      "meta_path": "../agents/agent1/inbox/route_smoke.txt.meta.json",
+      "checksum_sha256": "c53869adb27d4ce70f80586643a19cbe36cab0d053777db18434ddacb76d5666"
+    },
+    {
+      "filename": "smoke_mail.txt",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-19",
+      "meta_path": "../agents/agent1/inbox/smoke_mail.txt.meta.json",
+      "checksum_sha256": "7b2a6fd77c3c21f23617df98b04d431eadb0b59dffda9ef516e66cb45c9494ab"
+    },
+    {
+      "filename": "SS_3.7.10_DOC.exe",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "EXE",
+      "received": "2025-11-06",
+      "meta_path": "../agents/agent1/inbox/SS_3.7.10_DOC.exe.meta.json",
+      "checksum_sha256": "f31f1eaabecb31941b6bea34a667a6e3e5e58734e1a49669f998bf405cce022e"
+    },
+    {
+      "filename": "team_lunch.txt",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-12",
+      "meta_path": "../agents/agent1/inbox/team_lunch.txt.meta.json",
+      "checksum_sha256": "925b6ff2f4c0ef4ae2754d6ceebe76e6502e2550d2abbd3256702958d7c3072f"
+    },
+    {
+      "filename": "test1.pdf",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "PDF",
+      "received": "2025-12-20",
+      "meta_path": "../agents/agent1/inbox/test1.pdf.meta.json",
+      "checksum_sha256": "6bb87a2b0e384f6e2b6918b9b56f0c91558fa0b4c6dcd46c8b03ae3f8642056e"
+    },
+    {
+      "filename": "test2.docx",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "DOCX",
+      "received": "2025-12-20",
+      "meta_path": "../agents/agent1/inbox/test2.docx.meta.json",
+      "checksum_sha256": "5f8587e643ed84f15c9e29e73473ac5ce7ab96e1e1d55ea80cd1b01b00ec7fd8"
+    },
+    {
+      "filename": "test3.txt",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-20",
+      "meta_path": "../agents/agent1/inbox/test3.txt.meta.json",
+      "checksum_sha256": "0fe15a6e6bd50680f8b0b81edb2d1fced5d530a4f836dedbb7d57211b730a93b"
+    },
+    {
+      "filename": "test4.jpg",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "JPG",
+      "received": "2025-12-20",
+      "meta_path": "../agents/agent1/inbox/test4.jpg.meta.json",
+      "checksum_sha256": "2cfbb9d9567f62572077b3f3259c5e3a3f251b7835aaa2552d96df2a7c6c0233"
+    },
+    {
+      "filename": "test5.zip",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "ZIP",
+      "received": "2025-12-20",
+      "meta_path": "../agents/agent1/inbox/test5.zip.meta.json",
+      "checksum_sha256": "4c5d1a3d50885fee1945eb4aebf39ee8a5fe104a4493f7f9b1c1c83b275ef564"
+    },
+    {
+      "filename": "test_file.txt",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-20",
+      "meta_path": "../agents/agent1/inbox/test_file.txt.meta.json",
+      "checksum_sha256": "bd3d270fdafc7c9cdfddf1c203e87cb203bf2ba22416f4844828ec64f350d096"
+    },
+    {
+      "filename": "test_file2.txt",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "TXT",
+      "received": "2025-12-20",
+      "meta_path": "../agents/agent1/inbox/test_file2.txt.meta.json",
+      "checksum_sha256": "7b077bd7470fb38a94a116e525a7f23f2b6e2b371c23ce4b37e14affda359d52"
+    },
+    {
+      "filename": "WinSCP-6.5.4-Setup.exe",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "EXE",
+      "received": "2025-11-05",
+      "meta_path": "../agents/agent1/inbox/WinSCP-6.5.4-Setup.exe.meta.json",
+      "checksum_sha256": "95f7935b63115b7eb4631a3be5e56f78d2ad7eca8525e8b6be8761d4be3fe130"
+    },
+    {
+      "filename": "WinSCP.lnk",
+      "routed_to": "agent1",
+      "confidence": null,
+      "file_type": "LNK",
+      "received": "2025-11-05",
+      "meta_path": "../agents/agent1/inbox/WinSCP.lnk.meta.json",
+      "checksum_sha256": "89c2f82e9197af46c903c82445b56d6638cdf0dd26bae9e803da37fe40610302"
+    }
+  ],
+  "html_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <title>NAVI Mail Room Update (preview)</title>\n    <style>body{font-family:Segoe UI,Arial,sans-serif;padding:24px;background:#0a0e27;color:#f0f0f0}</style>\n</head>\n<body>\n<!-- TRUST_HEADER\nrendered_at: 2025-12-20T16:40:46.114Z\nsnapshot_id: 2025-12-20T16-40-42-416Z.json\nitems_processed: 25\nmailroom_routed_to: agent1\n-->\n<div class=\"container\">\n  <h1>NAVI Mail Room Update (preview)</h1>\n  <p>Snapshot: 2025-12-20T16-40-42-416Z.json</p>\n  <p>Items: 25</p>\n  <p>Routed to: agent1</p>\n</div>\n</body>\n</html>"
+}

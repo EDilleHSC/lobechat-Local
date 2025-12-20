@@ -1,0 +1,13 @@
+{
+  "filename": "all-in-one-wp-migration-unlimited-extension (1).zip",
+  "routing_id": "a1a9704b-5c8b-4139-b464-8b265c6c3adf",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-20T17-39-26-612Z.json",
+  "routed_at": "2025-12-20T17:39:27.591Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "8598785b0b6ded352b3a13c262dbd17bfdbf8500c8f7860984b5cbf971bab2a8",
+  "trust_header": "2025-12-20T17-39-26-612Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}

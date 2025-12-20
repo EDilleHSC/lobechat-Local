@@ -1,0 +1,13 @@
+{
+  "filename": "pygpt-2.6.65.msi",
+  "routing_id": "0f01777c-f3b1-442b-8492-80eae4fa927f",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-20T17-39-26-612Z.json",
+  "routed_at": "2025-12-20T17:39:29.806Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "3ba888fa09b79405ea805a5a0c89ddaa6b4733a0f20ba445346db95381a4439d",
+  "trust_header": "2025-12-20T17-39-26-612Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}
