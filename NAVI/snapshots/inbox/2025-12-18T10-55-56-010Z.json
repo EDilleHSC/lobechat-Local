@@ -1,8 +1,0 @@
-{
-  "source": "process_endpoint",
-  "event": "inbox_snapshot",
-  "timestamp": "2025-12-18T10:55:56.010Z",
-  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
-  "items": [],
-  "status": "unprocessed"
-}

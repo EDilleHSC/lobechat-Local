@@ -1,0 +1,14 @@
+{
+  "reviewer": "TestOperator",
+  "status": "approved",
+  "snapshot_id": "2025-12-20T08-26-01-740Z.json",
+  "timestamp": "2025-12-20T08:30:00.000Z",
+  "items": [
+    {
+      "filename": "team_lunch.txt",
+      "gtd_outcome": "next_action",
+      "sensitivity": "normal",
+      "notes": "Test approval for lunch planning"
+    }
+  ]
+}

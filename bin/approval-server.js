@@ -1,12 +1,20 @@
 #!/usr/bin/env node
 const express = require('express');
+const path = require('path');
 const { makeHandler } = require('../src/approval-handler');
 
 const PORT = process.env.PORT || 8005;
 const app = express();
 app.use(express.json());
 
-app.post('/approval', makeHandler());
+// Serve static files from NAVI/presenter
+app.use(express.static(path.join(__dirname, '..', 'NAVI', 'presenter')));
+
+app.post('/approval', (req, res) => {
+  console.log('POST /approval received');
+  const handler = makeHandler();
+  handler(req, res);
+});
 
 // Expose audit endpoint in the main approval server too
 const { parseAudit } = require('../src/approval-audit');

@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 const PORT = process.env.E2E_PORT || 8005;
-const BASE = `http://localhost:${PORT}/presenter/index.html`;
+const BASE = `http://localhost:${PORT}/presenter/mail-room.html`;
 
 test.describe('Mail Room UI', () => {
   test('shows entries from audit and posts decisions', async ({ page }) => {
