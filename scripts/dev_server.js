@@ -1,14 +1,14 @@
-#!/usr/bin/env node
 const express = require('express');
+const path = require('path');
 const { makeHandler } = require('../src/approval-handler');
 
 const PORT = process.env.PORT || 8005;
 const app = express();
 app.use(express.json());
-
+app.use('/presenter', express.static(path.join(__dirname, '..', 'presenter')));
 app.post('/approval', makeHandler());
 
-// Expose audit endpoint in the main approval server too
+// Audit endpoint returns parsed audit log entries as JSON (new)
 const { parseAudit } = require('../src/approval-audit');
 app.get('/approvals/audit', async (req, res) => {
   try {
@@ -20,5 +20,5 @@ app.get('/approvals/audit', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`✅ Approval server listening on http://localhost:${PORT}`);
+  console.log(`Dev server listening on http://localhost:${PORT}`);
 });
