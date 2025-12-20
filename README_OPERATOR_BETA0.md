@@ -62,3 +62,12 @@ http://localhost:8005/presenter/index.html
 ---
 
 **Reminder:** Confusion or friction is considered signal, not failure. Take notes, flag it. You’re helping make this bulletproof.
+
+---
+
+## Approval logging & testing notes
+
+- Approvals are persisted to `NAVI/approvals/audit.log`. The handler will ensure the directory exists before writing.
+- If writing `audit.log` fails (e.g. disk or permission errors), the service writes a structured JSON line to `NAVI/approvals/audit.err.log` containing a timestamp, error message, and the original payload to assist operations.
+- Integration tests that exercise the real `/approval` endpoint are gated by the `MCP_APPROVAL_TOKEN` environment variable; the repository CI will only run these tests when the `MCP_APPROVAL_TOKEN` secret is configured.
+
