@@ -136,3 +136,5 @@ What GitHub Actions does for these tests:
 
 If you see visual differences in CI, download the artifacts from the failing run, validate the diffs locally, and update snapshots locally using `npx playwright test --update-snapshots` if the change is expected.
 
+<!-- CI trigger: whitespace -->
+
