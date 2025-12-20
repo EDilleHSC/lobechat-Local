@@ -10,6 +10,8 @@ test.describe('NAVI Approval flow (e2e)', () => {
     page.on('response', r => console.log('RESP', r.status(), r.url()));
     page.on('pageerror', e => console.log('PAGE ERROR', e.message));
     await page.goto(BASE);
+    // Ensure the client JS initialized and bound the submit handler
+    await page.waitForFunction(() => window.__handleSubmitBound === true, { timeout: 3000 });
 
     // Basic page smoke checks - ensure snapshot display exists
     await expect(page.locator('[data-testid="snapshot"]')).toBeVisible();

@@ -64,6 +64,14 @@
             </div>
 
             <form id="approvalForm" class="approval-form">
+                <label for="file">File</label>
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                  <input id="fileInput" name="file" data-testid="file-input" aria-label="File name or path" placeholder="e.g., Client_Notes_Intro.docx">
+                  <button type="button" id="openFile" class="btn-secondary" data-testid="open-file">Open</button>
+                  <button type="button" id="previewFile" class="btn-secondary" data-testid="preview-file">Preview</button>
+                </div>
+                <div id="preview" style="margin-bottom:8px;display:none"><iframe id="previewFrame" style="width:100%;height:300px;border:1px solid #27314f;border-radius:6px"></iframe></div>
+
                 <label for="token">Approval token <span class="small muted">(paste token given by operator)</span></label>
                 <input id="token" name="token" data-testid="token-input" aria-label="Approval token" placeholder="X-MCP-APPROVAL-TOKEN">
                 <div id="tokenError" class="small" role="alert" style="display:none;color:#f9b7b7" data-testid="token-error">Approval token is required</div>
@@ -73,6 +81,14 @@
 
                 <label for="role">Role</label>
                 <input id="role" name="role" data-testid="role-input" aria-label="Role" placeholder="e.g., UX, Engineering">
+
+                <label>Decision <span class="small muted">(choose one)</span></label>
+                <div class="checklist" role="radiogroup" aria-label="Decision">
+                    <button type="button" class="check" id="decTrack" data-testid="action-track">Track</button>
+                    <button type="button" class="check" id="decHold" data-testid="action-hold">Hold</button>
+                    <button type="button" class="check" id="decEsc" data-testid="action-escalate">Escalate</button>
+                </div>
+                <input type="hidden" id="statusHidden" name="status">
 
                 <label>Checklist <span class="small muted">(hover items for details)</span></label>
                 <div class="checklist">
@@ -101,6 +117,7 @@
 
   <script>
     (function(){
+      console.log('design-approval script loaded, form present:', !!document.getElementById('approvalForm'));
       // Extract TRUST_HEADER from the HTML (if present) to show snapshot_id
       function parseTrustHeader() {
         try {
@@ -132,48 +149,93 @@
           this.textContent = 'Copied!';
           setTimeout(()=>{ this.textContent = 'Copy snapshot ID'; }, 1500);
         } catch (e) {
-          alert('Copy failed: ' + (e && e.message));
+          const errEl = document.getElementById('error');
+          if (errEl) { errEl.style.display='block'; errEl.textContent = 'Copy failed: ' + (e && e.message); }
         }
       });
 
-      document.getElementById('viewAudit').addEventListener('click', function(){
-        window.open('/approvals/audit', '_blank');
+      // File open / preview helpers
+      function isViewable(file) {
+        return file && (file.endsWith('.pdf') || file.endsWith('.txt') || file.endsWith('.html'));
+      }
+
+      document.getElementById('openFile').addEventListener('click', function(){
+        const file = (document.getElementById('fileInput').value || '').trim();
+        if (!file) return alert('Enter a file name to open');
+        const url = '/' + file.replace(/^\/+/, '');
+        // Try to open in a new tab (download will be handled by browser/system)
+        window.open(url, '_blank');
       });
 
-      document.getElementById('approvalForm').addEventListener('submit', async function(ev){
-        ev.preventDefault();
-        const token = document.getElementById('token').value.trim();
-        if (!token) {
-          // show inline validation message and focus token
-          const err = document.getElementById('tokenError');
-          if (err) { err.style.display = 'block'; }
-          document.getElementById('token').focus();
-          return;
+      document.getElementById('previewFile').addEventListener('click', function(){
+        const file = (document.getElementById('fileInput').value || '').trim();
+        const preview = document.getElementById('preview');
+        const frame = document.getElementById('previewFrame');
+        if (!file) { preview.style.display='none'; return; }
+        const url = '/' + file.replace(/^\/+/, '');
+        if (isViewable(file)) {
+          frame.src = url;
+          preview.style.display = 'block';
         } else {
-          const err = document.getElementById('tokenError');
-          if (err) { err.style.display = 'none'; }
+          // For binary files, just open / download
+          window.open(url, '_blank');
         }
+      });
+      // Decision button handling
+      let selectedStatus = null;
+      function setDecision(status) {
+        selectedStatus = status;
+        document.getElementById('statusHidden').value = status;
+        ['decTrack','decHold','decEsc'].forEach(id => { const el=document.getElementById(id); if(el){ el.style.borderColor = '#27314f'; }});
+        const sel = { 'Track':'decTrack','Hold':'decHold','Escalate':'decEsc' }[status];
+        if (sel) { document.getElementById(sel).style.borderColor = '#4ac04a'; }
+      }
+      document.getElementById('decTrack').addEventListener('click', () => setDecision('Track'));
+      document.getElementById('decHold').addEventListener('click', () => setDecision('Hold'));
+      document.getElementById('decEsc').addEventListener('click', () => setDecision('Escalate'));
 
-        const payload = {
-          approvedBy: document.getElementById('approvedBy').value.trim() || 'anon',
-          date: new Date().toISOString(),
-          role: document.getElementById('role').value.trim() || null,
-          notes: document.getElementById('notes').value.trim() || null,
-          checklist: {
-            layout: !!document.getElementById('cl_layout').checked,
-            accessibility: !!document.getElementById('cl_accessibility').checked,
-            bugFixed: !!document.getElementById('cl_bug').checked,
-            production: !!document.getElementById('cl_prod').checked
-          },
-          status: (function(){ const s = document.querySelector('input[name="status"]:checked'); return s ? s.value : 'approved'; })()
-        };
-
-        const submitBtn = document.querySelector('[data-testid="submit-approval"]');
-        const out = document.getElementById('result');
-        const errEl = document.getElementById('error');
+      const submitButtonElement = document.querySelector('[data-testid="submit-approval"]');
+      if (submitButtonElement) { submitButtonElement.addEventListener('click', () => console.log('submit clicked')); }
+      async function handleSubmit(ev){
+        if (ev && ev.preventDefault) ev.preventDefault();
+        console.log('handleSubmit invoked');
         try {
+          const token = document.getElementById('token').value.trim();
+          console.log('handleSubmit token:', token);
+          if (!token) {
+            // show inline validation message and focus token
+            const err = document.getElementById('tokenError');
+            if (err) { err.style.display = 'block'; }
+            document.getElementById('token').focus();
+            return;
+          } else {
+            const err = document.getElementById('tokenError');
+            if (err) { err.style.display = 'none'; }
+          }
+
+          const payload = {
+            approvedBy: document.getElementById('approvedBy').value.trim() || 'anon',
+            date: new Date().toISOString(),
+            role: document.getElementById('role').value.trim() || null,
+            notes: document.getElementById('notes').value.trim() || null,
+            snapshot: snapshotSpan.textContent || null,
+            file: document.getElementById('fileInput').value.trim() || null,
+            checklist: {
+              layout: !!document.getElementById('cl_layout').checked,
+              accessibility: !!document.getElementById('cl_accessibility').checked,
+              bugFixed: !!document.getElementById('cl_bug').checked,
+              production: !!document.getElementById('cl_prod').checked
+            },
+            status: selectedStatus || 'Track'
+          };
+
+          const submitBtn = document.querySelector('[data-testid="submit-approval"]');
+          const out = document.getElementById('result');
+          const errEl = document.getElementById('error');
+
           submitBtn.disabled = true;
           submitBtn.setAttribute('aria-busy', 'true');
+
           console.log('SUBMITTING approval', payload);
           const res = await fetch('/approval', {
             method: 'POST',
@@ -206,18 +268,26 @@
             if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
           } else {
             let msg = text || ('HTTP ' + res.status);
-            if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'Approval failed: ' + msg; }
+            if (errEl) { errEl.style.display = 'block'; errEl.setAttribute('aria-hidden','false'); errEl.textContent = 'Approval failed: ' + msg; }
             if (out) { out.style.display = 'none'; }
           }
 
         } catch (e) {
+          const errEl = document.getElementById('error');
           if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'Approval request failed: ' + (e && e.message); }
+          const out = document.getElementById('result');
           if (out) { out.style.display = 'none'; }
         } finally {
-          submitBtn.disabled = false;
-          submitBtn.removeAttribute('aria-busy');
+          const submitBtn = document.querySelector('[data-testid="submit-approval"]');
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.removeAttribute('aria-busy'); }
         }
-      });
+      }
+
+      // attach handler to both submit event and button clicks to ensure handlers fire in all cases
+      const formEl = document.getElementById('approvalForm');
+      if (formEl) { formEl.addEventListener('submit', handleSubmit); console.log('handleSubmit bound to form'); window.__handleSubmitBound = true; }
+      const submitButtonElement2 = document.querySelector('[data-testid="submit-approval"]');
+      if (submitButtonElement2) { submitButtonElement2.addEventListener('click', handleSubmit); console.log('handleSubmit bound to submit button'); window.__handleSubmitBoundButton = true; }
 
     })();
   </script>

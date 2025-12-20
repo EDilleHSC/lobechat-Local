@@ -32,11 +32,11 @@ if (!REQUIRED_TOKEN) {
       try { await fs.rm(tmpDir, { recursive: true, force: true }); } catch (e) { }
     });
 
-    test('writes audit log when token supplied', async () => {
+    test('writes audit log when token supplied and includes notes & file', async () => {
       const res = await request(url)
         .post('/approval')
         .set('x-mcp-approval-token', REQUIRED_TOKEN)
-        .send({ approvedBy: 'Integration Tester', status: 'Hold', snapshot: 'Int_Snap' });
+        .send({ approvedBy: 'Integration Tester', status: 'Hold', snapshot: 'Int_Snap', notes: 'Integration note', file: 'Client_Notes_Intro.docx' });
 
       expect(res.status).toBe(201);
       const logPath = res.body.file;
@@ -44,6 +44,10 @@ if (!REQUIRED_TOKEN) {
       expect(content).toContain('Integration Tester');
       expect(content).toContain('Int_Snap.docx');
       expect(content).toContain('Hold');
+      expect(content).toContain('Integration note');
+      // Validate timestamp + format
+      expect(content).toMatch(/\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\] /);
+      expect(content).toMatch(/ → Hold/);
     });
   });
 }
