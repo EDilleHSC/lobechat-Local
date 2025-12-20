@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>NAVI Mail Room Update</title>
+    <title>NAVI Mail Room — Review</title>
     <style>
         * {
             margin: 0;
@@ -18,146 +16,1047 @@
             background: #0a0e27;
             color: #f0f0f0;
             font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            padding: 32px 24px;
-            line-height: 1.8;
+            padding: 24px 20px;
+            line-height: 1.7;
+            font-size: 18px;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 960px;
             margin: 0 auto;
         }
 
-        .operator-banner {
-            background: #f3c623;
-            color: #0a0e27;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-weight: 700;
-            margin-bottom: 18px;
-            display: inline-block;
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #1e2749;
         }
 
-        .data-failed {
-            margin-top: 18px;
-            padding: 12px;
-            background: rgba(231,76,60,0.08);
-            color: #ff6b6b;
-            border-radius: 6px;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .header-icon {
+            font-size: 32px;
+        }
+
+        .header-content h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .header-content p {
+            font-size: 14px;
+            color: #7a8299;
+        }
+
+        /* PROGRESS INDICATOR */
+        .progress-box {
+            background: #0f1433;
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            padding: 12px 20px;
+            text-align: center;
+            min-width: 120px;
+        }
+
+        .progress-current {
+            font-size: 28px;
+            font-weight: 700;
+            color: #4a90e2;
+        }
+
+        .progress-total {
+            font-size: 14px;
+            color: #5a6279;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #1e2749;
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #4ac04a;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* MAIN CONTENT GRID */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            gap: 24px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ACTIONS COLUMN */
+        .actions-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            border: 2px solid;
+            border-radius: 8px;
+            background: #0f1433;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 18px;
             font-weight: 600;
+            font-family: inherit;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .action-btn.selected {
+            transform: scale(1.02);
+        }
+
+        .action-icon {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .action-text {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .action-title {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .action-desc {
+            font-size: 13px;
+            opacity: 0.7;
+        }
+
+        .btn-track {
+            border-color: #4ac04a;
+            color: #7cff7c;
+        }
+        .btn-track:hover, .btn-track.selected {
+            background: rgba(74, 192, 74, 0.15);
+        }
+
+        .btn-hold {
+            border-color: #f5a623;
+            color: #ffc107;
+        }
+        .btn-hold:hover, .btn-hold.selected {
+            background: rgba(245, 166, 35, 0.15);
+        }
+
+        .btn-escalate {
+            border-color: #e74c3c;
+            color: #ff6b6b;
+        }
+        .btn-escalate:hover, .btn-escalate.selected {
+            background: rgba(231, 76, 60, 0.15);
+        }
+
+        /* FILE CARD */
+        .file-card {
+            background: #0f1433;
+            border-left: 5px solid #f5a623;
+            padding: 24px;
+            border-radius: 8px;
+        }
+
+        .file-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid #1e2749;
+        }
+
+        .file-header span {
+            font-size: 24px;
+        }
+
+        .file-header h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ffd700;
+            word-break: break-all;
+        }
+
+        .file-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .meta-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #5a6279;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-value {
+            font-size: 16px;
+            color: #f0f0f0;
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            background: rgba(74, 192, 74, 0.2);
+            border: 1px solid #4ac04a;
+            color: #7cff7c;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .confidence-badge.medium {
+            background: rgba(245, 166, 35, 0.2);
+            border-color: #f5a623;
+            color: #ffc107;
+        }
+
+        .confidence-badge.low {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #ff6b6b;
+        }
+
+        /* FORM FIELDS - OPTIMIZED */
+        .form-section {
+            border-top: 2px solid #1e2749;
+            padding-top: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .field-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .field-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #7a8299;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-label .required {
+            color: #ff6b6b;
+            margin-left: 4px;
+        }
+
+        .field-select {
+            background: #0a0e27;
+            border: 2px solid #1e2749;
+            border-radius: 6px;
+            color: #f0f0f0;
+            font-size: 16px;
+            padding: 10px 14px;
+            font-family: inherit;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%237a8299' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .field-select:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .field-select.error {
+            border-color: #e74c3c;
+        }
+
+        .field-textarea {
+            background: #0a0e27;
+            border: 2px solid #1e2749;
+            border-radius: 6px;
+            color: #f0f0f0;
+            font-size: 14px;
+            padding: 10px 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .field-textarea:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .char-count {
+            font-size: 11px;
+            color: #5a6279;
+            text-align: right;
+            margin-top: 2px;
+        }
+
+        /* REASONING - COMPACT INFO */
+        .reasoning {
+            background: #0a0e27;
+            border: 2px solid #1e2749;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .reasoning h4 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: #7a8299;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .reasoning h4::before {
+            content: "🤖";
+            font-size: 16px;
+        }
+
+        .reason-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .reason-item {
+            font-size: 14px;
+            padding: 8px 14px;
+            color: #a0a8c0;
+            line-height: 1.4;
+            background: #0f1433;
+            border-radius: 20px;
+            border: 1px solid #1e2749;
+        }
+
+        .reason-item::before {
+            display: none;
+        }
+
+        /* NAVIGATION BAR */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            background: #0f1433;
+            border: 2px solid #1e2749;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+        }
+
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border: 2px solid #4a90e2;
+            border-radius: 6px;
+            background: transparent;
+            color: #4a90e2;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(74, 144, 226, 0.15);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-btn.primary {
+            background: #4ac04a;
+            border-color: #4ac04a;
+            color: #0a0e27;
+        }
+
+        .nav-btn.primary:hover:not(:disabled) {
+            background: #5bd65b;
+        }
+
+        .nav-status {
+            text-align: center;
+            flex: 1;
+        }
+
+        .nav-status-text {
+            font-size: 12px;
+            color: #5a6279;
+        }
+
+        .nav-status-decision {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .nav-status-decision.pending {
+            color: #f5a623;
+        }
+
+        .nav-status-decision.complete {
+            color: #4ac04a;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: #0a0e27;
+            border-top: 1px solid #1e2749;
+            padding: 14px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #5a6279;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .footer-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            top: 32px;
+            right: 32px;
+            background: #0f1433;
+            border: 2px solid #4ac04a;
+            border-radius: 8px;
+            padding: 16px 24px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            z-index: 200;
+        }
+
+        .toast.show {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.error {
+            border-color: #e74c3c;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        .toast-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #7cff7c;
+        }
+
+        .toast.error .toast-text {
+            color: #ff6b6b;
+        }
+
+        /* COMPLETION SCREEN */
+        .completion-screen {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+            background: #0f1433;
+            border-radius: 8px;
+            border: 2px solid #4ac04a;
+        }
+
+        .completion-screen.show {
+            display: block;
+        }
+
+        .completion-icon {
+            font-size: 72px;
+            margin-bottom: 24px;
+        }
+
+        .completion-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #7cff7c;
+            margin-bottom: 16px;
+        }
+
+        .completion-summary {
+            font-size: 18px;
+            color: #a0a8c0;
+            margin-bottom: 32px;
+        }
+
+        .completion-btn {
+            padding: 16px 32px;
+            background: #4ac04a;
+            border: none;
+            border-radius: 6px;
+            color: #0a0e27;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .completion-btn:hover {
+            background: #5bd65b;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="operator-banner">This UI is operator-approved; data is advisory only.</div>
-
         <!-- HEADER -->
         <div class="header">
-            <div class="header-icon">📬</div>
-            <div class="header-content">
-                <h1>NAVI Mail Room Update</h1>
-                <p id="processed-at">Processed at 21:20:50</p>
+            <div class="header-left">
+                <div class="header-icon">📬</div>
+                <div class="header-content">
+                    <h1>NAVI Mail Room — Review</h1>
+                    <p>Processed at <span id="processTime">14:30:22</span></p>
+                </div>
+            </div>
+            <div class="progress-box">
+                <div class="progress-current" id="currentNum">1</div>
+                <div class="progress-total">of <span id="totalNum">7</span> items</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 14.28%;"></div>
+                </div>
             </div>
         </div>
 
-        <!-- SUMMARY -->
-        <div class="summary-card">
-            <h2>Summary</h2>
-            <p>1 incoming request processed</p>
-            <p>Items routed to ACTIVE, WAITING, or DONE</p>
-        </div>
+        <!-- MAIN REVIEW AREA -->
+        <div id="reviewArea">
+            <!-- MAIN CONTENT GRID -->
+            <div class="content-grid">
+                <!-- LEFT: SPEED ACTIONS -->
+                <div class="actions-section">
+                    <button class="action-btn btn-track" onclick="quickAction('track')">
+                        <div class="action-icon">🟢</div>
+                        <div class="action-text">
+                            <div class="action-title">Track</div>
+                            <div class="action-desc">→ Next Action</div>
+                        </div>
+                    </button>
 
-        <!-- MAIN CONTENT -->
-        <div class="content-grid">
-            <!-- LEFT: ACTIONS (VERTICAL BUTTONS) -->
-            <div class="actions-section">
-                <button class="action-btn btn-track">
-                    <div class="action-icon">🟢</div>
-                    <div class="action-text">
-                        <div class="action-title">Track</div>
-                        <div class="action-desc">Accept responsibility</div>
-                    </div>
-                </button>
+                    <button class="action-btn btn-hold" onclick="quickAction('hold')">
+                        <div class="action-icon">🟡</div>
+                        <div class="action-text">
+                            <div class="action-title">Hold</div>
+                            <div class="action-desc">→ Reference</div>
+                        </div>
+                    </button>
 
-                <button class="action-btn btn-hold">
-                    <div class="action-icon">🟡</div>
-                    <div class="action-text">
-                        <div class="action-title">Hold</div>
-                        <div class="action-desc">Not actionable now</div>
-                    </div>
-                </button>
+                    <button class="action-btn btn-escalate" onclick="quickAction('escalate')">
+                        <div class="action-icon">🔴</div>
+                        <div class="action-text">
+                            <div class="action-title">Escalate</div>
+                            <div class="action-desc">→ Sets Legal flag</div>
+                        </div>
+                    </button>
+                </div>
 
-                <button class="action-btn btn-escalate">
-                    <div class="action-icon">🔴</div>
-                    <div class="action-text">
-                        <div class="action-title">Escalate</div>
-                        <div class="action-desc">Deadlines · Delegation · Fire drills</div>
+                <!-- RIGHT: FILE INFO -->
+                <div class="file-card">
+                    <div class="file-header">
+                        <span>📄</span>
+                        <h3 id="fileName">Loading...</h3>
                     </div>
-                </button>
+                    <div class="file-meta">
+                        <div class="meta-item">
+                            <span class="meta-label">File Type</span>
+                            <span class="meta-value" id="fileType">—</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Received</span>
+                            <span class="meta-value" id="fileDate">—</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Suggested Route</span>
+                            <span class="meta-value" id="fileRoute">—</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-label">Confidence</span>
+                            <span class="confidence-badge" id="fileConfidence">—</span>
+                        </div>
+                    </div>
+
+                    <!-- FORM FIELDS -->
+                    <div class="form-section">
+                        <div class="form-row">
+                            <div class="field-group">
+                                <label class="field-label">GTD Outcome<span class="required">*</span></label>
+                                <select class="field-select" id="gtdSelect">
+                                    <option value="">-- Select --</option>
+                                    <option value="next_action">📌 Next Action</option>
+                                    <option value="project">📁 Project</option>
+                                    <option value="waiting_for">⏳ Waiting For</option>
+                                    <option value="someday">💭 Someday/Maybe</option>
+                                    <option value="reference">📚 Reference</option>
+                                    <option value="trash">🗑️ Trash</option>
+                                </select>
+                            </div>
+                            <div class="field-group">
+                                <label class="field-label">Sensitivity</label>
+                                <select class="field-select" id="sensitivitySelect">
+                                    <option value="normal">Normal</option>
+                                    <option value="confidential">🔒 Confidential</option>
+                                    <option value="legal">⚖️ Legal</option>
+                                    <option value="financial">💰 Financial</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field-group full-width">
+                            <label class="field-label">Notes</label>
+                            <textarea class="field-textarea" id="notesField" placeholder="Optional notes..." maxlength="280" oninput="updateCharCount()"></textarea>
+                            <div class="char-count" id="charCount">0/280</div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- RIGHT: FILE INFO -->
-            <div id="items-container"></div>
+            <!-- REASONING -->
+            <div class="reasoning">
+                <h4>NAVI's take</h4>
+                <ul class="reason-list" id="reasonList">
+                    <li class="reason-item">Loading...</li>
+                </ul>
+            </div>
+
+            <!-- NAVIGATION BAR -->
+            <div class="nav-bar">
+                <button class="nav-btn" id="prevBtn" onclick="prevItem()" disabled>
+                    ← Previous
+                </button>
+                <div class="nav-status">
+                    <div class="nav-status-text">Current Item Status</div>
+                    <div class="nav-status-decision pending" id="statusDecision">⏳ Pending Decision</div>
+                </div>
+                <button class="nav-btn primary" id="nextBtn" onclick="nextItem()">
+                    Next →
+                </button>
+            </div>
         </div>
 
-        <!-- REASONING -->
-        <div class="reasoning">
-            <h4>Why did NAVI think this?</h4>
-            <ul class="reason-list">
-                <li class="reason-item">Matched priority keywords: <strong id="keywords">important, urgent, priority</strong></li>
-                <li class="reason-item">File type allowed for work intake</li>
-                <li class="reason-item">No exclusion rules triggered</li>
-                <li class="reason-item">No conflicting signals detected</li>
-            </ul>
+        <!-- COMPLETION SCREEN -->
+        <div class="completion-screen" id="completionScreen">
+            <div class="completion-icon">✅</div>
+            <div class="completion-title">Review Complete!</div>
+            <div class="completion-summary" id="completionSummary">
+                7 items reviewed and classified.
+            </div>
+            <div class="reviewer-field" style="margin: 24px 0; text-align: left; max-width: 300px; margin-left: auto; margin-right: auto;">
+                <label class="field-label" style="display: block; margin-bottom: 8px;">Reviewer Name<span class="required">*</span></label>
+                <input type="text" id="reviewerName" class="field-textarea" style="width: 100%; padding: 12px; font-size: 16px;" placeholder="Enter your name" required>
+            </div>
+            <button class="completion-btn" onclick="submitAll()">Submit All Decisions</button>
         </div>
 
         <!-- FOOTER -->
         <div class="footer">
-            <div class="footer-item">✓ Presenter is advisory only</div>
-            <div class="footer-item">✓ No files moved or modified</div>
-            <div class="footer-item">✓ Human decisions applied separately</div>
-            <div class="footer-item">✓ Inbox accepts work items only</div>
-            <div class="footer-item">✓ Review opens file location only</div>
+            <div class="footer-item">✓ Advisory only</div>
+            <div class="footer-item">✓ No files moved</div>
+            <div class="footer-item">✓ Human decides</div>
+            <div class="footer-item">✓ Snapshot preserved</div>
         </div>
     </div>
 
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✅</span>
+        <span class="toast-text" id="toastText">Saved!</span>
+    </div>
+
     <script>
-    // Approved UI reads generated/presenter.json and renders one card per file. It is NOT overwritten by the generator.
-    (async function(){
-        function esc(s){ return String(s||''); }
-        function renderCard(item){
-            return `
-            <div class="file-card">
-                <h3>📄 ${esc(item.filename || 'Unknown File')}</h3>
-                <div class="file-meta">
-                    <div class="meta-item"><span class="meta-label">Routed to:</span><span class="meta-value">${esc(item.routed_to || 'UNKNOWN')}</span></div>
-                    <div class="meta-item"><span class="meta-label">Confidence:</span><span class="confidence-badge">${esc(item.confidence || '')}</span></div>
-                    <div class="meta-item"><span class="meta-label">File type:</span><span class="meta-value">${esc(item.file_type || '')}</span></div>
-                    <div class="meta-item"><span class="meta-label">Received:</span><span class="meta-value">${esc(item.received || '')}</span></div>
-                </div>
-            </div>`;
-        }
-
-        try {
-            const res = await fetch('./generated/presenter.json',{cache:'no-store'});
-            if (!res.ok) throw new Error('no data');
-            const data = await res.json();
-            const th = data.trust_header || {};
-            if (th.rendered_at) document.getElementById('processed-at').textContent = 'Processed at ' + new Date(th.rendered_at).toLocaleTimeString();
-
-            const items = data.items || [];
-            const container = document.getElementById('items-container');
-            if (items.length === 0) {
-                container.innerHTML = '<div class="file-card"><p>No items in this snapshot</p></div>';
-            } else {
-                container.innerHTML = items.map(renderCard).join('');
+        // Sample data - would come from presenter.json
+        const items = [
+            { 
+                id: 1, 
+                filename: 'Client_Notes_Intro.docx', 
+                type: 'DOCX', 
+                received: '2025-12-20', 
+                route: 'ACTIVE',
+                confidence: 90,
+                reasons: [
+                    'Says "client" — probably wants attention',
+                    'DOCX = work vibes',
+                    'Nothing sketchy'
+                ]
+            },
+            { 
+                id: 2, 
+                filename: 'Navi_KB_00_Master_Index.md', 
+                type: 'MD', 
+                received: '2025-12-19', 
+                route: 'REFERENCE',
+                confidence: 95,
+                reasons: [
+                    'Knowledge base file — shelf it',
+                    'Index = lookup material',
+                    'Not urgent, just useful'
+                ]
+            },
+            { 
+                id: 3, 
+                filename: 'Q4_staging_invoice_FINAL.pdf', 
+                type: 'PDF', 
+                received: '2025-12-20', 
+                route: 'ACTIVE',
+                confidence: 85,
+                reasons: [
+                    'Invoice = money stuff',
+                    'Q4 = this quarter',
+                    'FINAL = stop procrastinating'
+                ]
+            },
+            { 
+                id: 4, 
+                filename: 'vendor_contract_draft.docx', 
+                type: 'DOCX', 
+                received: '2025-12-19', 
+                route: 'WAITING',
+                confidence: 75,
+                reasons: [
+                    'Contract — might need lawyer eyes',
+                    'Draft = not done yet',
+                    'Ball in someone else\'s court?'
+                ]
+            },
+            { 
+                id: 5, 
+                filename: 'team_photo_holiday.jpg', 
+                type: 'JPG', 
+                received: '2025-12-18', 
+                route: 'SOMEDAY',
+                confidence: 60,
+                reasons: [
+                    'It\'s a picture',
+                    'Holiday = not urgent',
+                    'Nice to have, not need to have'
+                ]
+            },
+            { 
+                id: 6, 
+                filename: 'tax_docs_2024.zip', 
+                type: 'ZIP', 
+                received: '2025-12-17', 
+                route: 'REFERENCE',
+                confidence: 80,
+                reasons: [
+                    'Tax docs — keep forever',
+                    '2024 = last year, archive it',
+                    'ZIP = bundled for storage'
+                ]
+            },
+            { 
+                id: 7, 
+                filename: 'urgent_client_request.txt', 
+                type: 'TXT', 
+                received: '2025-12-20', 
+                route: 'ACTIVE',
+                confidence: 92,
+                reasons: [
+                    'Literally says URGENT',
+                    'Client request = jump on it',
+                    'Today\'s date — move it'
+                ]
             }
-        } catch(e){
-            console.warn('Presenter JSON load failed', e);
-            const note = document.createElement('div'); note.className='data-failed'; note.textContent='Data load failed — showing last generated snapshot';
-            document.querySelector('.container').appendChild(note);
+        ];
+
+        // State
+        let currentIndex = 0;
+        const decisions = new Array(items.length).fill(null).map(() => ({
+            gtd: '',
+            sensitivity: 'normal',
+            notes: ''
+        }));
+
+        // Initialize
+        document.getElementById('processTime').textContent = new Date().toLocaleTimeString();
+        document.getElementById('totalNum').textContent = items.length;
+        renderCurrentItem();
+
+        function renderCurrentItem() {
+            const item = items[currentIndex];
+            const decision = decisions[currentIndex];
+
+            // Update header
+            document.getElementById('currentNum').textContent = currentIndex + 1;
+            document.getElementById('progressFill').style.width = 
+                ((currentIndex + 1) / items.length * 100) + '%';
+
+            // Update file info
+            document.getElementById('fileName').textContent = item.filename;
+            document.getElementById('fileType').textContent = item.type;
+            document.getElementById('fileDate').textContent = item.received;
+            document.getElementById('fileRoute').textContent = item.route;
+
+            // Confidence badge
+            const confBadge = document.getElementById('fileConfidence');
+            confBadge.textContent = item.confidence + '%';
+            confBadge.className = 'confidence-badge';
+            if (item.confidence < 70) confBadge.classList.add('low');
+            else if (item.confidence < 85) confBadge.classList.add('medium');
+
+            // Reasons
+            document.getElementById('reasonList').innerHTML = 
+                item.reasons.map(r => `<li class="reason-item">${r}</li>`).join('');
+
+            // Form fields
+            document.getElementById('gtdSelect').value = decision.gtd;
+            document.getElementById('gtdSelect').classList.remove('error');
+            document.getElementById('sensitivitySelect').value = decision.sensitivity;
+            document.getElementById('notesField').value = decision.notes;
+            updateCharCount();
+
+            // Nav buttons
+            document.getElementById('prevBtn').disabled = currentIndex === 0;
+            
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentIndex === items.length - 1) {
+                nextBtn.textContent = 'Finish ✓';
+            } else {
+                nextBtn.textContent = 'Next →';
+            }
+
+            // Status
+            updateStatusDisplay();
+
+            // Clear action button selection
+            document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('selected'));
         }
-    })();
+
+        function updateStatusDisplay() {
+            const decision = decisions[currentIndex];
+            const statusEl = document.getElementById('statusDecision');
+            
+            if (decision.gtd) {
+                statusEl.textContent = '✓ Decision Made';
+                statusEl.className = 'nav-status-decision complete';
+            } else {
+                statusEl.textContent = '⏳ Pending Decision';
+                statusEl.className = 'nav-status-decision pending';
+            }
+        }
+
+        function saveCurrentDecision() {
+            decisions[currentIndex] = {
+                gtd: document.getElementById('gtdSelect').value,
+                sensitivity: document.getElementById('sensitivitySelect').value,
+                notes: document.getElementById('notesField').value
+            };
+        }
+
+        function quickAction(action) {
+            const gtdSelect = document.getElementById('gtdSelect');
+            const sensitivitySelect = document.getElementById('sensitivitySelect');
+
+            // Clear previous selection
+            document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('selected'));
+
+            if (action === 'track') {
+                gtdSelect.value = 'next_action';
+                document.querySelector('.btn-track').classList.add('selected');
+            } else if (action === 'hold') {
+                gtdSelect.value = 'reference';
+                document.querySelector('.btn-hold').classList.add('selected');
+            } else if (action === 'escalate') {
+                sensitivitySelect.value = 'legal';
+                document.querySelector('.btn-escalate').classList.add('selected');
+                // Don't auto-set GTD for escalate
+            }
+
+            gtdSelect.classList.remove('error');
+            saveCurrentDecision();
+            updateStatusDisplay();
+            showToast(action.charAt(0).toUpperCase() + action.slice(1) + ' applied');
+        }
+
+        function prevItem() {
+            if (currentIndex > 0) {
+                saveCurrentDecision();
+                currentIndex--;
+                renderCurrentItem();
+            }
+        }
+
+        function nextItem() {
+            const gtdSelect = document.getElementById('gtdSelect');
+            
+            // Validate GTD
+            if (!gtdSelect.value) {
+                gtdSelect.classList.add('error');
+                showToast('Please select a GTD Outcome', true);
+                gtdSelect.focus();
+                return;
+            }
+
+            saveCurrentDecision();
+
+            if (currentIndex === items.length - 1) {
+                // Show completion screen
+                showCompletion();
+            } else {
+                currentIndex++;
+                renderCurrentItem();
+            }
+        }
+
+        function showCompletion() {
+            document.getElementById('reviewArea').style.display = 'none';
+            document.getElementById('completionScreen').classList.add('show');
+            
+            // Count by GTD
+            const counts = {};
+            decisions.forEach(d => {
+                counts[d.gtd] = (counts[d.gtd] || 0) + 1;
+            });
+            
+            document.getElementById('completionSummary').textContent = 
+                `${items.length} items reviewed. Ready to submit.`;
+        }
+
+        function submitAll() {
+            const reviewerName = document.getElementById('reviewerName').value.trim();
+            if (!reviewerName) {
+                showToast('Please enter your name', true);
+                document.getElementById('reviewerName').focus();
+                return;
+            }
+
+            const approvalData = {
+                timestamp: new Date().toISOString(),
+                reviewer: reviewerName,
+                items: items.map((item, i) => ({
+                    ...item,
+                    decision: decisions[i]
+                }))
+            };
+            
+            console.log('BATCH APPROVAL SUBMITTED', approvalData);
+            
+            // POST to server
+            fetch('/approval', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-MCP-APPROVAL-TOKEN': 'TRUSTED_APPROVAL_2024'
+                },
+                body: JSON.stringify(approvalData)
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                console.log('Approval response:', data);
+                showToast(`Files processed: ${data.processedCount || 'Success'}`);
+            })
+            .catch(err => {
+                console.error('Submission error:', err);
+                showToast('Error submitting approvals: ' + err.message, true);
+            });
+        }
+
+        function updateCharCount() {
+            const textarea = document.getElementById('notesField');
+            document.getElementById('charCount').textContent = 
+                textarea.value.length + '/280';
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+            const toastIcon = toast.querySelector('.toast-icon');
+            
+            toastText.textContent = message;
+            toastIcon.textContent = isError ? '⚠️' : '✅';
+            toast.className = 'toast show' + (isError ? ' error' : '');
+            
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // Save on field change
+        document.getElementById('gtdSelect').addEventListener('change', () => {
+            saveCurrentDecision();
+            updateStatusDisplay();
+        });
+        document.getElementById('sensitivitySelect').addEventListener('change', saveCurrentDecision);
+        document.getElementById('notesField').addEventListener('input', saveCurrentDecision);
     </script>
 </body>
 </html>
