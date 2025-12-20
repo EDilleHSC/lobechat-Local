@@ -575,6 +575,199 @@
         .completion-btn:hover {
             background: #5bd65b;
         }
+
+        /* BAT REPORT STYLES */
+        .bat-report {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .bat-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .bat-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .bat-header h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #7cff7c;
+            margin-bottom: 8px;
+        }
+
+        .bat-subtitle {
+            font-size: 16px;
+            color: #a0a8c0;
+        }
+
+        .bat-details {
+            background: #0f1433;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #1e2749;
+        }
+
+        .bat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #1e2749;
+        }
+
+        .bat-row:last-child {
+            border-bottom: none;
+        }
+
+        .bat-label {
+            font-weight: 600;
+            color: #7a8299;
+        }
+
+        .bat-value {
+            font-weight: 500;
+            color: #f0f0f0;
+        }
+
+        .bat-decisions {
+            margin-bottom: 32px;
+        }
+
+        .bat-decisions h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #4a90e2;
+        }
+
+        .bat-decision-list {
+            background: #0f1433;
+            border-radius: 8px;
+            border: 1px solid #1e2749;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .bat-decision-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #1e2749;
+        }
+
+        .bat-decision-item:last-child {
+            border-bottom: none;
+        }
+
+        .bat-file-icon {
+            font-size: 24px;
+            margin-right: 16px;
+            min-width: 24px;
+        }
+
+        .bat-file-info {
+            flex: 1;
+        }
+
+        .bat-filename {
+            font-weight: 600;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+
+        .bat-outcome {
+            font-size: 14px;
+            color: #7cff7c;
+            font-weight: 500;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .bat-outcome-next_action { background-color: rgba(74,144,226,0.1); }
+        .bat-outcome-project { background-color: rgba(74,144,226,0.1); }
+        .bat-outcome-waiting_for { background-color: rgba(245,166,35,0.1); }
+        .bat-outcome-someday { background-color: rgba(245,166,35,0.1); }
+        .bat-outcome-reference { background-color: rgba(245,166,35,0.1); }
+        .bat-outcome-trash { background-color: rgba(255,107,107,0.1); }
+
+        .bat-notes {
+            font-size: 14px;
+            color: #a0a8c0;
+            font-style: italic;
+            margin-top: 4px;
+        }
+
+        .bat-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .bat-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .bat-btn.primary {
+            background: #4a90e2;
+            color: #0a0e27;
+        }
+
+        .bat-btn.primary:hover {
+            background: #5ba0f2;
+        }
+
+        .bat-btn.secondary {
+            background: #1e2749;
+            color: #f0f0f0;
+            border: 1px solid #4a90e2;
+        }
+
+        .bat-btn.secondary:hover {
+            background: #2a3359;
+        }
+
+        .bat-btn.small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        /* PRINT STYLES */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            
+            .container {
+                max-width: none;
+            }
+            
+            .bat-report {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+            
+            .bat-actions {
+                display: none;
+            }
+            
+            .bat-decision-list {
+                max-height: none;
+                overflow: visible;
+            }
+        }
     </style>
 </head>
 <body>
@@ -718,8 +911,8 @@
                 7 items reviewed and classified.
             </div>
             <div class="reviewer-field" style="margin: 24px 0; text-align: left; max-width: 300px; margin-left: auto; margin-right: auto;">
-                <label class="field-label" style="display: block; margin-bottom: 8px;">Reviewer Name<span class="required">*</span></label>
-                <input type="text" id="reviewerName" class="field-textarea" style="width: 100%; padding: 12px; font-size: 16px;" placeholder="Enter your name" required>
+                <label class="field-label" style="display: block; margin-bottom: 8px;">Reviewer Initials<span class="required">*</span></label>
+                <input type="text" id="reviewerName" class="field-textarea" style="width: 100%; padding: 12px; font-size: 16px;" value="ED" readonly required>
             </div>
             <button class="completion-btn" onclick="submitAll()">Submit All Decisions</button>
         </div>
@@ -842,11 +1035,6 @@
             sensitivity: 'normal',
             notes: ''
         }));
-
-        // Initialize
-        document.getElementById('processTime').textContent = new Date().toLocaleTimeString();
-        document.getElementById('totalNum').textContent = items.length;
-        renderCurrentItem();
 
         function renderCurrentItem() {
             const item = items[currentIndex];
@@ -989,12 +1177,14 @@
         }
 
         function submitAll() {
-            const reviewerName = document.getElementById('reviewerName').value.trim();
-            if (!reviewerName) {
-                showToast('Please enter your name', true);
-                document.getElementById('reviewerName').focus();
-                return;
-            }
+            const reviewerName = 'ED';
+
+            // Show loading state
+            const submitBtn = document.querySelector('.completion-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.7';
 
             const approvalData = {
                 timestamp: new Date().toISOString(),
@@ -1025,17 +1215,106 @@
             .then(data => {
                 console.log('Approval response:', data);
                 showToast(`Files processed: ${data.processedCount || 'Success'}`);
+                showBATReport(data);
             })
             .catch(err => {
                 console.error('Submission error:', err);
                 showToast('Error submitting approvals: ' + err.message, true);
+                // Reset button on error
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
             });
         }
 
-        function updateCharCount() {
-            const textarea = document.getElementById('notesField');
-            document.getElementById('charCount').textContent = 
-                textarea.value.length + '/280';
+        function showBATReport(data) {
+            // Hide completion screen and show BAT report
+            document.getElementById('completionScreen').classList.remove('show');
+            
+            // Create BAT report HTML
+            const batHtml = `
+                <div class="bat-report">
+                    <div class="bat-header">
+                        <div class="bat-icon">✅</div>
+                        <h2>Batch Approval Complete</h2>
+                        <p class="bat-subtitle">All decisions have been submitted and logged</p>
+                    </div>
+                    
+                    <div class="bat-details">
+                        <div class="bat-row">
+                            <span class="bat-label">Reviewer:</span>
+                            <span class="bat-value">${document.getElementById('reviewerName').value.trim()}</span>
+                        </div>
+                        <div class="bat-row">
+                            <span class="bat-label">Timestamp:</span>
+                            <span class="bat-value">${new Date().toLocaleString()}</span>
+                        </div>
+                        <div class="bat-row">
+                            <span class="bat-label">Total Files:</span>
+                            <span class="bat-value">${items.length}</span>
+                        </div>
+                        ${data.file ? `
+                        <div class="bat-row">
+                            <span class="bat-label">Audit File:</span>
+                            <span class="bat-value">${data.file}</span>
+                            <button class="bat-btn small" onclick="showInFolder('${data.file}')">📁 Show in Folder</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="bat-decisions">
+                        <h3>Decisions Summary</h3>
+                        <div class="bat-decision-list">
+                            ${items.map((item, i) => {
+                                const decision = decisions[i];
+                                const gtdIcon = {
+                                    'next_action': '📌',
+                                    'project': '📁',
+                                    'waiting_for': '⏳',
+                                    'someday': '💭',
+                                    'reference': '📚',
+                                    'trash': '🗑️'
+                                }[decision.gtd] || '❓';
+                                
+                                return `
+                                    <div class="bat-decision-item">
+                                        <div class="bat-file-icon">${item.type === 'DOCX' ? '📄' : item.type === 'PDF' ? '📕' : item.type === 'JPG' ? '🖼️' : '📄'}</div>
+                                        <div class="bat-file-info">
+                                            <div class="bat-filename">${item.filename}</div>
+                                            <div class="bat-outcome bat-outcome-${decision.gtd}">${gtdIcon} ${decision.gtd.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                                            <div class="bat-notes">${decision.notes || '—'}</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="bat-actions">
+                        <button class="bat-btn primary" onclick="location.reload()">Process Another Batch</button>
+                        <button class="bat-btn secondary" onclick="window.print()">Print Summary</button>
+                        <button class="bat-btn secondary" onclick="window.close()">Close Window</button>
+                    </div>
+                </div>
+            `;
+            
+            // Replace completion screen content with BAT report
+            document.getElementById('completionScreen').innerHTML = batHtml;
+            document.getElementById('completionScreen').classList.add('show');
+
+            // Auto-copy audit file to clipboard
+            if (data.file) {
+                navigator.clipboard.writeText(data.file).catch(err => console.log('Clipboard copy failed', err));
+            }
+
+            // Auto-return after 10s idle
+            setTimeout(() => location.reload(), 10000);
+        }
+
+        function showInFolder(fileName) {
+            const dateStr = new Date().toISOString().slice(0,10);
+            const folderPath = `file:///D:/05_AGENTS-AI/01_RUNTIME/VBoarder/NAVI/approvals/${dateStr}`;
+            window.open(folderPath);
         }
 
         function showToast(message, isError = false) {
