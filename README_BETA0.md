@@ -133,6 +133,8 @@ This repository will be tagged `v0.1.0-beta0` to mark the Beta‑0 trust baselin
 ---
 For questions or to propose Beta‑1 features (mailroom restoration, routing, richer tests), open an issue or PR referencing this document.
 
+🟢 main is now the production NAVI mailroom processor — clean, tested, ready for intake.
+
 ## Playwright E2E Tests ✅
 
 To run the E2E tests locally:

@@ -808,7 +808,8 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
 
                         // Append to audit log
                         const auditPath = path.join(APPROVAL_DIR, 'audit.log');
-                        const auditLine = `[${new Date().toISOString()}] ${reviewer} approved snapshot ${snapshot_id} with ${items.length} items → ${approvalFile}\n`;
+                        const timestamp = new Date().toISOString().slice(0,19) + 'Z';
+                        const auditLine = `[${timestamp}] ${reviewer} approved snapshot ${snapshot_id} (${items.length} items) → ${approvalFile}\n`;
                         fs.appendFileSync(auditPath, auditLine, 'utf8');
 
                         // Enforcement move pass
