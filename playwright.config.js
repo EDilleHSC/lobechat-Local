@@ -14,8 +14,11 @@ module.exports = defineConfig({
   // NAVI server is started manually.
   // Do NOT spawn a web server from Playwright — reuse the existing instance.
   webServer: {
-    url: 'http://localhost:8005',
+    // Use the health endpoint so Playwright sees a 200 and does not attempt to start a server
+    url: 'http://localhost:8005/health',
     reuseExistingServer: true,
+    // harmless placeholder to satisfy Playwright validation; will not be executed
+    command: 'echo "playwright: reuseExistingServer placeholder"',
   },
   // Fast fail if NAVI isn't running: perform a health check in globalSetup
   globalSetup: require.resolve('./ops/playwright_health_check.js'),
