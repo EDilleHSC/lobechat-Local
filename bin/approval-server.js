@@ -7,8 +7,8 @@ const PORT = process.env.PORT || 8005;
 const app = express();
 app.use(express.json());
 
-// Serve static files from NAVI/presenter
-app.use(express.static(path.join(__dirname, '..', 'NAVI', 'presenter')));
+// Serve static files from NAVI/presenter under the /presenter route (match dev_server)
+app.use('/presenter', express.static(path.join(__dirname, '..', 'NAVI', 'presenter')));
 
 app.post('/approval', (req, res) => {
   console.log('POST /approval received');
