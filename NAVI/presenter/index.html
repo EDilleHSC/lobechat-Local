@@ -688,11 +688,13 @@
             border-radius: 4px;
         }
 
-        .bat-outcome-next_action { background-color: rgba(74,144,226,0.1); }
-        .bat-outcome-project { background-color: rgba(74,144,226,0.1); }
-        .bat-outcome-waiting_for { background-color: rgba(245,166,35,0.1); }
-        .bat-outcome-someday { background-color: rgba(245,166,35,0.1); }
-        .bat-outcome-reference { background-color: rgba(245,166,35,0.1); }
+        .bat-outcome-account { background-color: rgba(74,144,226,0.1); }
+        .bat-outcome-legal { background-color: rgba(231,76,60,0.1); }
+        .bat-outcome-finance { background-color: rgba(74,144,226,0.1); }
+        .bat-outcome-hr { background-color: rgba(245,166,35,0.1); }
+        .bat-outcome-ops { background-color: rgba(74,144,226,0.1); }
+        .bat-outcome-support { background-color: rgba(74,144,226,0.1); }
+        .bat-outcome-intake { background-color: rgba(245,166,35,0.1); }
         .bat-outcome-trash { background-color: rgba(255,107,107,0.1); }
 
         .bat-notes {
@@ -850,15 +852,17 @@
                     <div class="form-section">
                         <div class="form-row">
                             <div class="field-group">
-                                <label class="field-label">GTD Outcome<span class="required">*</span></label>
-                                <select class="field-select" id="gtdSelect">
+                                <label class="field-label">Department<span class="required">*</span></label>
+                                <select class="field-select" id="deptSelect">
                                     <option value="">-- Select --</option>
-                                    <option value="next_action">📌 Next Action</option>
-                                    <option value="project">📁 Project</option>
-                                    <option value="waiting_for">⏳ Waiting For</option>
-                                    <option value="someday">💭 Someday/Maybe</option>
-                                    <option value="reference">📚 Reference</option>
-                                    <option value="trash">🗑️ Trash</option>
+                                    <option value="Account">📊 Account</option>
+                                    <option value="Legal">⚖️ Legal</option>
+                                    <option value="Finance">💰 Finance</option>
+                                    <option value="HR">👥 HR</option>
+                                    <option value="Ops">⚙️ Ops</option>
+                                    <option value="Support">🛠️ Support</option>
+                                    <option value="Intake">📥 Intake</option>
+                                    <option value="Trash">🗑️ Trash</option>
                                 </select>
                             </div>
                             <div class="field-group">
@@ -1031,7 +1035,7 @@
         // State
         let currentIndex = 0;
         const decisions = new Array(items.length).fill(null).map(() => ({
-            gtd: '',
+            dept: '',
             sensitivity: 'normal',
             notes: ''
         }));
@@ -1063,8 +1067,8 @@
                 item.reasons.map(r => `<li class="reason-item">${r}</li>`).join('');
 
             // Form fields
-            document.getElementById('gtdSelect').value = decision.gtd;
-            document.getElementById('gtdSelect').classList.remove('error');
+            document.getElementById('deptSelect').value = decision.dept;
+            document.getElementById('deptSelect').classList.remove('error');
             document.getElementById('sensitivitySelect').value = decision.sensitivity;
             document.getElementById('notesField').value = decision.notes;
             updateCharCount();
@@ -1090,7 +1094,7 @@
             const decision = decisions[currentIndex];
             const statusEl = document.getElementById('statusDecision');
             
-            if (decision.gtd) {
+            if (decision.dept) {
                 statusEl.textContent = '✓ Decision Made';
                 statusEl.className = 'nav-status-decision complete';
             } else {
@@ -1267,21 +1271,23 @@
                         <div class="bat-decision-list">
                             ${items.map((item, i) => {
                                 const decision = decisions[i];
-                                const gtdIcon = {
-                                    'next_action': '📌',
-                                    'project': '📁',
-                                    'waiting_for': '⏳',
-                                    'someday': '💭',
-                                    'reference': '📚',
-                                    'trash': '🗑️'
-                                }[decision.gtd] || '❓';
+                                const deptIcon = {
+                                    'Account': '📊',
+                                    'Legal': '⚖️',
+                                    'Finance': '💰',
+                                    'HR': '👥',
+                                    'Ops': '⚙️',
+                                    'Support': '🛠️',
+                                    'Intake': '📥',
+                                    'Trash': '🗑️'
+                                }[decision.dept] || '❓';
                                 
                                 return `
                                     <div class="bat-decision-item">
                                         <div class="bat-file-icon">${item.type === 'DOCX' ? '📄' : item.type === 'PDF' ? '📕' : item.type === 'JPG' ? '🖼️' : '📄'}</div>
                                         <div class="bat-file-info">
                                             <div class="bat-filename">${item.filename}</div>
-                                            <div class="bat-outcome bat-outcome-${decision.gtd}">${gtdIcon} ${decision.gtd.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>
+                                            <div class="bat-outcome bat-outcome-${decision.dept.toLowerCase()}">${deptIcon} ${decision.dept}</div>
                                             <div class="bat-notes">${decision.notes || '—'}</div>
                                         </div>
                                     </div>
@@ -1313,8 +1319,8 @@
 
         function showInFolder(fileName) {
             const dateStr = new Date().toISOString().slice(0,10);
-            const folderPath = `file:///D:/05_AGENTS-AI/01_RUNTIME/VBoarder/NAVI/approvals/${dateStr}`;
-            window.open(folderPath);
+            const filePath = `file:///D:/05_AGENTS-AI/01_RUNTIME/VBoarder/NAVI/approvals/${dateStr}/${fileName}`;
+            window.open(filePath);
         }
 
         function showToast(message, isError = false) {
