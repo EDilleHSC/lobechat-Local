@@ -72,6 +72,7 @@ const STATES = {
     DECISION: {
         AUTO_ROUTED: 'AUTO_ROUTED',
         REVIEW_REQUIRED: 'REVIEW_REQUIRED',
+        KB_REVIEW_REQUIRED: 'KB_REVIEW_REQUIRED',
         HUMAN_DECIDED: 'HUMAN_DECIDED'
     },
     FINAL: {
@@ -99,6 +100,8 @@ const PORT = Number(process.env.PORT) || 8005;
 // Track last activity for health
 let lastSnapshotTime = null;
 let lastPresenterTime = null;
+// Current process mode for /process endpoint: 'DEFAULT' or 'KB'
+let CURRENT_PROCESS_MODE = 'DEFAULT';
 
 // Log paths for verification
 console.log(`[PATHS] __dirname=${__dirname}`);
@@ -406,7 +409,30 @@ function takeSnapshot() {
             let confidence = receiptAnalysis.confidence;
             let reasons = receiptAnalysis.reasons;
             let ai_summary = receiptAnalysis.summary;
+            // Normalize ai_summary to an array so downstream code can safely use .join('\n')
+            if (!Array.isArray(ai_summary)) {
+                if (typeof ai_summary === 'string' && ai_summary.trim()) {
+                    ai_summary = [ai_summary];
+                } else if (ai_summary == null) {
+                    ai_summary = [];
+                } else {
+                    ai_summary = [String(ai_summary)];
+                }
+            }
             let risk_flags = receiptAnalysis.risk_flags;
+
+            // Normalize confidence and dedupe risk_flags for consistent representation
+            // confidence may be returned as a fraction (0.46), a percent (46), or accidentally scaled (4600).
+            let confRaw = Number(receiptAnalysis.confidence) || 0;
+            // If confidence is too large (e.g., 4600), reduce by 100 to percent
+            if (confRaw > 100) { confRaw = Math.round(confRaw / 100); }
+            // If confidence is a fraction (<=1), convert to percent
+            if (confRaw <= 1) { confRaw = Math.round(confRaw * 100); }
+            const confidencePercent = Math.max(0, Math.min(100, Math.round(confRaw)));
+
+            // Dedupe risk flags
+            if (!Array.isArray(risk_flags)) { risk_flags = risk_flags ? [String(risk_flags)] : []; }
+            risk_flags = Array.from(new Set(risk_flags));
 
             // Check for risky file types
             const ext = path.extname(filename).toLowerCase();
@@ -426,7 +452,7 @@ function takeSnapshot() {
                 state: STATES.LIFECYCLE.ANALYZED,
                 ai: {
                     guess: guessedDept,
-                    confidence: Math.round(confidence * 100),
+                    confidence: confidencePercent,
                     reasons,
                     summary: ai_summary.join('\n'),
                     risk_flags
@@ -468,6 +494,14 @@ function takeSnapshot() {
                 item.final_state = STATES.FINAL.QUARANTINED;
                 reviewRequired.push(item);
                 log(`[ROUTE] ${item.filename} flagged for quarantine (executable)`);
+                continue;
+            }
+
+            // KB mode: no auto-routing; everything requires human KB review (except quarantined executables)
+            if (CURRENT_PROCESS_MODE === 'KB') {
+                item.state = STATES.DECISION.KB_REVIEW_REQUIRED;
+                reviewRequired.push(item);
+                log(`[KB MODE] ${item.filename} set to KB_REVIEW_REQUIRED (no auto-route)`);
                 continue;
             }
             
@@ -570,6 +604,12 @@ function regeneratePresenter(snapshotResult) {
             counters
         };
 
+        // KB mode: include informational banner and metadata in presenter output
+        if ((snapshotResult && snapshotResult.mode === 'KB') || CURRENT_PROCESS_MODE === 'KB') {
+            data.kb_mode = true;
+            data.kb_banner = 'KB Ingest Mode — Human review required';
+        }
+
         // Define output paths
         const jsonPath = path.join(generatedDir, 'presenter.json');
         const jsonTmp = jsonPath + '.tmp';
@@ -665,7 +705,12 @@ function serveStaticFile(req, res, baseDir, urlPath) {
 // is required by other code).
 const server = http.createServer((req, res) => {
     // Process inbox endpoint - triggers full pipeline
-    if (req.method === 'POST' && req.url === '/process') {
+    if (req.method === 'POST' && req.url && req.url.split('?')[0] === '/process') {
+        // Allow mode selection via query param: /process?mode=KB
+        const u = new URL(req.url, `http://localhost:${PORT}`);
+        const processMode = (u.searchParams.get('mode') || 'DEFAULT').toString().toUpperCase();
+        CURRENT_PROCESS_MODE = processMode;
+        log(`[MCP] Process mode: ${CURRENT_PROCESS_MODE}`);
         const lockFile = path.join(__dirname, 'process.lock');
 
         // Check if already running
@@ -776,7 +821,7 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
 
             // Regenerate presenter again to include any mailroom routing metadata (optional in Beta-1)
             try {
-                const presInfo = regeneratePresenter(Object.assign({}, snapshotResult, { mailroom: mailroomInfo }));
+                const presInfo = regeneratePresenter(Object.assign({}, snapshotResult, { mailroom: mailroomInfo, mode: CURRENT_PROCESS_MODE }));
                 log(`PROCESS_OK snapshot=${presInfo.snapshot_id} presenter=${presInfo.presenter} rendered_at=${presInfo.rendered_at} mailroom=${mailroomInfo ? JSON.stringify(mailroomInfo) : 'none'}`);
             } catch (presErr) {
                 console.error('[ERROR] Presenter regeneration failed: ' + presErr.message);
@@ -812,6 +857,9 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
                 timestamp: new Date().toISOString()
             }));
         } finally {
+            // Reset process mode back to default
+            try { CURRENT_PROCESS_MODE = 'DEFAULT'; } catch(e) { /* no-op */ }
+
             // Always remove lock file
             try {
                 if (fs.existsSync(lockFile)) {
