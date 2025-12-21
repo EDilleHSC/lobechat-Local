@@ -1,0 +1,35 @@
+name: 'NAVI Presenter Smoke Tests'
+
+on:
+  push:
+    paths:
+      - 'NAVI/**'
+      - 'tests/smoke/**'
+  pull_request:
+    paths:
+      - 'NAVI/**'
+      - 'tests/smoke/**'
+
+jobs:
+  smoke:
+    name: Run smoke tests (non-blocking)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install deps & Playwright browsers
+        run: |
+          cd tests/smoke
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Run smoke tests
+        run: |
+          cd tests/smoke
+          npx playwright test --reporter=list
+        continue-on-error: true

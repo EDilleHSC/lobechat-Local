@@ -1,0 +1,10 @@
+{
+  "name": "navi-presenter-smoke-tests",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.45.0"
+  },
+  "scripts": {
+    "test": "playwright test"
+  }
+}
