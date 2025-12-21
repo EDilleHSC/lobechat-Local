@@ -809,13 +809,14 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
                         // Append to audit log
                         const auditPath = path.join(APPROVAL_DIR, 'audit.log');
                         const timestamp = new Date().toISOString().slice(0,19) + 'Z';
-                        const auditLine = `[${timestamp}] ${reviewer} approved snapshot ${snapshot_id} (${items.length} items) → ${approvalFile}\n`;
+                        const auditLine = `[${timestamp}] ${reviewer} routed ${items.length} items → ${approvalFile}\n`;
                         fs.appendFileSync(auditPath, auditLine, 'utf8');
 
                         // Enforcement move pass
                         const moveResults = [];
                         for (const item of items) {
-                            const { filename, gtd_outcome, sensitivity } = item;
+                            const { filename, decision } = item;
+                            const { dept, sensitivity } = decision;
                             
                             // Skip dotfiles
                             if (filename.startsWith('.')) {
@@ -832,7 +833,7 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
 
                             // Compute destBase
                             let bucket;
-                            if (gtd_outcome === 'trash') {
+                            if (dept === 'Trash') {
                                 bucket = 'rejected';
                             } else if (sensitivity !== 'normal') {
                                 bucket = 'escalated';
@@ -840,7 +841,7 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
                                 bucket = 'processed';
                             }
 
-                            const destDir = path.join(correctNAVI_DIR, bucket, snapshot_id);
+                            const destDir = path.join(correctNAVI_DIR, bucket, dept);
                             fs.mkdirSync(destDir, { recursive: true });
 
                             const src = path.join(INBOX_DIR, safe);
