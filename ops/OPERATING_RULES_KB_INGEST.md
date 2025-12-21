@@ -51,6 +51,10 @@ Operational notes:
 - Recommended training: 10–15 minute walkthrough with ~10 sample items
 - Retention policy: Approved KB artifacts remain; rejected runs archived for 90 days
 
+Quick run & test commands:
+- Run KB ingest: `POST http://localhost:8005/process?mode=KB` or `pwsh ops/smoke_ingest.ps1 -BatchName <name> -Mode KB`
+- Run KB mode test: `npx playwright test ops/tests/kb_ingest_mode.spec.ts`
+
 Contact for questions: ops@your-org.local
 
 ---
