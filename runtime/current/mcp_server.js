@@ -18,7 +18,7 @@ const validateApproval = ajv.compile(approvalSchema);
 const PYTHON = 'D:\\02_SOFTWARE\\Python312\\python.exe';
 // Beta-0 trust mode: when true, regenerate presenter from snapshot and skip routing/mailroom
 // For Beta-1 we default to OFF so mailroom routing executes by default; set env BETA0_TRUST_MODE=1 to keep Beta-0 behavior
-const BETA0_TRUST_MODE = (process.env.BETA0_TRUST_MODE || '0') === '1'; // default OFF for Beta-1 workflow
+let BETA0_TRUST_MODE = (process.env.BETA0_TRUST_MODE || '0') === '1'; // default OFF for Beta-1 workflow (mutable for admin/test)
 
 console.log("Node version:", process.version);
 console.log("CWD:", process.cwd());
@@ -756,10 +756,13 @@ const server = http.createServer((req, res) => {
                 // In Beta-0 trust mode we **do not** run mailroom routing — we only validate regeneration
                 log('[BETA0] Trust mode active: skipping mailroom routing');
 
+                // Ensure we do not leave KB mode set when returning early
+                try { CURRENT_PROCESS_MODE = 'DEFAULT'; log('[BETA0] Reset CURRENT_PROCESS_MODE to DEFAULT before early return'); } catch(e) {}
+
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
                     status: 'ok',
-                    message: 'Snapshot taken and presenter regenerated (Beta-0 trust mode, routing skipped)',
+                    message: 'Snapshot taken and presenter regenerated (Beta-0 trust mode, routing skipped). Mode reset to DEFAULT.',
                     timestamp: new Date().toISOString()
                 }));
 
@@ -1111,6 +1114,37 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
             console.error('[MCP] Error during admin shutdown:', e);
             try { removePidFile(); } catch(e){}
             process.exit(1);
+        }
+
+    // TEST ADMIN: allow toggling BETA0 and debug querying when ENABLE_TEST_ADMIN=1 and correct token supplied
+    } else if (process.env.ENABLE_TEST_ADMIN === '1' && req.url && req.url.indexOf('/__mcp_set_beta0') === 0) {
+        try {
+            const u = new URL(req.url, `http://localhost:${PORT}`);
+            const token = u.searchParams.get('token') || '';
+            const expected = process.env.MCP_SHUTDOWN_TOKEN || 'TEST_SHUTDOWN';
+            if (token !== expected) { res.writeHead(403); res.end('Forbidden'); return; }
+            const value = (u.searchParams.get('value') || '0').toString();
+            BETA0_TRUST_MODE = (value === '1' || value.toLowerCase() === 'true');
+            log(`[TEST_ADMIN] Set BETA0_TRUST_MODE=${BETA0_TRUST_MODE}`);
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ ok: true, BETA0_TRUST_MODE }));
+            return;
+        } catch (e) {
+            res.writeHead(400); res.end('Bad Request');
+            return;
+        }
+    } else if (process.env.ENABLE_TEST_ADMIN === '1' && req.url && req.url.indexOf('/__mcp_debug') === 0) {
+        try {
+            const u = new URL(req.url, `http://localhost:${PORT}`);
+            const token = u.searchParams.get('token') || '';
+            const expected = process.env.MCP_SHUTDOWN_TOKEN || 'TEST_SHUTDOWN';
+            if (token !== expected) { res.writeHead(403); res.end('Forbidden'); return; }
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ CURRENT_PROCESS_MODE, BETA0_TRUST_MODE }));
+            return;
+        } catch (e) {
+            res.writeHead(400); res.end('Bad Request');
+            return;
         }
     } else if (req.method === 'POST' && req.url === '/approval') {
         // Token-gated approval persistence endpoint (schema-validated via AJV)
