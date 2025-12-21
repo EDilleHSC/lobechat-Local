@@ -4,3 +4,20 @@ dist
 Dockerfile.debug
 lobe-chat/
 .env.local
+
+# Runtime
+*.pid
+runtime/logs/
+runtime/test_runs/
+
+# Presenter generated
+presenter/generated/
+presenter.json
+
+# Inbox / snapshots
+NAVI/inbox/*
+NAVI/snapshots/
+
+# OS
+.DS_Store
+Thumbs.db
