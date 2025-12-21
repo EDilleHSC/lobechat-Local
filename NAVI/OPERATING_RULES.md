@@ -62,3 +62,79 @@ Temporary uvx shim (containment)
 - Removal: delete `bin/uvx.*` and remove the PATH entry added when installing the shim. Also remove the `logs/uvx-shim.log` file if desired.
 
 > NOTE: This shim is intentionally simple and safe; it is not a replacement for the real `uvx` binary. Track follow-up work to either install the real binary or update the spawning code to avoid depending on `uvx`.
+
+---
+
+## Root-Cause Summary Template (fill after diagnosis) ✅
+
+Use this template for the incident record. Keep it factual, time-scoped, and include exact evidence and remediation options.
+
+- Title: Short incident title (e.g., "Unexpected spawns of missing binary 'uvx' causing ENOENT noise")
+- Date/Time (first observed): YYYY-MM-DDTHH:MM:SSZ
+- Reporter: @who or system
+
+Root-cause hypothesis
+---------------------
+- Summary: One or two sentences describing the root cause once confirmed.
+- Evidence: List of concrete evidence (ProcMon PIDs/timestamps, `uvx-shim.log` lines, `uvx-parent-trace.log` entries, correlated CSV rows, commit IDs, scheduled task name, service name, crontab entry, etc.). Include at least one timestamped correlation entry like:
+  - ProcMon: Process Create at 2025-12-21T19:52:00Z → Parent PID=1234 (Parent name: spawner.exe) → CommandLine: "spawner.exe --run uvx"
+  - uvx-shim.log: 2025-12-21T19:52:00.123Z pid=4321 ppid=1234 args=["--version"]
+
+Impact
+------
+- Systems affected: list services/processes/nodes
+- Symptom severity: low/medium/high (brief rationale)
+- Volume: number of invocations per hour/day (if known)
+
+Immediate remediation taken
+--------------------------
+- Containment: e.g., `bin/uvx` shim deployed (date/time, commit)
+- Monitoring: logs/alerts added (e.g., watch job started or metrics placed)
+
+Recommended next steps (options)
+--------------------------------
+- Option A: Install the real `uvx` binary on affected hosts (preconditions, verification steps)
+- Option B: Patch the spawner to check for binary existence (include spawn-guard snippet reference) and gracefully degrade if missing
+- Option C: Disable/remove the spawner (if determined to be orphaned) — include rollback plan
+- For each option, include a short verification plan and an owner
+
+Follow-up actions & owners
+--------------------------
+- Owner: @team or person
+- Deadline: YYYY-MM-DD
+- Notes: any further audits, tests, or documentation updates required (e.g., update this OPERATING_RULES entry)
+
+Appendix
+--------
+- Links to raw artifacts (ProcMon PML/CSV, `ops/uvx-correlated.jsonl`, `logs/uvx-shim.log`, `logs/uvx-parent-trace.log`)
+- Relevant commits, PRs, or configuration changes
+
+> Use this template to populate a short, verifiable record and to drive the remediation decision. Keep the language factual — avoid speculation; include evidence and the specific next action with an owner.
+
+---
+
+Canonical runbook: starting NAVI & running Playwright tests
+----------------------------------------------------------
+Follow this exact sequence every time to avoid duplicate server spawns and intermittent failures:
+
+Terminal 1 — NAVI
+```powershell
+cd D:\05_AGENTS-AI\01_RUNTIME\VBoarder
+node runtime/current/mcp_server.js
+```
+
+Wait for:
+
+```
+=== NAVI READY ===
+```
+
+Terminal 2 — Tests
+```powershell
+cd D:\05_AGENTS-AI\01_RUNTIME\VBoarder
+npx playwright test
+```
+
+Notes:
+- No conditionals or special flags required.
+- This aligns Playwright with the manual NAVI lifecycle and prevents Playwright from spawning servers that conflict with local processes.
