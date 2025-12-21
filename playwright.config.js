@@ -11,13 +11,14 @@ module.exports = defineConfig({
     ignoreHTTPSErrors: true,
     video: 'retain-on-failure',
   },
-  // Start a lightweight static server in CI so tests can run without manual setup
+  // NAVI server is started manually.
+  // Do NOT spawn a web server from Playwright — reuse the existing instance.
   webServer: {
-    command: 'npx http-server . -p 8005 -c-1',
-    url: 'http://localhost:8005/presenter/design-approval.html',
-    timeout: 120000,
-    reuseExistingServer: !process.env.CI,
+    url: 'http://localhost:8005',
+    reuseExistingServer: true,
   },
+  // Fast fail if NAVI isn't running: perform a health check in globalSetup
+  globalSetup: require.resolve('./ops/playwright_health_check.js'),
   projects: [
     {
       name: 'chromium',
