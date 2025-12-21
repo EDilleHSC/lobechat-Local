@@ -10,6 +10,10 @@ lobe-chat/
 runtime/logs/
 runtime/test_runs/
 
+# Local shim logs
+logs/
+NAVI/logs/
+
 # Presenter generated
 presenter/generated/
 presenter.json
