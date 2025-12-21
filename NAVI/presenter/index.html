@@ -296,6 +296,35 @@
             font-family: inherit;
         }
 
+        /* Hold / Escalate quick actions */
+        .hold-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1px solid #1e2749;
+            border-radius: 6px;
+            background: rgba(255, 193, 7, 0.06);
+            color: #ffc107;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .escalate-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1px solid #1e2749;
+            border-radius: 6px;
+            background: rgba(245, 166, 35, 0.06);
+            color: #ffc107;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
         .override-btn:hover {
             border-color: #4a90e2;
             color: #f0f0f0;
@@ -753,11 +782,17 @@
                         <span class="sublabel" id="approveSublabel">Route to LEGAL</span>
                     </button>
 
-                    <!-- SECONDARY: OVERRIDE -->
+                    <!-- SECONDARY: QUICK ACTIONS (LEFT RAIL) -->
                     <div class="secondary-actions">
-                        <button class="secondary-toggle" onclick="toggleOverride()">
-                            ▸ Change decision...
+                        <button class="hold-btn" id="holdBtn" onclick="holdItem()">
+                            <span class="icon">🟡</span> Hold
                         </button>
+
+                        <button class="escalate-btn" id="escalateBtn" onclick="toggleOverride()">
+                            <span class="icon">⚠️</span> Escalate
+                        </button>
+
+                        <!-- keep the override options for explicit escalate routing -->
                         <div class="override-options" id="overrideOptions">
                             <select id="overrideReason" class="override-reason-select">
                                 <option value="">Select override reason...</option>
@@ -960,6 +995,10 @@
             document.getElementById('approveBtn').disabled = !enabled;
             const discardBtn = document.getElementById('discardBtn');
             if (discardBtn) discardBtn.disabled = !enabled;
+            const holdBtn = document.getElementById('holdBtn');
+            if (holdBtn) holdBtn.disabled = !enabled;
+            const escalateBtn = document.getElementById('escalateBtn');
+            if (escalateBtn) escalateBtn.disabled = !enabled;
             document.getElementById('prevBtn').disabled = !enabled || currentIndex === 0;
             document.getElementById('nextBtn').disabled = !enabled;
             document.querySelectorAll('.override-btn').forEach(b => b.disabled = !enabled);
@@ -1100,6 +1139,29 @@
             updateStatusDisplay();
             document.getElementById('overrideOptions').classList.remove('show');
             
+            // Auto-advance
+            setTimeout(() => {
+                if (currentIndex < items.length - 1) {
+                    currentIndex++;
+                    renderCurrentItem();
+                } else {
+                    showCompletion();
+                }
+            }, 400);
+        }
+
+        function holdItem() {
+            // Mark item as held for later reference (non-destructive)
+            decisions[currentIndex] = {
+                decision: 'hold',
+                route: 'HOLD',
+                notes: document.getElementById('notesField').value,
+                timestamp: new Date().toISOString()
+            };
+
+            showToast('Marked as Hold');
+            updateStatusDisplay();
+
             // Auto-advance
             setTimeout(() => {
                 if (currentIndex < items.length - 1) {

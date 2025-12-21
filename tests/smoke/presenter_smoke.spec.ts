@@ -62,7 +62,7 @@ test.describe('NAVI Presenter smoke tests (read-only, non-destructive)', () => {
 
   test('override requires reason or notes and advances when provided', async ({ page }) => {
     // Show override options
-    await page.click('.secondary-toggle');
+    await page.click('#escalateBtn');
     // Try clicking an override button without selecting reason or notes
     await page.click('.override-btn:has-text("Legal")');
 
