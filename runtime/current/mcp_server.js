@@ -706,11 +706,13 @@ function serveStaticFile(req, res, baseDir, urlPath) {
 const server = http.createServer((req, res) => {
     // Process inbox endpoint - triggers full pipeline
     if (req.method === 'POST' && req.url && req.url.split('?')[0] === '/process') {
-        // Allow mode selection via query param: /process?mode=KB
+        // Allow mode selection via query param: /process?mode=KB or via header 'x-mcp-mode: KB'
         const u = new URL(req.url, `http://localhost:${PORT}`);
-        const processMode = (u.searchParams.get('mode') || 'DEFAULT').toString().toUpperCase();
+        const headerMode = (req.headers['x-mcp-mode'] || '').toString().toUpperCase();
+        const qsMode = (u.searchParams.get('mode') || '').toString().toUpperCase();
+        const processMode = headerMode || qsMode || 'DEFAULT';
         CURRENT_PROCESS_MODE = processMode;
-        log(`[MCP] Process mode: ${CURRENT_PROCESS_MODE}`);
+        log(`[MCP] Process mode set from ${headerMode ? 'header' : qsMode ? 'query' : 'default'}: ${CURRENT_PROCESS_MODE}`);
         const lockFile = path.join(__dirname, 'process.lock');
 
         // Check if already running
