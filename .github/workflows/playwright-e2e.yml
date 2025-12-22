@@ -1,0 +1,71 @@
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches: [ 'main', 'master', 'develop' ]
+  pull_request:
+    branches: [ '*' ]
+
+jobs:
+  e2e:
+    name: Playwright E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install runtime dependencies
+        working-directory: runtime/current
+        run: |
+          npm ci
+
+      - name: Install Playwright browsers
+        working-directory: runtime/current
+        run: npx playwright install --with-deps
+
+      - name: Start NAVI server
+        working-directory: runtime/current
+        run: |
+          # Start server in background and write the PID for cleanup
+          nohup node mcp_server.js > server.log 2>&1 & echo $! > server.pid
+
+      - name: Wait for NAVI health
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8005/health >/dev/null 2>&1; then
+              echo "NAVI is healthy"; break
+            fi
+            echo "Waiting for NAVI... ($i)"; sleep 2
+          done
+
+      - name: Run Playwright tests
+        working-directory: runtime/current
+        run: |
+          npx playwright test tests/e2e --reporter=list
+        env:
+          # ensure Playwright runs headless in CI
+          PLAYWRIGHT_HEADLESS: '1'
+
+      - name: Upload Playwright results (if any)
+        if: failure() || success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: runtime/current/test-results || runtime/current/playwright-report || runtime/current/tests/e2e/test-results
+
+      - name: Stop NAVI server
+        if: always()
+        working-directory: runtime/current
+        run: |
+          if [ -f server.pid ]; then
+            kill $(cat server.pid) || true
+            rm -f server.pid
+          fi
+          pkill -f mcp_server.js || true
+          echo "Server shutdown complete"
