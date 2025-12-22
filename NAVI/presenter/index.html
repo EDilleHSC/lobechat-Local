@@ -1244,23 +1244,43 @@
                 return;
             }
 
-            const payload = {
-                timestamp: new Date().toISOString(),
-                reviewer: 'Eric Dille',
-                items: items.map((item, i) => ({
+            const reviewer = 'Eric Dille';
+            const ts = new Date().toISOString();
+
+            // Normalize client decisions to server-expected shape:
+            // { filename, final_route, timestamp, human_reason }
+            const decisionsPayload = items.map((item, i) => {
+                const d = decisions[i] || {};
+                let final_route = d.route || null;
+                if (d.decision === 'discard') final_route = 'Trash';
+                return {
                     filename: item.filename,
-                    decision: decisions[i]
-                }))
+                    final_route: final_route,
+                    timestamp: d.timestamp || ts,
+                    human_reason: d.notes || null
+                };
+            });
+
+            const payload = {
+                timestamp: ts,
+                reviewer: reviewer,
+                decisions: decisionsPayload
             };
 
-            // Persist decisions to backend endpoint
+            // Persist decisions to backend endpoint (server expects { decisions })
             fetch('/clear_exceptions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
-            }).then(r => {
-                if (!r.ok) throw new Error('Failed to persist decisions');
+            }).then(async (r) => {
+                if (!r.ok) {
+                    const text = await r.text().catch(() => '');
+                    throw new Error('Failed to persist decisions: ' + text);
+                }
                 showToast('All decisions submitted!');
+                // Refresh presenter to reflect persisted human_routed_files
+                setInteractiveElementsEnabled(false);
+                loadData();
             }).catch(err => {
                 console.error(err);
                 showToast('Failed to submit decisions', true);
