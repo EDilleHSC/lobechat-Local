@@ -1,0 +1,20 @@
+{
+  "id": "KB_BATCH_01",
+  "run_dir": "ops/runs/run_2025-12-21_16-28-48_mock_test_batch_01_exploded",
+  "created": "2025-12-21T23:29:59.000Z",
+  "status": "locked",
+  "notes": "Human-verified KB seed. Do not auto-route. Use as KB baseline for regression tests.",
+  "files": [
+    "Navi_Complete_Personal_Identity.md",
+    "Navi_KB_00_Master_Index.md",
+    "Navi_KB_01_Communication_Style.md",
+    "Navi_KB_02_Formatting_Rules.md",
+    "Navi_KB_03_Tool_Protocols.md",
+    "Navi_KB_04_User_Preferences.md",
+    "Navi_KB_05_Templates_and_Routing.md",
+    "README_Installation_Guide.md",
+    "urgent_ceo_meeting.txt",
+    "We are in  Production.txt"
+  ],
+  "approved_by": null
+}

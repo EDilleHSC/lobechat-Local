@@ -1,0 +1,154 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T08:39:26.609Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "id": "2c2ce0a99c773f1408b6d3f41fb47a35308b1c9a25510cd260c653e862afab1c",
+      "filename": "Duplicate_Contract.pdf.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Duplicate_Contract.pdf.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Legal",
+        "confidence": 94,
+        "reasons": [
+          "AI analysis",
+          "Legal document patterns"
+        ],
+        "summary": "File: Duplicate_Contract.pdf.txt, Size: 82 bytes, Type: .txt\n- Legal document detected",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:39:26.607Z",
+        "analyzed": "2025-12-21T08:39:26.607Z",
+        "decided": null,
+        "moved": "2025-12-21T08:39:26.607Z"
+      }
+    },
+    {
+      "id": "683e88471a9f72e737c7c1bc1ed3a63039ec79906f0d18078c53ac7e9c1a5e97",
+      "filename": "Memo_Internal.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Memo_Internal.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 99,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Memo_Internal.txt, Size: 84 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:39:26.607Z",
+        "analyzed": "2025-12-21T08:39:26.607Z",
+        "decided": null,
+        "moved": "2025-12-21T08:39:26.608Z"
+      }
+    },
+    {
+      "id": "e44f00408666bb7f4371c9a37709db40b8af080cffa4d52ac9ff85dc5af82400",
+      "filename": "NDA_Contract_2025.pdf.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\NDA_Contract_2025.pdf.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Legal",
+        "confidence": 95,
+        "reasons": [
+          "AI analysis",
+          "Legal document patterns"
+        ],
+        "summary": "File: NDA_Contract_2025.pdf.txt, Size: 102 bytes, Type: .txt\n- Legal document detected",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:39:26.607Z",
+        "analyzed": "2025-12-21T08:39:26.607Z",
+        "decided": null,
+        "moved": "2025-12-21T08:39:26.608Z"
+      }
+    }
+  ],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 58,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence",
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:39:26.606Z",
+        "analyzed": "2025-12-21T08:39:26.606Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    },
+    {
+      "id": "c3f853ffe0b5ba4268626f8a8fd8f839f1432d614096ede208c1b25330782ae3",
+      "filename": "Test_Document.pdf.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Test_Document.pdf.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 55,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Test_Document.pdf.txt, Size: 63 bytes, Type: .txt\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:39:26.607Z",
+        "analyzed": "2025-12-21T08:39:26.607Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 5,
+  "autoRoutedCount": 3,
+  "reviewRequiredCount": 2,
+  "status": "processed"
+}

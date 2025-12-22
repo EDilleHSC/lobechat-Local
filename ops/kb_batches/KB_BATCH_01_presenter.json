@@ -1,0 +1,43 @@
+{
+  "batchId": "2025-12-21T23-28-48-419Z.json",
+  "snapshotTimestamp": "2025-12-21T23:28:48.524Z",
+  "items": [
+    {
+      "id": "a56f457809f083e037a0dc23bd689180376c4301335f3436f96b08c8dd8268bc",
+      "filename": ".mock_test_batch_01_exploded.tmp",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\.mock_test_batch_01_exploded.tmp",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 4700,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: .mock_test_batch_01_exploded.tmp, Size: 49 bytes, Type: .tmp\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence",
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:28:48.419Z",
+        "analyzed": "2025-12-21T23:28:48.419Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "counters": {
+    "total": 1,
+    "review_required": 1,
+    "auto_routed": 0,
+    "moved": 0,
+    "trash_pending": 0
+  }
+}

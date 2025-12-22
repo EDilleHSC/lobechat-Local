@@ -1,0 +1,187 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T06:47:04.574Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "filename": "Drives.zip",
+      "type": "ZIP",
+      "received": "2025-12-10",
+      "route": "INBOX",
+      "confidence": 94,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending",
+      "action": "auto_routed",
+      "dept": "Intake"
+    },
+    {
+      "filename": "files (2).zip",
+      "type": "ZIP",
+      "received": "2025-12-10",
+      "route": "INBOX",
+      "confidence": 97,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending",
+      "action": "auto_routed",
+      "dept": "Intake"
+    }
+  ],
+  "exceptions": [
+    {
+      "filename": "02.zip",
+      "type": "ZIP",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 85,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "AIR.zip",
+      "type": "ZIP",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 69,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "D rive complicance.zip",
+      "type": "ZIP",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 84,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "files (1).zip",
+      "type": "ZIP",
+      "received": "2025-12-10",
+      "route": "INBOX",
+      "confidence": 87,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "Files to  Install.zip",
+      "type": "ZIP",
+      "received": "2025-12-10",
+      "route": "INBOX",
+      "confidence": 79,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "files.zip",
+      "type": "ZIP",
+      "received": "2025-12-10",
+      "route": "INBOX",
+      "confidence": 73,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "Html.zip",
+      "type": "ZIP",
+      "received": "2025-12-16",
+      "route": "INBOX",
+      "confidence": 68,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "LM-Studio-0.3.34-1-x64.exe",
+      "type": "EXE",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 62,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "Project  Files.zip",
+      "type": "ZIP",
+      "received": "2025-12-10",
+      "route": "INBOX",
+      "confidence": 83,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test3.pdf",
+      "type": "PDF",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 69,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test4.pdf",
+      "type": "PDF",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 52,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test_file2.txt",
+      "type": "TXT",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 83,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    }
+  ],
+  "totalFiles": 14,
+  "autoRoutedCount": 2,
+  "exceptionCount": 12,
+  "status": "processed"
+}

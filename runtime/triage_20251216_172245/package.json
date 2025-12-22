@@ -1,0 +1,20 @@
+{
+  "name": "triage_20251216_172245",
+  "version": "1.0.0",
+  "description": "",
+  "main": "ecosystem.config.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "chokidar": "^5.0.0"
+  }
+}

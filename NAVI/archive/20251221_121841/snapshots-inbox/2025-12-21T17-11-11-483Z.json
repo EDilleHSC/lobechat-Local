@@ -1,0 +1,95 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T17:11:11.483Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 80,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe",
+        "risk_flags": [
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:11.483Z",
+        "analyzed": "2025-12-21T17:11:11.483Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    },
+    {
+      "id": "e44f00408666bb7f4371c9a37709db40b8af080cffa4d52ac9ff85dc5af82400",
+      "filename": "NDA_Contract_2025.pdf.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\NDA_Contract_2025.pdf.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Legal",
+        "confidence": 72,
+        "reasons": [
+          "AI analysis",
+          "Legal document patterns"
+        ],
+        "summary": "File: NDA_Contract_2025.pdf.txt, Size: 102 bytes, Type: .txt\n- Legal document detected",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:11.483Z",
+        "analyzed": "2025-12-21T17:11:11.483Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "81e6e64ee5cee07a5c47e6e62d2dcfe4a6ace386f81c617defcf76fe21c4dcc9",
+      "filename": "Old_Version_Report.doc.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Old_Version_Report.doc.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 67,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Old_Version_Report.doc.txt, Size: 74 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:11.483Z",
+        "analyzed": "2025-12-21T17:11:11.483Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 3,
+  "autoRoutedCount": 0,
+  "reviewRequiredCount": 3,
+  "status": "processed"
+}

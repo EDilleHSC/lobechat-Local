@@ -3,3 +3,8 @@
 [2025-12-20T08:33:08.492Z] TestOperator approved snapshot 2025-12-20T08-26-01-740Z.json with 1 items
 [2025-12-20T16:35:42.071Z] Test approved snapshot 2025-12-20T16-35-30-056Z.json with 2 items → 2025-12-20T16-35-30-056Z.json.Test.1766248542071.approval.json
 [2025-12-20T16:40:50.823Z] Test approved snapshot 2025-12-20T16-40-42-416Z.json with 2 items → 2025-12-20T16-40-42-416Z.json.Test.1766248850822.approval.json
+{"filename":"test_file2.txt","ai_guess":"Intake","ai_confidence":84,"ai_reason":["AI analysis"],"final_route":"TRASH","resolved_by":"human","timestamp":"2025-12-21T06:49:29.076Z"}
+{"filename":"Binary_File.exe","state":"REVIEW_REQUIRED","final_route":"OPERATIONS","final_state":"MOVED","resolved_by":"human","timestamp":"2025-12-21T08:45:32.196Z","human_reason":"policy"}
+{"filename":"Binary_File.exe","state":"REVIEW_REQUIRED","final_state":"MOVED","resolved_by":"human","timestamp":"2025-12-21T08:49:53.136Z","human_reason":null}
+{"filename":"Employment_Amendment_JohnSmith.doc","state":"REVIEW_REQUIRED","final_state":"MOVED","resolved_by":"human","timestamp":"2025-12-21T08:50:33.768Z","human_reason":null}
+{"filename":"Settlement_Agreement_JaneDoe_MegaCorp.doc","state":"REVIEW_REQUIRED","final_state":"MOVED","resolved_by":"human","timestamp":"2025-12-21T08:50:35.134Z","human_reason":null}

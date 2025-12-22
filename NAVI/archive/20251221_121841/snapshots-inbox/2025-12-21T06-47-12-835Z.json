@@ -1,0 +1,92 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T06:47:12.835Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "filename": "Html.zip",
+      "type": "ZIP",
+      "received": "2025-12-16",
+      "route": "INBOX",
+      "confidence": 99,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending",
+      "action": "auto_trashed",
+      "dept": "Trash"
+    },
+    {
+      "filename": "test3.pdf",
+      "type": "PDF",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 91,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending",
+      "action": "auto_routed",
+      "dept": "Intake"
+    }
+  ],
+  "exceptions": [
+    {
+      "filename": "D rive complicance.zip",
+      "type": "ZIP",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 75,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "LM-Studio-0.3.34-1-x64.exe",
+      "type": "EXE",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 54,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "Project  Files.zip",
+      "type": "ZIP",
+      "received": "2025-12-10",
+      "route": "INBOX",
+      "confidence": 52,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test_file2.txt",
+      "type": "TXT",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 82,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    }
+  ],
+  "totalFiles": 6,
+  "autoRoutedCount": 2,
+  "exceptionCount": 4,
+  "status": "processed"
+}

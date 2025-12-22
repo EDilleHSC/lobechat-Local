@@ -6,6 +6,7 @@ const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 const ajv = new Ajv({ allErrors: true });
 addFormats(ajv);
+const chokidar = require('chokidar');
 const approvalSchema = require('./schemas/approval.schema.json');
 const validateApproval = ajv.compile(approvalSchema);
 
@@ -39,6 +40,20 @@ const MIME_TYPES = {
   '.ico':  'image/x-icon',
   '.txt':  'text/plain; charset=utf-8',
 };
+
+// Load configuration
+const CONFIG_PATH = path.join(PROJECT_ROOT, 'config.json');
+let config = {};
+try {
+    config = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+    console.log(`[CONFIG] Loaded config from ${CONFIG_PATH}`);
+} catch (e) {
+    console.log(`[CONFIG] Could not load config.json, using defaults: ${e.message}`);
+    config = {
+        confidence_thresholds: { human_required: 0.50, auto_route: 0.90, auto_trash: 0.98 },
+        departments: ["Account", "Legal", "Finance", "HR", "Ops", "Support", "Intake", "Trash"]
+    };
+}
 
 // Server port can be overridden with the PORT env var for testing/CI
 const PORT = Number(process.env.PORT) || 8005;
@@ -78,6 +93,105 @@ function log(message) {
     console.log(`[${timestamp}] ${message}`);
 }
 
+// 🚀 TRIGGER PROCESS PIPELINE - Called by inbox watcher
+function triggerProcessPipeline() {
+    const http = require('http');
+    
+    const options = {
+        hostname: 'localhost',
+        port: PORT,
+        path: '/process',
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': 0
+        }
+    };
+
+    const req = http.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => {
+            data += chunk;
+        });
+        res.on('end', () => {
+            try {
+                const response = JSON.parse(data);
+                log(`[WATCHER] Process pipeline triggered: ${response.status}`);
+            } catch (e) {
+                log(`[WATCHER] Process pipeline response: ${data}`);
+            }
+        });
+    });
+
+    req.on('error', (err) => {
+        log(`[WATCHER] Failed to trigger process pipeline: ${err.message}`);
+    });
+
+    req.end();
+}
+
+// 📸 SNAPSHOT CREATION FUNCTION - Extracted for reuse
+function takeSnapshot(dirPath) {
+    try {
+        log(`[SNAPSHOT] Taking snapshot of: ${dirPath}`);
+        
+        if (!fs.existsSync(dirPath)) {
+            log(`[SNAPSHOT] Directory not found: ${dirPath}`);
+            return null;
+        }
+
+        // List directory contents
+        const items = fs.readdirSync(dirPath).map(item => {
+            const fullPath = path.join(dirPath, item);
+            const stats = fs.statSync(fullPath);
+            return {
+                name: item,
+                type: stats.isDirectory() ? 'directory' : 'file',
+                path: fullPath,
+                size: stats.size,
+                modified: stats.mtime.toISOString()
+            };
+        });
+
+        log(`[SNAPSHOT] Found ${items.length} items`);
+
+        // Create snapshot directory if needed
+        if (!fs.existsSync(SNAPSHOT_DIR)) {
+            fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
+            log(`[SNAPSHOT] Created snapshot directory: ${SNAPSHOT_DIR}`);
+        }
+
+        const snapshot = {
+            source: "NAVI",
+            event: "inbox_snapshot", 
+            timestamp: new Date().toISOString(),
+            path: dirPath,
+            items: items.map(item => ({
+                name: item.name,
+                type: item.type,
+                size: item.size,
+                modified: item.modified,
+                // 📁 FOLDER HANDLING: Treat folders as single items with low confidence
+                confidence: item.type === 'directory' ? 0.25 : undefined, // Low confidence for folders
+                guessedDept: item.type === 'directory' ? 'INTAKE' : undefined // Always route folders to INTAKE
+            })),
+            status: "unprocessed"
+        };
+
+        const snapshotFilename = `${snapshot.timestamp.replace(/[:.]/g, '-')}.json`;
+        const snapshotPath = path.join(SNAPSHOT_DIR, snapshotFilename);
+        fs.writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2));
+        
+        log(`[SNAPSHOT] Written: ${snapshotPath}`);
+        lastSnapshotTime = new Date().toISOString();
+        
+        return snapshotPath;
+    } catch (snapshotError) {
+        log(`[SNAPSHOT] Failed: ${snapshotError.message}`);
+        return null;
+    }
+}
+
 // PID-file path and helper exposed at module scope so request handlers and signal handlers can access it
 const pidFile = path.join(__dirname, 'mcp_server.pid');
 function removePidFile() {
@@ -112,23 +226,117 @@ function takeSnapshot() {
             return fs.statSync(filePath).isFile();
         });
 
-        // Create snapshot data
+        // Create snapshot data with AI analysis
+        const items = files.map(filename => {
+            const filePath = path.join(inboxPath, filename);
+            const stats = fs.statSync(filePath);
+            
+            // Simulate AI confidence and department guess based on filename
+            let confidence = Math.random() * 0.5 + 0.5; // 0.5-1.0
+            let guessedDept = 'Intake';
+            let reasons = ['AI analysis'];
+
+            const lowerName = filename.toLowerCase();
+            if (lowerName.includes('invoice') || lowerName.includes('receipt')) {
+                guessedDept = 'Finance';
+                confidence = Math.random() * 0.3 + 0.7; // 0.7-1.0
+                reasons.push('Contains financial keywords');
+            } else if (lowerName.includes('contract') || lowerName.includes('legal')) {
+                guessedDept = 'Legal';
+                confidence = Math.random() * 0.3 + 0.7;
+                reasons.push('Legal document patterns');
+            } else if (lowerName.includes('client') || lowerName.includes('account')) {
+                guessedDept = 'Account';
+                confidence = Math.random() * 0.3 + 0.7;
+                reasons.push('Client/account references');
+            } else if (lowerName.includes('urgent') || lowerName.includes('important')) {
+                guessedDept = 'Ops';
+                confidence = Math.random() * 0.4 + 0.6;
+                reasons.push('Priority indicators');
+            } else if (lowerName.includes('photo') || lowerName.includes('image') || lowerName.includes('.jpg') || lowerName.includes('.png')) {
+                guessedDept = 'Intake';
+                confidence = Math.random() * 0.3 + 0.2; // 0.2-0.5 (very low confidence)
+                reasons.push('Image file - low AI confidence');
+            } else if (confidence < 0.6) {
+                guessedDept = 'Intake';
+                reasons.push('Low confidence, needs review');
+            }
+
+            return {
+                filename,
+                type: path.extname(filename).toUpperCase().slice(1) || 'FILE',
+                received: stats.mtime.toISOString().split('T')[0],
+                route: 'INBOX',
+                confidence: Math.round(confidence * 100),
+                guessedDept,
+                reasons,
+                state: 'pending'
+            };
+        });
+
+        // Auto-route based on confidence
+        const autoRouted = [];
+        const exceptions = [];
+        const thresholds = config.confidence_thresholds;
+
+        for (const item of items) {
+            const conf = item.confidence / 100; // Convert to 0-1
+            if (conf >= thresholds.auto_trash) {
+                // Auto-trash
+                const destDir = path.join(NAVI_DIR, 'rejected', 'Trash');
+                fs.mkdirSync(destDir, { recursive: true });
+                const src = path.join(inboxPath, item.filename);
+                const dest = path.join(destDir, item.filename);
+                try {
+                    fs.renameSync(src, dest);
+                    autoRouted.push({ ...item, action: 'auto_trashed', dept: 'Trash' });
+                    log(`[AUTO-ROUTE] Auto-trashed ${item.filename} (conf: ${item.confidence}%)`);
+                } catch (e) {
+                    console.error(`[ERROR] Failed to auto-trash ${item.filename}:`, e.message);
+                }
+            } else if (conf >= thresholds.auto_route) {
+                // Auto-route
+                const destDir = path.join(NAVI_DIR, 'processed', item.guessedDept);
+                fs.mkdirSync(destDir, { recursive: true });
+                const src = path.join(inboxPath, item.filename);
+                const dest = path.join(destDir, item.filename);
+                try {
+                    fs.renameSync(src, dest);
+                    autoRouted.push({ ...item, action: 'auto_routed', dept: item.guessedDept });
+                    log(`[AUTO-ROUTE] Auto-routed ${item.filename} to ${item.guessedDept} (conf: ${item.confidence}%)`);
+                } catch (e) {
+                    console.error(`[ERROR] Failed to auto-route ${item.filename}:`, e.message);
+                }
+            } else if (conf <= thresholds.human_required) {
+                // Very low confidence - route to Intake
+                const destDir = path.join(NAVI_DIR, 'processed', 'Intake');
+                fs.mkdirSync(destDir, { recursive: true });
+                const src = path.join(inboxPath, item.filename);
+                const dest = path.join(destDir, item.filename);
+                try {
+                    fs.renameSync(src, dest);
+                    autoRouted.push({ ...item, action: 'exception_routed', dept: 'Intake' });
+                    log(`[AUTO-ROUTE] Exception-routed ${item.filename} to Intake (conf: ${item.confidence}%)`);
+                } catch (e) {
+                    console.error(`[ERROR] Failed to exception-route ${item.filename}:`, e.message);
+                }
+            } else {
+                // Medium confidence - needs human review
+                exceptions.push(item);
+            }
+        }
+
         const snapshot = {
             source: 'process_endpoint',
             event: 'inbox_snapshot',
             timestamp: new Date().toISOString(),
             path: inboxPath,
-            items: files.map(filename => {
-                const filePath = path.join(inboxPath, filename);
-                const stats = fs.statSync(filePath);
-                return {
-                    name: filename,
-                    type: 'file',
-                    size: stats.size,
-                    modified: stats.mtime.toISOString()
-                };
-            }),
-            status: 'unprocessed'
+            autoRouted,
+            exceptions,
+            totalFiles: files.length,
+            autoRoutedCount: autoRouted.length,
+            exceptionCount: exceptions.length,
+            status: 'processed'
         };
 
         // Save snapshot
@@ -136,11 +344,11 @@ function takeSnapshot() {
         const snapshotPath = path.join(snapshotDir, snapshotFilename);
 
         fs.writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2));
-        console.log(`[SNAPSHOT] Saved: ${snapshotFilename}`);
+        console.log(`[SNAPSHOT] Saved: ${snapshotFilename} (${autoRouted.length} auto-routed, ${exceptions.length} exceptions)`);
 
         lastSnapshotTime = new Date().toISOString();
 
-        return { success: true, snapshotPath, fileCount: files.length };
+        return { success: true, snapshotPath, autoRoutedCount: autoRouted.length, exceptionCount: exceptions.length, exceptions };
 
     } catch (err) {
         console.error('[ERROR] Snapshot error:', err.message);
@@ -167,18 +375,19 @@ function regeneratePresenter(snapshotResult) {
 
         const rendered_at = new Date().toISOString();
         const snapshot_id = snapshotResult && snapshotResult.snapshotPath ? path.basename(snapshotResult.snapshotPath) : 'UNKNOWN';
-        const items_processed = (snapshotResult && typeof snapshotResult.fileCount === 'number') ? snapshotResult.fileCount : 'UNKNOWN';
-        const mailroom_info = snapshotResult && snapshotResult.mailroom ? snapshotResult.mailroom : null;
-        const routed_to = mailroom_info && mailroom_info.routed_to ? mailroom_info.routed_to : null;
+        const exception_count = snapshotResult && typeof snapshotResult.exceptionCount === 'number' ? snapshotResult.exceptionCount : 0;
+        const auto_routed_count = snapshotResult && typeof snapshotResult.autoRoutedCount === 'number' ? snapshotResult.autoRoutedCount : 0;
+        const total_files = snapshotResult && typeof snapshotResult.totalFiles === 'number' ? snapshotResult.totalFiles : 0;
 
         const trust_header = {
             rendered_at,
             snapshot_id,
-            items_processed,
-            routed_to: routed_to || null
+            exception_count,
+            auto_routed_count,
+            total_files
         };
 
-        const simpleHtml = `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="utf-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1">\n    <title>NAVI Mail Room Update (preview)</title>\n    <style>body{font-family:Segoe UI,Arial,sans-serif;padding:24px;background:#0a0e27;color:#f0f0f0}</style>\n</head>\n<body>\n<!-- TRUST_HEADER\nrendered_at: ${rendered_at}\nsnapshot_id: ${snapshot_id}\nitems_processed: ${items_processed}${routed_to ? `\nmailroom_routed_to: ${routed_to}` : ''}\n-->\n<div class="container">\n  <h1>NAVI Mail Room Update (preview)</h1>\n  <p>Snapshot: ${snapshot_id}</p>\n  <p>Items: ${items_processed}</p>\n  ${routed_to ? `<p>Routed to: ${routed_to}</p>` : ''}\n</div>\n</body>\n</html>`;
+        const simpleHtml = `<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="utf-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1">\n    <title>NAVI Mail Room Update (preview)</title>\n    <style>body{font-family:Segoe UI,Arial,sans-serif;padding:24px;background:#0a0e27;color:#f0f0f0}</style>\n</head>\n<body>\n<!-- TRUST_HEADER\nrendered_at: ${rendered_at}\nsnapshot_id: ${snapshot_id}\nexception_count: ${exception_count}\nauto_routed_count: ${auto_routed_count}\ntotal_files: ${total_files}\n-->\n<div class="container">\n  <h1>NAVI Mail Room Update (preview)</h1>\n  <p>Snapshot: ${snapshot_id}</p>\n  <p>Total Files: ${total_files}</p>\n  <p>Auto-routed: ${auto_routed_count}</p>\n  <p>Exceptions: ${exception_count}</p>\n</div>\n</body>\n</html>`;
 
         // Write JSON atomically to generated/presenter.json
         const jsonTmp = path.join(generatedDir, 'presenter.json.tmp');
@@ -186,30 +395,22 @@ function regeneratePresenter(snapshotResult) {
         const previewTmp = path.join(generatedDir, 'index.html.tmp');
         const previewPath = path.join(generatedDir, 'index.html');
 
-        // Build per-file items array using snapshot file and per-file meta files
+        // Build per-file items array using exceptions from snapshot
         let items = [];
         try {
-            const snapshotPath = snapshotResult && snapshotResult.snapshotPath ? snapshotResult.snapshotPath : null;
-            let snapshotItems = [];
-            if (snapshotPath && fs.existsSync(snapshotPath)) {
-                try {
-                    const sdata = JSON.parse(fs.readFileSync(snapshotPath, 'utf8'));
-                    snapshotItems = Array.isArray(sdata.items) ? sdata.items : [];
-                } catch (e) {
-                    log(`[WARN] Failed to read snapshot for presenter enrichment: ${e.message}`);
-                }
-            }
-
-            const agentsDir = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\agents";
-
-            for (const sItem of snapshotItems) {
-                const filename = sItem.name;
+            const exceptions = snapshotResult && Array.isArray(snapshotResult.exceptions) ? snapshotResult.exceptions : [];
+            
+            for (const exception of exceptions) {
+                const filename = exception.name || exception.filename;
                 const file_type = path.extname(filename).replace('.', '').toUpperCase();
-                const received = sItem.modified ? sItem.modified.split('T')[0] : null;
+                const received = exception.modified ? exception.modified.split('T')[0] : null;
+                const confidence = exception.confidence || null;
+                const routed_to = exception.routed_to || 'UNKNOWN';
 
                 // find per-file meta in agents/*/inbox/<filename>.meta.json
                 let meta = null;
                 let metaPath = null;
+                const agentsDir = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\agents";
                 if (fs.existsSync(agentsDir)) {
                     const agents = fs.readdirSync(agentsDir);
                     for (const agent of agents) {
@@ -239,22 +440,43 @@ function regeneratePresenter(snapshotResult) {
                     }
                 }
 
+                // Generate reasons based on confidence and routing
+                let reasons = [];
+                if (confidence >= 90) {
+                    reasons.push('High confidence AI routing');
+                } else if (confidence >= 80) {
+                    reasons.push('Strong AI recommendation');
+                } else if (confidence >= 70) {
+                    reasons.push('Moderate confidence - human review needed');
+                } else {
+                    reasons.push('Low confidence - requires human decision');
+                }
+                
+                if (routed_to) {
+                    reasons.push(`Routed to: ${routed_to}`);
+                }
+                
+                if (file_type) {
+                    reasons.push(`File type: ${file_type}`);
+                }
+
                 items.push({
                     filename: filename || 'Unknown File',
-                    routed_to: (meta && meta.routed_to) ? meta.routed_to : 'UNKNOWN',
-                    confidence: (meta && meta.confidence) ? meta.confidence : null,
+                    routed_to: routed_to,
+                    confidence: confidence,
                     file_type: file_type || null,
                     received: received || null,
                     meta_path: metaPath || null,
-                    checksum_sha256: checksum || null
+                    checksum_sha256: checksum || null,
+                    reasons: reasons
                 });
             }
         } catch (e) {
             log(`[WARN] Failed to build per-file items: ${e.message}`);
         }
 
-        // Update items_processed to reflect actual items
-        trust_header.items_processed = items.length;
+        // Update exception_count to reflect actual items
+        trust_header.exception_count = items.length;
 
         const data = {
             trust_header,
@@ -286,7 +508,7 @@ function regeneratePresenter(snapshotResult) {
 
         log(`[PRESENTER] Items for presenter: ${JSON.stringify(items, null, 2)}`);
         log(`[PRESENTER] Regenerated presenter assets (no overwrite of approved UI)`);
-        return { presenter: previewPath, rendered_at, snapshot_id, items_processed, routed_to };
+        return { presenter: previewPath, rendered_at, snapshot_id, exception_count: items.length, auto_routed_count, total_files };
     } catch (e) {
         log(`[ERROR] Presenter regeneration failed: ${e.message}`);
         log(`Stack: ${e.stack}`);
@@ -578,7 +800,10 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
 
                     log(`Listing directory: ${requestedPath}`);
                     
-                    // List directory contents
+                    // 📸 SNAPSHOT WRITER - This is the critical functionality
+                    const snapshotPath = takeSnapshot(requestedPath);
+
+                    // List directory contents (re-read in case snapshot creation modified anything)
                     const items = fs.readdirSync(requestedPath).map(item => {
                         const fullPath = path.join(requestedPath, item);
                         const stats = fs.statSync(fullPath);
@@ -590,38 +815,6 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
                             modified: stats.mtime.toISOString()
                         };
                     });
-
-                    log(`Found ${items.length} items`);
-
-                    // 📸 SNAPSHOT WRITER - This is the critical functionality
-                    try {
-                        if (!fs.existsSync(SNAPSHOT_DIR)) {
-                            fs.mkdirSync(SNAPSHOT_DIR, { recursive: true });
-                            log(`Created snapshot directory: ${SNAPSHOT_DIR}`);
-                        }
-
-                        const snapshot = {
-                            source: "NAVI",
-                            event: "inbox_snapshot", 
-                            timestamp: new Date().toISOString(),
-                            path: requestedPath,
-                            items: items.map(item => ({
-                                name: item.name,
-                                type: item.type,
-                                size: item.size,
-                                modified: item.modified
-                            })),
-                            status: "unprocessed"
-                        };
-
-                        const snapshotFilename = `${snapshot.timestamp.replace(/[:.]/g, '-')}.json`;
-                        const snapshotPath = path.join(SNAPSHOT_DIR, snapshotFilename);
-                        fs.writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2));
-                        
-                        log(`[SNAPSHOT] Written: ${snapshotPath}`);
-                    } catch (snapshotError) {
-                        log(`[WARN] Snapshot write failed: ${snapshotError.message}`);
-                    }
 
                     // Return raw data
                     const result = {
@@ -879,6 +1072,47 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
                             }
                         }
 
+                        // Log agreement metrics for Zone 2 items (Phase 2.1)
+                        try {
+                            const agreementLogPath = path.join(APPROVAL_DIR, 'agreement_metrics.log');
+                            const snapshotPath = path.join(SNAPSHOT_DIR, `${snapshot_id}.json`);
+                            
+                            if (fs.existsSync(snapshotPath)) {
+                                const snapshot = JSON.parse(fs.readFileSync(snapshotPath, 'utf8'));
+                                const snapshotItems = snapshot.items || [];
+                                
+                                for (const item of items) {
+                                    const snapshotItem = snapshotItems.find(si => si.name === item.filename);
+                                    if (snapshotItem && snapshotItem.confidence) {
+                                        const confidence = snapshotItem.confidence / 100;
+                                        const ai_dept = snapshotItem.guessedDept || 'UNKNOWN';
+                                        const human_dept = item.decision.dept;
+                                        const corrected = ai_dept !== human_dept;
+                                        
+                                        // Only log Zone 2 items (50-90% confidence)
+                                        if (confidence >= 0.50 && confidence < 0.90) {
+                                            const metric = {
+                                                timestamp: new Date().toISOString(),
+                                                snapshot_id,
+                                                filename: item.filename,
+                                                confidence: confidence,
+                                                ai_dept,
+                                                human_dept,
+                                                corrected,
+                                                reviewer
+                                            };
+                                            
+                                            const logLine = JSON.stringify(metric) + '\n';
+                                            fs.appendFileSync(agreementLogPath, logLine, 'utf8');
+                                            console.log('[AGREEMENT] Logged:', metric);
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (logErr) {
+                            console.error('[AGREEMENT] Failed to log metrics:', logErr.message);
+                        }
+
                         // Compute summary counts
                         const moved_processed = moveResults.filter(r => r.bucket === 'processed').length;
                         const moved_escalated = moveResults.filter(r => r.bucket === 'escalated').length;
@@ -920,6 +1154,48 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
             return;
         } catch (e) {
             log('[ERROR] Serving approvals audit log: ' + (e && e.message));
+            res.writeHead(500, { 'Content-Type': 'text/plain' });
+            res.end('Server error');
+            return;
+        }
+    } else if (req.method === 'GET' && req.url === '/approvals/agreement') {
+        // Serve agreement metrics log (Phase 2.1)
+        try {
+            const agreementPath = path.join(APPROVAL_DIR, 'agreement_metrics.log');
+            if (!fs.existsSync(agreementPath)) {
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('agreement_metrics.log not found');
+                return;
+            }
+            const content = fs.readFileSync(agreementPath, 'utf8');
+            
+            // Parse and compute summary stats
+            const lines = content.trim().split('\n').filter(line => line.trim());
+            const metrics = lines.map(line => {
+                try {
+                    return JSON.parse(line);
+                } catch (e) {
+                    return null;
+                }
+            }).filter(m => m);
+            
+            const total = metrics.length;
+            const corrected = metrics.filter(m => m.corrected).length;
+            const agreement_rate = total > 0 ? ((total - corrected) / total * 100).toFixed(1) : '0.0';
+            
+            const summary = `AI-Human Agreement Metrics (Zone 2: 50-90% confidence)\n` +
+                           `==========================================\n` +
+                           `Total Zone 2 decisions: ${total}\n` +
+                           `AI correct (no correction): ${total - corrected}\n` +
+                           `Human corrections: ${corrected}\n` +
+                           `Agreement rate: ${agreement_rate}%\n\n` +
+                           `Raw data:\n${content}`;
+            
+            res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.end(summary);
+            return;
+        } catch (e) {
+            log('[ERROR] Serving agreement metrics: ' + (e && e.message));
             res.writeHead(500, { 'Content-Type': 'text/plain' });
             res.end('Server error');
             return;
@@ -1032,6 +1308,55 @@ function startServer() {
     try {
         server.listen(PORT, () => {
             console.log('[MCP] Server connected and ready');
+            
+            // 🚨 INBOX WATCHER - Auto-trigger snapshots when files arrive
+            console.log('[WATCHER] Starting inbox watcher...');
+            const watcher = chokidar.watch(INBOX_DIR, {
+                persistent: true,
+                ignoreInitial: true, // Don't trigger on existing files
+                awaitWriteFinish: {
+                    stabilityThreshold: 2000, // Wait 2 seconds after last change
+                    pollInterval: 100 // Check every 100ms during stability period
+                },
+                ignored: /(^|[\/\\])\../ // Ignore dotfiles
+            });
+
+            watcher.on('add', (filePath) => {
+                const fileName = path.basename(filePath);
+                console.log(`[WATCHER] File added: ${fileName}`);
+                
+                // Trigger full processing pipeline
+                setTimeout(() => {
+                    triggerProcessPipeline();
+                }, 500); // Debounce
+            });
+
+            watcher.on('addDir', (dirPath) => {
+                const dirName = path.basename(dirPath);
+                console.log(`[WATCHER] Directory added: ${dirName}`);
+                
+                // Trigger full processing pipeline
+                setTimeout(() => {
+                    triggerProcessPipeline();
+                }, 500); // Debounce
+            });
+
+            watcher.on('unlink', (filePath) => {
+                const fileName = path.basename(filePath);
+                console.log(`[WATCHER] File removed: ${fileName}`);
+                takeSnapshot(INBOX_DIR);
+            });
+
+            watcher.on('unlinkDir', (dirPath) => {
+                const dirName = path.basename(dirPath);
+                console.log(`[WATCHER] Directory removed: ${dirName}`);
+                takeSnapshot(INBOX_DIR);
+            });
+
+            console.log(`[WATCHER] Watching: ${INBOX_DIR}`);
+            
+            // Store watcher reference for cleanup
+            server.watcher = watcher;
         });
     } catch (e) {
         // Synchronous listen errors (e.g., EADDRINUSE) will be handled here as backup
@@ -1050,6 +1375,12 @@ function startServer() {
 function gracefulShutdown(reason, exitCode = 0, timeoutMs = 5000) {
     console.log(`[MCP] Initiating graceful shutdown: ${reason}`);
     try {
+        // Stop the file watcher if it exists
+        if (server && server.watcher) {
+            console.log('[MCP] Stopping file watcher...');
+            server.watcher.close();
+        }
+        
         if (server && typeof server.close === 'function') {
             let closed = false;
             server.close(() => {

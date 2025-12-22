@@ -1,0 +1,13 @@
+{
+  "filename": "urgent_client_request.txt",
+  "routing_id": "97ded1c0-dbd6-43b7-a93b-a81ca1eb50a1",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-21T02-13-10-681Z.json",
+  "routed_at": "2025-12-21T02:13:11.058Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "1b3232c7219bdee51af9b729b168820ef20d1a9e5ca90beeaf69c6be07e6709d",
+  "trust_header": "2025-12-21T02-13-10-681Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}

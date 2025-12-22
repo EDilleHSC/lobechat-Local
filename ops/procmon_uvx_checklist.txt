@@ -1,0 +1,33 @@
+ProcMon Capture Checklist (minimal)
+
+1) Launch ProcMon as Administrator
+   - Procmon.exe (Sysinternals)
+   - Ctrl+E -> Stop capture immediately
+   - Ctrl+X -> Clear existing events
+
+2) Filters (open Filter...)
+   - Include: Operation    is    Process Create
+   - Include: Process Name is    uvx.exe
+   - Include: Process Name is    uvx.cmd
+   - Include: Process Name is    node.exe
+   - Exclude: everything else (add a broad Exclude for noise if you need)
+
+3) Capture Window
+   - Ctrl+E -> Start capture
+   - Reproduce the scenario (restart service or run the workflow that spawns uvx)
+   - Wait ~5-10 seconds
+   - Ctrl+E -> Stop capture
+
+4) Save
+   - File -> Save
+   - Format: CSV (or Native PML if you prefer; CSV easier for script parsing)
+   - Suggested name: uvx-parent-trace-YYYYMMDD-HHMMSS.csv
+
+5) After capture
+   - Run the correlation script:
+       .\ops\correlate_procmon_with_uvx.ps1 -ProcmonCsv 'path\to\uvx-parent-trace.csv' -UvXLog 'logs\\uvx-shim.log' -TraceLog 'logs\\uvx-parent-trace.log' -OutFile 'ops\\uvx-correlated.jsonl'
+   - Share the generated `ops/uvx-correlated.jsonl` (or the CSV + PML) if you want me to analyze further.
+
+Safety notes:
+ - Keep the capture window small.
+ - Export CSV rather than sending full PML if you need to share output; CSV is smaller and contains needed fields.

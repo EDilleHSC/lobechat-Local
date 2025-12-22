@@ -1,0 +1,200 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T17:11:17.043Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "id": "45731513a0663a0f378e585d058983fb8b1a97865c4d11bc89864b3d707b63c8",
+      "filename": "inquiry_remote_work.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\inquiry_remote_work.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 99,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: inquiry_remote_work.txt, Size: 202 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:17.041Z",
+        "analyzed": "2025-12-21T17:11:17.041Z",
+        "decided": null,
+        "moved": "2025-12-21T17:11:17.041Z"
+      }
+    },
+    {
+      "id": "237458e94a739ad100e44721f80d687feefa6cc06a64fdadb96faedffb7573f0",
+      "filename": "NDA_InnovateTech_PartnerCorp.pdf",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\NDA_InnovateTech_PartnerCorp.pdf",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 100,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: NDA_InnovateTech_PartnerCorp.pdf, Size: 193 bytes, Type: .pdf",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:17.041Z",
+        "analyzed": "2025-12-21T17:11:17.041Z",
+        "decided": null,
+        "moved": "2025-12-21T17:11:17.042Z"
+      }
+    }
+  ],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 68,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe",
+        "risk_flags": [
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:17.041Z",
+        "analyzed": "2025-12-21T17:11:17.041Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    },
+    {
+      "id": "9edd64f6a439a13f53ac827c384935142c4e3844f15c8ee500204ecdec4ea49d",
+      "filename": "test_file_001.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\test_file_001.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 62,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: test_file_001.txt, Size: 164 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:17.041Z",
+        "analyzed": "2025-12-21T17:11:17.041Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "6a51cda2c098ea8c69361eff8fc2b09595a7a6e72b14a10ca523d0cffc79850d",
+      "filename": "test_mailroom_observation.txt.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\test_mailroom_observation.txt.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 80,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: test_mailroom_observation.txt.txt, Size: 0 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:17.041Z",
+        "analyzed": "2025-12-21T17:11:17.041Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "523754907449a04199633c4b002ae970da03b6a513d3a0460dff8ccd78288cbd",
+      "filename": "urgent_ceo_meeting.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\urgent_ceo_meeting.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Ops",
+        "confidence": 88,
+        "reasons": [
+          "AI analysis",
+          "Priority indicators"
+        ],
+        "summary": "File: urgent_ceo_meeting.txt, Size: 200 bytes, Type: .txt\n- Marked as urgent or important",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:17.041Z",
+        "analyzed": "2025-12-21T17:11:17.041Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "20cc9fcfdebb9cfa3884380b011a063a29e46517a507ffe44e28f67f9e777d77",
+      "filename": "We are in  Production.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\We are in  Production.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 87,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: We are in  Production.txt, Size: 49 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:17.041Z",
+        "analyzed": "2025-12-21T17:11:17.041Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 7,
+  "autoRoutedCount": 2,
+  "reviewRequiredCount": 5,
+  "status": "processed"
+}

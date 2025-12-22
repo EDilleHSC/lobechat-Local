@@ -1,0 +1,43 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T23:21:43.834Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "reviewRequired": [
+    {
+      "id": "05b4d15649eb1dd7872e497208ae42e98e4cce64881d5ef7f0cd08b98ce5c39e",
+      "filename": ".mock_test_batch_01.tmp",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\.mock_test_batch_01.tmp",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 4600,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: .mock_test_batch_01.tmp, Size: 49 bytes, Type: .tmp\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence",
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:21:43.834Z",
+        "analyzed": "2025-12-21T23:21:43.834Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 1,
+  "autoRoutedCount": 0,
+  "reviewRequiredCount": 1,
+  "status": "processed"
+}

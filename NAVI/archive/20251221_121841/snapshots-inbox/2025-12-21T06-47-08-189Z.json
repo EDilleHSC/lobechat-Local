@@ -1,0 +1,126 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T06:47:08.189Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "filename": "Files to  Install.zip",
+      "type": "ZIP",
+      "received": "2025-12-10",
+      "route": "INBOX",
+      "confidence": 93,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending",
+      "action": "auto_routed",
+      "dept": "Intake"
+    }
+  ],
+  "exceptions": [
+    {
+      "filename": "AIR.zip",
+      "type": "ZIP",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 86,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "D rive complicance.zip",
+      "type": "ZIP",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 81,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "Html.zip",
+      "type": "ZIP",
+      "received": "2025-12-16",
+      "route": "INBOX",
+      "confidence": 58,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "LM-Studio-0.3.34-1-x64.exe",
+      "type": "EXE",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 55,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "Project  Files.zip",
+      "type": "ZIP",
+      "received": "2025-12-10",
+      "route": "INBOX",
+      "confidence": 76,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test3.pdf",
+      "type": "PDF",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 84,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test4.pdf",
+      "type": "PDF",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 68,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test_file2.txt",
+      "type": "TXT",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 76,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    }
+  ],
+  "totalFiles": 9,
+  "autoRoutedCount": 1,
+  "exceptionCount": 8,
+  "status": "processed"
+}

@@ -1,0 +1,311 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T17:11:10.907Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "id": "2c2ce0a99c773f1408b6d3f41fb47a35308b1c9a25510cd260c653e862afab1c",
+      "filename": "Duplicate_Contract.pdf.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Duplicate_Contract.pdf.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Legal",
+        "confidence": 91,
+        "reasons": [
+          "AI analysis",
+          "Legal document patterns"
+        ],
+        "summary": "File: Duplicate_Contract.pdf.txt, Size: 82 bytes, Type: .txt\n- Legal document detected",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.904Z",
+        "analyzed": "2025-12-21T17:11:10.904Z",
+        "decided": null,
+        "moved": "2025-12-21T17:11:10.905Z"
+      }
+    },
+    {
+      "id": "bdcdd61b2db0d6efd818fae9565389e83d1a4aa19737048aacf11a4a62bb4e34",
+      "filename": "Invoice_January_2025.xlsx.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Invoice_January_2025.xlsx.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Finance",
+        "confidence": 95,
+        "reasons": [
+          "AI analysis",
+          "Contains financial keywords"
+        ],
+        "summary": "File: Invoice_January_2025.xlsx.txt, Size: 62 bytes, Type: .txt\n- Appears to be a financial document",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.904Z",
+        "analyzed": "2025-12-21T17:11:10.904Z",
+        "decided": null,
+        "moved": "2025-12-21T17:11:10.905Z"
+      }
+    },
+    {
+      "id": "683e88471a9f72e737c7c1bc1ed3a63039ec79906f0d18078c53ac7e9c1a5e97",
+      "filename": "Memo_Internal.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Memo_Internal.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 97,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Memo_Internal.txt, Size: 84 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.904Z",
+        "analyzed": "2025-12-21T17:11:10.904Z",
+        "decided": null,
+        "moved": "2025-12-21T17:11:10.906Z"
+      }
+    },
+    {
+      "id": "f6de5bd1eb9f0dac9c63ca50503b44330a2adbb4df2858bf676a5a522f3e94bf",
+      "filename": "Random_File.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Random_File.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 91,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Random_File.txt, Size: 48 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.904Z",
+        "analyzed": "2025-12-21T17:11:10.904Z",
+        "decided": null,
+        "moved": "2025-12-21T17:11:10.907Z"
+      }
+    }
+  ],
+  "reviewRequired": [
+    {
+      "id": "5bf66f0088db5b7abf0e3713f40bcddc3e306524d4a63a86229cf2d043f0011d",
+      "filename": "Amendment_Legal_2025.doc.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Amendment_Legal_2025.doc.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Legal",
+        "confidence": 73,
+        "reasons": [
+          "AI analysis",
+          "Legal document patterns"
+        ],
+        "summary": "File: Amendment_Legal_2025.doc.txt, Size: 96 bytes, Type: .txt\n- Legal document detected",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.904Z",
+        "analyzed": "2025-12-21T17:11:10.904Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 74,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe",
+        "risk_flags": [
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.904Z",
+        "analyzed": "2025-12-21T17:11:10.904Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    },
+    {
+      "id": "cc7ce32c34e1b1a496506e490461a41323ca314cad41ce2a23eae13dcf76710c",
+      "filename": "Client_Report_Q4.pptx.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Client_Report_Q4.pptx.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Account",
+        "confidence": 78,
+        "reasons": [
+          "AI analysis",
+          "Client/account references"
+        ],
+        "summary": "File: Client_Report_Q4.pptx.txt, Size: 75 bytes, Type: .txt\n- Client or account related",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.904Z",
+        "analyzed": "2025-12-21T17:11:10.904Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "e44f00408666bb7f4371c9a37709db40b8af080cffa4d52ac9ff85dc5af82400",
+      "filename": "NDA_Contract_2025.pdf.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\NDA_Contract_2025.pdf.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Legal",
+        "confidence": 77,
+        "reasons": [
+          "AI analysis",
+          "Legal document patterns"
+        ],
+        "summary": "File: NDA_Contract_2025.pdf.txt, Size: 102 bytes, Type: .txt\n- Legal document detected",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.904Z",
+        "analyzed": "2025-12-21T17:11:10.904Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "81e6e64ee5cee07a5c47e6e62d2dcfe4a6ace386f81c617defcf76fe21c4dcc9",
+      "filename": "Old_Version_Report.doc.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Old_Version_Report.doc.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 87,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Old_Version_Report.doc.txt, Size: 74 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.904Z",
+        "analyzed": "2025-12-21T17:11:10.904Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "c3f853ffe0b5ba4268626f8a8fd8f839f1432d614096ede208c1b25330782ae3",
+      "filename": "Test_Document.pdf.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Test_Document.pdf.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 55,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Test_Document.pdf.txt, Size: 63 bytes, Type: .txt\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.905Z",
+        "analyzed": "2025-12-21T17:11:10.905Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "6e91266eba91dde5826f35e65415335fefd8d984be6ac18621bda038c5cb905a",
+      "filename": "test_file2.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\test_file2.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 63,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: test_file2.txt, Size: 17 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:10.905Z",
+        "analyzed": "2025-12-21T17:11:10.905Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 11,
+  "autoRoutedCount": 4,
+  "reviewRequiredCount": 7,
+  "status": "processed"
+}

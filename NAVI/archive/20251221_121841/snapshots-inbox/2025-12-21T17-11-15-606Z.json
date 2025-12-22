@@ -1,0 +1,98 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T17:11:15.606Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 65,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe",
+        "risk_flags": [
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:15.605Z",
+        "analyzed": "2025-12-21T17:11:15.605Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    },
+    {
+      "id": "237458e94a739ad100e44721f80d687feefa6cc06a64fdadb96faedffb7573f0",
+      "filename": "NDA_InnovateTech_PartnerCorp.pdf",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\NDA_InnovateTech_PartnerCorp.pdf",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 58,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: NDA_InnovateTech_PartnerCorp.pdf, Size: 193 bytes, Type: .pdf\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:15.606Z",
+        "analyzed": "2025-12-21T17:11:15.606Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "9367ead784f12e212c7b0b62b0b64d2e03be0a6873f93bbfcaa9b8484a9c729f",
+      "filename": "Service_Contract_ABC_XYZ_2025.pdf",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Service_Contract_ABC_XYZ_2025.pdf",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Legal",
+        "confidence": 81,
+        "reasons": [
+          "AI analysis",
+          "Legal document patterns"
+        ],
+        "summary": "File: Service_Contract_ABC_XYZ_2025.pdf, Size: 232 bytes, Type: .pdf\n- Legal document detected",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T17:11:15.606Z",
+        "analyzed": "2025-12-21T17:11:15.606Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 3,
+  "autoRoutedCount": 0,
+  "reviewRequiredCount": 3,
+  "status": "processed"
+}

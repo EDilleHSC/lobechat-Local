@@ -1,0 +1,17 @@
+STARBUCKS
+123 Main Street
+Anytown, USA 12345
+
+Date: 12/20/2025
+Time: 2:30 PM
+Transaction #: 123456789
+
+Item                     Qty  Price
+Coffee - Large           1    $4.75
+Croissant                1    $3.25
+Tax                      -    $0.68
+---------------------------
+Total                    -    $8.68
+
+Thank you for your business!
+Paid by: Visa ****1234

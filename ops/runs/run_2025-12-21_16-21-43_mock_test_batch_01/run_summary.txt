@@ -1,0 +1,15 @@
+{
+  "got_presenter": true,
+  "batch": "mock_test_batch_01",
+  "got_snapshot": true,
+  "run_dir": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\ops\\runs\\run_2025-12-21_16-21-43_mock_test_batch_01",
+  "started": "2025-12-21_16-21-43",
+  "health": {
+    "ok": true,
+    "pid": 45480,
+    "uptime": 23.5413035,
+    "snapshot_last": "2025-12-21T23:21:20.217Z",
+    "presenter_last": "2025-12-21T23:21:20.53Z",
+    "timestamp": "2025-12-21T23:21:43.534Z"
+  }
+}

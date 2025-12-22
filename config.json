@@ -1,0 +1,16 @@
+{
+  "confidence_thresholds": {
+    "human_required": 0.50,
+    "auto_route": 0.90,
+    "auto_trash": 0.98
+  },
+  "departments": [
+    "Business",
+    "Finance",
+    "Legal",
+    "Operations",
+    "Personal",
+    "Intake",
+    "Trash"
+  ]
+}

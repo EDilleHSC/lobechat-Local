@@ -1,0 +1,25 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T06:47:14.868Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "exceptions": [
+    {
+      "filename": "test_file2.txt",
+      "type": "TXT",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 89,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    }
+  ],
+  "totalFiles": 1,
+  "autoRoutedCount": 0,
+  "exceptionCount": 1,
+  "status": "processed"
+}

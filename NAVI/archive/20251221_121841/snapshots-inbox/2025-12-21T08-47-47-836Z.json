@@ -1,0 +1,101 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T08:47:47.836Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "id": "812604e4c68e8832358ea04a4cfbeff16663d3087117c13416cb9963fcf1076a",
+      "filename": "Legal_Invoice_GlobalEnterprises.xlsx",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Legal_Invoice_GlobalEnterprises.xlsx",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Finance",
+        "confidence": 94,
+        "reasons": [
+          "AI analysis",
+          "Contains financial keywords"
+        ],
+        "summary": "File: Legal_Invoice_GlobalEnterprises.xlsx, Size: 194 bytes, Type: .xlsx\n- Appears to be a financial document",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:47:47.835Z",
+        "analyzed": "2025-12-21T08:47:47.835Z",
+        "decided": null,
+        "moved": "2025-12-21T08:47:47.835Z"
+      }
+    }
+  ],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 56,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence",
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:47:47.835Z",
+        "analyzed": "2025-12-21T08:47:47.835Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    },
+    {
+      "id": "6122cedb33f10752411ae82dcc6c778e4e95c508e27533e26035c3e90f01db08",
+      "filename": "Employment_Amendment_JohnSmith.doc",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Employment_Amendment_JohnSmith.doc",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 58,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Employment_Amendment_JohnSmith.doc, Size: 197 bytes, Type: .doc\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:47:47.835Z",
+        "analyzed": "2025-12-21T08:47:47.835Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 3,
+  "autoRoutedCount": 1,
+  "reviewRequiredCount": 2,
+  "status": "processed"
+}

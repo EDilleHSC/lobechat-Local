@@ -1,218 +1,307 @@
 {
-  "trust_header": {
-    "rendered_at": "2025-12-20T17:39:30.744Z",
-    "snapshot_id": "2025-12-20T17-39-26-612Z.json",
-    "items_processed": 23,
-    "routed_to": "agent1"
-  },
+  "batchId": "2025-12-21T23-35-12-825Z.json",
+  "snapshotTimestamp": "2025-12-21T23:35:12.946Z",
   "items": [
     {
-      "filename": ".processed",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": null,
-      "received": "2025-11-26",
-      "meta_path": "../agents/agent1/inbox/.processed.meta.json",
-      "checksum_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    },
-    {
-      "filename": "agent_receive_smoke.txt",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-19",
-      "meta_path": "../agents/agent1/inbox/agent_receive_smoke.txt.meta.json",
-      "checksum_sha256": "5f0957970a1add47517091eb3c259aa5f086380eca27b6cc5ce51bf1b732dae0"
-    },
-    {
-      "filename": "all-in-one-wp-migration-unlimited-extension (1).zip",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "ZIP",
-      "received": "2025-11-05",
-      "meta_path": "../agents/agent1/inbox/all-in-one-wp-migration-unlimited-extension (1).zip.meta.json",
-      "checksum_sha256": "8598785b0b6ded352b3a13c262dbd17bfdbf8500c8f7860984b5cbf971bab2a8"
-    },
-    {
-      "filename": "epson18836.exe",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "EXE",
-      "received": "2025-11-06",
-      "meta_path": "../agents/agent1/inbox/epson18836.exe.meta.json",
-      "checksum_sha256": "1bfdf369e97e23ee381fa374eefa3d10c8ee6d3e3834e445213785143def7f56"
-    },
-    {
-      "filename": "ES400_EScan2_67821_AM.exe",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "EXE",
-      "received": "2025-11-06",
-      "meta_path": "../agents/agent1/inbox/ES400_EScan2_67821_AM.exe.meta.json",
-      "checksum_sha256": "850d3edd7b92c19d5cef1ed22e19d36b684edcdeb92cfdcfbfbb38a093886909"
-    },
-    {
-      "filename": "ES400_Lite_AM.exe",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "EXE",
-      "received": "2025-11-06",
-      "meta_path": "../agents/agent1/inbox/ES400_Lite_AM.exe.meta.json",
-      "checksum_sha256": "a6b7df65a301041e4ee02b31bbcafef6cd68a63829540c7d63d681a56a5288fb"
-    },
-    {
+      "id": "c4e0cf88b298a5a51092110af065a49fc2da47b4f6991e6d96366b7f24ad0abc",
       "filename": "Navi_Complete_Personal_Identity.md",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "MD",
-      "received": "2025-12-19",
-      "meta_path": "../agents/agent1/inbox/Navi_Complete_Personal_Identity.md.meta.json",
-      "checksum_sha256": "efc8a0c8369317718e0422a7dc688a25a86f0cec8de7306bab34dc7683afbbf0"
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_Complete_Personal_Identity.md",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 40,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_Complete_Personal_Identity.md, Size: 15449 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.822Z",
+        "analyzed": "2025-12-21T23:35:12.822Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
+      "id": "a41e2d463293bbd2013bbebd4aa4ac044d982f6a017e2a2972f445db20ab5bbe",
       "filename": "Navi_KB_00_Master_Index.md",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "MD",
-      "received": "2025-12-19",
-      "meta_path": "../agents/agent1/inbox/Navi_KB_00_Master_Index.md.meta.json",
-      "checksum_sha256": "e59cc334de36474402c631a9853e42438b5bda12bad73218700e4d7029e73f91"
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_00_Master_Index.md",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 47,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_00_Master_Index.md, Size: 9794 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.823Z",
+        "analyzed": "2025-12-21T23:35:12.823Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
+      "id": "d1425eb56a7c9f651836e3171a14b7a40a5d64b6a3bdd13ddc512a30cf77fc7f",
       "filename": "Navi_KB_01_Communication_Style.md",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "MD",
-      "received": "2025-12-19",
-      "meta_path": "../agents/agent1/inbox/Navi_KB_01_Communication_Style.md.meta.json",
-      "checksum_sha256": "4b835b8a0ab519e05448baf11a30bb560393daf25764645d5978b3e13ce712b6"
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_01_Communication_Style.md",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 33,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_01_Communication_Style.md, Size: 9092 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.823Z",
+        "analyzed": "2025-12-21T23:35:12.823Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "pygpt-2.6.65.msi",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "MSI",
-      "received": "2025-11-14",
-      "meta_path": "../agents/agent1/inbox/pygpt-2.6.65.msi.meta.json",
-      "checksum_sha256": "3ba888fa09b79405ea805a5a0c89ddaa6b4733a0f20ba445346db95381a4439d"
+      "id": "0d0a542f927b58903427dea89a6c39842b1641046347b4e67206e9c6667f71b6",
+      "filename": "Navi_KB_02_Formatting_Rules.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_02_Formatting_Rules.md",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 40,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_02_Formatting_Rules.md, Size: 10956 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.823Z",
+        "analyzed": "2025-12-21T23:35:12.823Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "route_smoke.txt",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-19",
-      "meta_path": "../agents/agent1/inbox/route_smoke.txt.meta.json",
-      "checksum_sha256": "c53869adb27d4ce70f80586643a19cbe36cab0d053777db18434ddacb76d5666"
+      "id": "d86b0ab84ff3596fc0a5e54151429eabe1eba1f8258b81529827e4f22d6a1c23",
+      "filename": "Navi_KB_03_Tool_Protocols.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_03_Tool_Protocols.md",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 43,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_03_Tool_Protocols.md, Size: 13349 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.823Z",
+        "analyzed": "2025-12-21T23:35:12.823Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "smoke_mail.txt",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-19",
-      "meta_path": "../agents/agent1/inbox/smoke_mail.txt.meta.json",
-      "checksum_sha256": "7b2a6fd77c3c21f23617df98b04d431eadb0b59dffda9ef516e66cb45c9494ab"
+      "id": "1a150a55b0585e9bf077e94cef861512405a9b66674b280bcee60ae54dfb3966",
+      "filename": "Navi_KB_04_User_Preferences.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_04_User_Preferences.md",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 39,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_04_User_Preferences.md, Size: 11995 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.823Z",
+        "analyzed": "2025-12-21T23:35:12.823Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "SS_3.7.10_DOC.exe",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "EXE",
-      "received": "2025-11-06",
-      "meta_path": "../agents/agent1/inbox/SS_3.7.10_DOC.exe.meta.json",
-      "checksum_sha256": "f31f1eaabecb31941b6bea34a667a6e3e5e58734e1a49669f998bf405cce022e"
+      "id": "ee6818ce84d0d6d778abd9435dcf8dd0d6469643d6d7c390518389a85c36eaa6",
+      "filename": "Navi_KB_05_Templates_and_Routing.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_05_Templates_and_Routing.md",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 48,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_05_Templates_and_Routing.md, Size: 13199 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.823Z",
+        "analyzed": "2025-12-21T23:35:12.823Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "team_lunch.txt",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-12",
-      "meta_path": "../agents/agent1/inbox/team_lunch.txt.meta.json",
-      "checksum_sha256": "925b6ff2f4c0ef4ae2754d6ceebe76e6502e2550d2abbd3256702958d7c3072f"
+      "id": "35e937b346aa03ca7c1b96dfd1ceca715e95cb453b2f3bbba9ca7cf534719bde",
+      "filename": "README_Installation_Guide.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\README_Installation_Guide.md",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 43,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: README_Installation_Guide.md, Size: 10146 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.823Z",
+        "analyzed": "2025-12-21T23:35:12.823Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "test1.pdf",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "PDF",
-      "received": "2025-12-20",
-      "meta_path": "../agents/agent1/inbox/test1.pdf.meta.json",
-      "checksum_sha256": "6bb87a2b0e384f6e2b6918b9b56f0c91558fa0b4c6dcd46c8b03ae3f8642056e"
+      "id": "523754907449a04199633c4b002ae970da03b6a513d3a0460dff8ccd78288cbd",
+      "filename": "urgent_ceo_meeting.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\urgent_ceo_meeting.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 68,
+        "reasons": [
+          "AI analysis",
+          "Receipt indicators detected",
+          "No clear ownership indicators"
+        ],
+        "summary": "File: urgent_ceo_meeting.txt, Size: 200 bytes, Type: .txt\n- Receipt-like file detected\n- Ownership unclear: requires human review",
+        "risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.823Z",
+        "analyzed": "2025-12-21T23:35:12.823Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "test2.docx",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "DOCX",
-      "received": "2025-12-20",
-      "meta_path": "../agents/agent1/inbox/test2.docx.meta.json",
-      "checksum_sha256": "5f8587e643ed84f15c9e29e73473ac5ce7ab96e1e1d55ea80cd1b01b00ec7fd8"
-    },
-    {
-      "filename": "test3.txt",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-20",
-      "meta_path": "../agents/agent1/inbox/test3.txt.meta.json",
-      "checksum_sha256": "0fe15a6e6bd50680f8b0b81edb2d1fced5d530a4f836dedbb7d57211b730a93b"
-    },
-    {
-      "filename": "test4.jpg",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "JPG",
-      "received": "2025-12-20",
-      "meta_path": "../agents/agent1/inbox/test4.jpg.meta.json",
-      "checksum_sha256": "2cfbb9d9567f62572077b3f3259c5e3a3f251b7835aaa2552d96df2a7c6c0233"
-    },
-    {
-      "filename": "test5.zip",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "ZIP",
-      "received": "2025-12-20",
-      "meta_path": "../agents/agent1/inbox/test5.zip.meta.json",
-      "checksum_sha256": "4c5d1a3d50885fee1945eb4aebf39ee8a5fe104a4493f7f9b1c1c83b275ef564"
-    },
-    {
-      "filename": "test_file.txt",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-20",
-      "meta_path": "../agents/agent1/inbox/test_file.txt.meta.json",
-      "checksum_sha256": "bd3d270fdafc7c9cdfddf1c203e87cb203bf2ba22416f4844828ec64f350d096"
-    },
-    {
-      "filename": "test_file2.txt",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-20",
-      "meta_path": "../agents/agent1/inbox/test_file2.txt.meta.json",
-      "checksum_sha256": "7b077bd7470fb38a94a116e525a7f23f2b6e2b371c23ce4b37e14affda359d52"
-    },
-    {
-      "filename": "WinSCP-6.5.4-Setup.exe",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "EXE",
-      "received": "2025-11-05",
-      "meta_path": "../agents/agent1/inbox/WinSCP-6.5.4-Setup.exe.meta.json",
-      "checksum_sha256": "95f7935b63115b7eb4631a3be5e56f78d2ad7eca8525e8b6be8761d4be3fe130"
-    },
-    {
-      "filename": "WinSCP.lnk",
-      "routed_to": "agent1",
-      "confidence": null,
-      "file_type": "LNK",
-      "received": "2025-11-05",
-      "meta_path": "../agents/agent1/inbox/WinSCP.lnk.meta.json",
-      "checksum_sha256": "89c2f82e9197af46c903c82445b56d6638cdf0dd26bae9e803da37fe40610302"
+      "id": "20cc9fcfdebb9cfa3884380b011a063a29e46517a507ffe44e28f67f9e777d77",
+      "filename": "We are in  Production.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\We are in  Production.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 63,
+        "reasons": [
+          "AI analysis",
+          "Receipt indicators detected",
+          "No clear ownership indicators"
+        ],
+        "summary": "File: We are in  Production.txt, Size: 49 bytes, Type: .txt\n- Receipt-like file detected\n- Ownership unclear: requires human review",
+        "risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T23:35:12.823Z",
+        "analyzed": "2025-12-21T23:35:12.823Z",
+        "decided": null,
+        "moved": null
+      }
     }
   ],
-  "html_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <title>NAVI Mail Room Update (preview)</title>\n    <style>body{font-family:Segoe UI,Arial,sans-serif;padding:24px;background:#0a0e27;color:#f0f0f0}</style>\n</head>\n<body>\n<!-- TRUST_HEADER\nrendered_at: 2025-12-20T17:39:30.744Z\nsnapshot_id: 2025-12-20T17-39-26-612Z.json\nitems_processed: 23\nmailroom_routed_to: agent1\n-->\n<div class=\"container\">\n  <h1>NAVI Mail Room Update (preview)</h1>\n  <p>Snapshot: 2025-12-20T17-39-26-612Z.json</p>\n  <p>Items: 23</p>\n  <p>Routed to: agent1</p>\n</div>\n</body>\n</html>"
+  "counters": {
+    "total": 10,
+    "review_required": 10,
+    "auto_routed": 0,
+    "moved": 0,
+    "trash_pending": 0
+  }
 }

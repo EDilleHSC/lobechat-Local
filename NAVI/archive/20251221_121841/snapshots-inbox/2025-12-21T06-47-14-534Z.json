@@ -1,0 +1,37 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T06:47:14.534Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "exceptions": [
+    {
+      "filename": "D rive complicance.zip",
+      "type": "ZIP",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 72,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test_file2.txt",
+      "type": "TXT",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 62,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    }
+  ],
+  "totalFiles": 2,
+  "autoRoutedCount": 0,
+  "exceptionCount": 2,
+  "status": "processed"
+}

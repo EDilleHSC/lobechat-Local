@@ -1,0 +1,6 @@
+"Time of Day","Process Name","PID","Operation","Path","Result","Detail"
+"08:27:45.123456","node.exe","39996","Process Create","C:\Program Files\nodejs\node.exe","SUCCESS","Command line: \"C:\Program Files\nodejs\node.exe\" \"C:\Program Files\nodejs\node_modules\npm\bin\npx-cli.js\" playwright test"
+"08:27:45.234567","node.exe","39996","Process Create","D:\05_AGENTS-AI\01_RUNTIME\VBoarder\node_modules\.bin\uvx.exe","SUCCESS","Command line: uvx run playwright"
+"08:27:45.345678","uvx.exe","41234","Process Create","D:\05_AGENTS-AI\01_RUNTIME\VBoarder\node_modules\playwright\cli.js","SUCCESS","Command line: playwright test presenter_smoke.spec.ts"
+"08:27:46.001234","node.exe","39996","Process Exit","C:\Program Files\nodejs\node.exe","SUCCESS","Exit Status: 0"
+"08:27:46.112233","uvx.exe","41234","Process Exit","D:\05_AGENTS-AI\01_RUNTIME\VBoarder\node_modules\.bin\uvx.exe","SUCCESS","Exit Status: 0"

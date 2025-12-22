@@ -1,0 +1,13 @@
+{
+  "filename": "vendor_contract_draft.docx",
+  "routing_id": "54a71f53-cc2a-44ee-b830-993402a76b09",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-21T02-13-10-681Z.json",
+  "routed_at": "2025-12-21T02:13:11.059Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "0f30cf1abc0bef9bc32625479e19baaa70bec604adec2fad7ff887367186efb5",
+  "trust_header": "2025-12-21T02-13-10-681Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}

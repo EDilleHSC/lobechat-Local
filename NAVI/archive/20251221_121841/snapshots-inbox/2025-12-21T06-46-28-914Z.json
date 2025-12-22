@@ -1,0 +1,62 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T06:46:28.914Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "exceptions": [
+    {
+      "filename": "python-3.12.10-embed-amd64.zip",
+      "type": "ZIP",
+      "received": "2025-12-16",
+      "route": "INBOX",
+      "confidence": 68,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test3.pdf",
+      "type": "PDF",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 52,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test4.pdf",
+      "type": "PDF",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 86,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test_file2.txt",
+      "type": "TXT",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 79,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    }
+  ],
+  "totalFiles": 4,
+  "autoRoutedCount": 0,
+  "exceptionCount": 4,
+  "status": "processed"
+}

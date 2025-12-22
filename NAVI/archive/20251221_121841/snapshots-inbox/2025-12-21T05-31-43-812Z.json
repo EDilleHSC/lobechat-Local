@@ -1,0 +1,12 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T05:31:43.812Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "exceptions": [],
+  "totalFiles": 0,
+  "autoRoutedCount": 0,
+  "exceptionCount": 0,
+  "status": "processed"
+}

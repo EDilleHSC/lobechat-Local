@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+<h1>Test Page</h1>
+<script>
+console.log("BASIC SCRIPT LOADED");
+console.log("Testing fetch...");
+fetch('./generated/presenter.json')
+  .then(r => r.json())
+  .then(d => console.log("FETCH SUCCESS:", d))
+  .catch(e => console.log("FETCH ERROR:", e));
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T08:47:44.896Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 81,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe",
+        "risk_flags": [
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:47:44.895Z",
+        "analyzed": "2025-12-21T08:47:44.895Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    },
+    {
+      "id": "df6051d8c034d1c88dd56b05f2d128099dcf1577fb41022354ece7b78a0449d1",
+      "filename": "Demand_Letter_TechCorp_Vendor.pdf",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Demand_Letter_TechCorp_Vendor.pdf",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 81,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Demand_Letter_TechCorp_Vendor.pdf, Size: 278 bytes, Type: .pdf",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:47:44.896Z",
+        "analyzed": "2025-12-21T08:47:44.896Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "6122cedb33f10752411ae82dcc6c778e4e95c508e27533e26035c3e90f01db08",
+      "filename": "Employment_Amendment_JohnSmith.doc",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Employment_Amendment_JohnSmith.doc",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 67,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Employment_Amendment_JohnSmith.doc, Size: 197 bytes, Type: .doc",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:47:44.896Z",
+        "analyzed": "2025-12-21T08:47:44.896Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "237458e94a739ad100e44721f80d687feefa6cc06a64fdadb96faedffb7573f0",
+      "filename": "NDA_InnovateTech_PartnerCorp.pdf",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\NDA_InnovateTech_PartnerCorp.pdf",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 83,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: NDA_InnovateTech_PartnerCorp.pdf, Size: 193 bytes, Type: .pdf",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:47:44.896Z",
+        "analyzed": "2025-12-21T08:47:44.896Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "c721dff577b09b83904dede691689fdb3bbeebe1edb7955962f874c9a909ed91",
+      "filename": "Settlement_Agreement_JaneDoe_MegaCorp.doc",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Settlement_Agreement_JaneDoe_MegaCorp.doc",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 66,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Settlement_Agreement_JaneDoe_MegaCorp.doc, Size: 206 bytes, Type: .doc",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:47:44.896Z",
+        "analyzed": "2025-12-21T08:47:44.896Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 5,
+  "autoRoutedCount": 0,
+  "reviewRequiredCount": 5,
+  "status": "processed"
+}

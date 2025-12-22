@@ -1,0 +1,68 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T08:39:26.614Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 94,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe",
+        "risk_flags": [
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:39:26.614Z",
+        "analyzed": "2025-12-21T08:39:26.614Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    },
+    {
+      "id": "c3f853ffe0b5ba4268626f8a8fd8f839f1432d614096ede208c1b25330782ae3",
+      "filename": "Test_Document.pdf.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Test_Document.pdf.txt",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 88,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Test_Document.pdf.txt, Size: 63 bytes, Type: .txt",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T08:39:26.614Z",
+        "analyzed": "2025-12-21T08:39:26.614Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 2,
+  "autoRoutedCount": 0,
+  "reviewRequiredCount": 2,
+  "status": "processed"
+}

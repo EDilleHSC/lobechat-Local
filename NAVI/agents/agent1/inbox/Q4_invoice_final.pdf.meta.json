@@ -1,0 +1,13 @@
+{
+  "filename": "Q4_invoice_final.pdf",
+  "routing_id": "ee75d26b-28ba-4303-9e23-927a89e3c321",
+  "routed_from": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "snapshot_id": "2025-12-21T02-13-10-681Z.json",
+  "routed_at": "2025-12-21T02:13:11.051Z",
+  "routed_to": "agent1",
+  "checksum_sha256": "7e7f04c8b5646f7ad29b1cb0c8085d4ff9c6b08f2a632f496641b31f524c7b98",
+  "trust_header": "2025-12-21T02-13-10-681Z.json",
+  "rules_applied": [
+    "default-route-agent1"
+  ]
+}

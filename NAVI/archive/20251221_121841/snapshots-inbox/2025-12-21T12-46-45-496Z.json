@@ -1,0 +1,98 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T12:46:45.496Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "id": "c721dff577b09b83904dede691689fdb3bbeebe1edb7955962f874c9a909ed91",
+      "filename": "Settlement_Agreement_JaneDoe_MegaCorp.doc",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Settlement_Agreement_JaneDoe_MegaCorp.doc",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 99,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Settlement_Agreement_JaneDoe_MegaCorp.doc, Size: 206 bytes, Type: .doc",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T12:46:45.495Z",
+        "analyzed": "2025-12-21T12:46:45.495Z",
+        "decided": null,
+        "moved": "2025-12-21T12:46:45.496Z"
+      }
+    },
+    {
+      "id": "e08055a7985609326d7ef1f0332d8e8b10607b997ba403b9b40a4b7a8466957d",
+      "filename": "test_receipt.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\test_receipt.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Finance",
+        "confidence": 94,
+        "reasons": [
+          "AI analysis",
+          "Contains financial keywords"
+        ],
+        "summary": "File: test_receipt.txt, Size: 379 bytes, Type: .txt\n- Appears to be a financial document",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T12:46:45.495Z",
+        "analyzed": "2025-12-21T12:46:45.495Z",
+        "decided": null,
+        "moved": "2025-12-21T12:46:45.496Z"
+      }
+    }
+  ],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 54,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence",
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T12:46:45.495Z",
+        "analyzed": "2025-12-21T12:46:45.495Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    }
+  ],
+  "totalFiles": 3,
+  "autoRoutedCount": 2,
+  "reviewRequiredCount": 1,
+  "status": "processed"
+}

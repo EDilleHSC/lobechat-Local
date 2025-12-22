@@ -52,5 +52,12 @@ foreach ($item in $items) {
     }
 }
 
+$ts = (Get-Date).ToString('yyyyMMdd_HHmmss')
+$dest = "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\ARCHIVE\$ts"
+New-Item -Path $dest -ItemType Directory -Force
+Move-Item -Path "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\inbox\*" -Destination $dest -Force
+Move-Item -Path "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\HOLDING\*" -Destination $dest -Force
+Move-Item -Path "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\tests\smoke\test-results\*" -Destination $dest -Force
+
 $log | Out-File $logPath -Encoding UTF8
 Write-Host "Apply complete. Log: $logPath"

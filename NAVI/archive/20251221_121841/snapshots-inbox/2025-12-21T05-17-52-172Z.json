@@ -1,0 +1,37 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T05:17:52.172Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "exceptions": [
+    {
+      "filename": "25_VS_AGENT_MASTER_EXECUTION_PLAN.md",
+      "type": "MD",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 74,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "26_SANDBOX_DECISION_GUIDE.md",
+      "type": "MD",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 76,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    }
+  ],
+  "totalFiles": 2,
+  "autoRoutedCount": 0,
+  "exceptionCount": 2,
+  "status": "processed"
+}

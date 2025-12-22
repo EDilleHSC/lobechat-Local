@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVI Mail Room — Review</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0e27;
+            color: #f0f0f0;
+            font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4ac04a;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #7a8299;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .header-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .refresh-btn {
+            background: #2a3a6b;
+            color: #f0f0f0;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .refresh-btn:hover {
+            background: #3a4a7b;
+        }
+
+        .snapshot-header {
+            color: #f5a623;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .exception-count {
+            color: #f5a623;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .triage-lanes {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .lane-btn {
+            background: #2a3a6b;
+            color: #f0f0f0;
+            border: 1px solid #3a4a7b;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lane-btn:hover {
+            background: #3a4a7b;
+        }
+
+        .lane-btn.active {
+            background: #4ac04a;
+            border-color: #5ad05a;
+        }
+
+        .file-card {
+            background: #1e2749;
+            border: 1px solid #2a3a6b;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .file-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #f0f0f0;
+        }
+
+        .ai-recommendation {
+            background: #1a233a;
+            border: 1px solid #2a3a6b;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .recommendation-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f5a623;
+        }
+
+        .recommendation-text.quarantine {
+            color: #f5a623;
+        }
+
+        .recommendation-text.intake {
+            color: #4ac04a;
+        }
+
+        .recommendation-text.department {
+            color: #4ac04a;
+        }
+
+        .recommendation-confidence {
+            font-size: 16px;
+            color: #7a8299;
+            font-weight: 500;
+        }
+
+        .ai-banner {
+            background: #0f1433;
+            border: 1px solid #2a3a6b;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+
+        .banner-content {
+            color: #f5a623;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .file-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #7a8299;
+        }
+
+        .receipt-badge {
+            background: #f5a623;
+            color: #0a0e27;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .confidence {
+            color: #f5a623;
+            font-weight: 500;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .ai-recommend {
+            background: linear-gradient(135deg, #4ac04a 0%, #5ad05a 100%);
+            color: #0a0e27;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(74, 192, 74, 0.3);
+        }
+
+        .ai-recommend:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(74, 192, 74, 0.4);
+        }
+
+        .alt-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .secondary-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #2a3a6b;
+        }
+
+        .alt-btn {
+            background: #2a3a6b;
+            color: #f0f0f0;
+            border: 1px solid #3a4a7b;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 120px;
+        }
+
+        .alt-btn:hover {
+            background: #3a4a7b;
+            border-color: #4a5a8b;
+        }
+
+        .trash-btn {
+            background: #e74c3c;
+            color: #f0f0f0;
+            border: 1px solid #f44336;
+        }
+
+        .trash-btn:hover {
+            background: #f44336;
+            border-color: #ff5c4c;
+        }
+
+        .discard-btn {
+            background: #e74c3c;
+            color: #f0f0f0;
+            border: 2px solid #f44336;
+            border-radius: 8px;
+            font-size: 15px;
+            padding: 14px 18px;
+            margin-top: 12px;
+            min-width: 160px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+        }
+
+        .discard-btn:hover {
+            background: #f44336;
+            border-color: #ff5c4c;
+            box-shadow: 0 4px 8px rgba(231, 76, 60, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .completion {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .completion h2 {
+            color: #4ac04a;
+            font-size: 24px;
+            margin-bottom: 32px;
+        }
+
+        .batch-summary {
+            background: #1e2749;
+            border: 1px solid #2a3a6b;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .batch-summary h3 {
+            color: #f0f0f0;
+            font-size: 18px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a3a6b;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: #7a8299;
+        }
+
+        .summary-value {
+            color: #f0f0f0;
+            font-weight: 500;
+        }
+
+        .routing-breakdown {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #2a3a6b;
+        }
+
+        .routing-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 14px;
+        }
+
+        .file-movements {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #2a3a6b;
+        }
+
+        .file-movements summary {
+            cursor: pointer;
+            color: #7a8299;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .file-movements summary:hover {
+            color: #f0f0f0;
+        }
+
+        .movements-list {
+            max-height: 200px;
+            overflow-y: auto;
+            background: #0f1433;
+            border: 1px solid #1e2749;
+            border-radius: 6px;
+            padding: 8px;
+        }
+
+        .movement-item {
+            font-family: monospace;
+            font-size: 12px;
+            color: #b0b8d1;
+            padding: 2px 0;
+            border-bottom: 1px solid #1e2749;
+        }
+
+        .movement-item:last-child {
+            border-bottom: none;
+        }
+
+        .audit-log {
+            background: #0f1433;
+            border: 1px solid #1e2749;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            text-align: center;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .audit-log p {
+            color: #7a8299;
+            margin-bottom: 8px;
+        }
+
+        .audit-reference {
+            color: #f5a623;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .completion-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .completion-btn {
+            background: #2a3a6b;
+            color: #f0f0f0;
+            border: 1px solid #3a4a7b;
+            border-radius: 8px;
+            padding: 14px 20px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 160px;
+        }
+
+        .completion-btn:hover {
+            background: #3a4a7b;
+            border-color: #4a5a8b;
+        }
+
+        .print-btn {
+            background: #4ac04a;
+            border-color: #5ad05a;
+        }
+
+        .print-btn:hover {
+            background: #5ad05a;
+            border-color: #6ae06a;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+
+            .completion-actions,
+            .header,
+            .exception-count {
+                display: none !important;
+            }
+
+            .completion {
+                padding: 0;
+            }
+
+            .batch-summary,
+            .audit-log {
+                background: white !important;
+                border: 1px solid #ccc !important;
+                color: black !important;
+                box-shadow: none !important;
+            }
+
+            .summary-label,
+            .audit-log p {
+                color: #666 !important;
+            }
+
+            .summary-value,
+            .audit-reference {
+                color: black !important;
+            }
+        }
+
+        .completion p {
+            color: #7a8299;
+            font-size: 16px;
+        }
+
+        .ai-summary {
+            background: #0f1433;
+            border: 1px solid #1e2749;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .ai-summary h3 {
+            color: #f5a623;
+            margin-bottom: 8px;
+        }
+
+        .risk-flags {
+            margin-bottom: 16px;
+        }
+
+        .risk-flag {
+            background: #e74c3c;
+            color: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1e2749;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            color: #e74c3c;
+            margin-bottom: 16px;
+        }
+
+        .modal-content p {
+            margin-bottom: 16px;
+        }
+
+        .modal-content select, .modal-content textarea {
+            width: 100%;
+            margin-bottom: 16px;
+            padding: 8px;
+            background: #0f1433;
+            border: 1px solid #2a3a6b;
+            color: #f0f0f0;
+        }
+
+        .modal-content button {
+            margin: 0 8px;
+            padding: 8px 16px;
+            background: #2a3a6b;
+            color: #f0f0f0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-content button:first-of-type {
+            background: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <div class="header">
+            <h1>NAVI Mail Room</h1>
+            <p>Review files that need human decision</p>
+            <div class="header-actions">
+                <button class="refresh-btn" onclick="loadData()">🔄 Refresh</button>
+            </div>
+            <div class="snapshot-header" id="snapshotHeader">Loading snapshot...</div>
+            <div class="exception-count" id="exceptionCount">—</div>
+            <div class="review-reason" id="reviewReason" style="color: #7a8299; font-size: 14px; text-align: center; margin-bottom: 16px;">—</div>
+            <div class="triage-lanes">
+                <button class="lane-btn active" data-lane="all">All</button>
+                <button class="lane-btn" data-lane="high-risk">High Risk</button>
+                <button class="lane-btn" data-lane="low-confidence">Low Confidence</button>
+                <button class="lane-btn" data-lane="unparseable">Unparseable</button>
+                <button class="lane-btn" data-lane="ambiguous">Ambiguous</button>
+            </div>
+        </div>
+
+        <div class="file-card" id="fileCard">
+            <div class="file-name" id="fileName">Loading...</div>
+            
+            <!-- AI Recommendation Display -->
+            <div class="ai-recommendation" id="aiRecommendation">
+                <div class="recommendation-text" id="recommendationText">Loading...</div>
+                <div class="recommendation-confidence" id="recommendationConfidence">—</div>
+            </div>
+            
+            <!-- AI Recommendation Banner -->
+            <div class="ai-banner" id="aiBanner">
+                <div class="banner-content" id="bannerContent">Loading AI analysis...</div>
+            </div>
+            
+            <div class="file-meta">
+                <span class="file-type" id="fileType">—</span>
+                <span>•</span>
+                <span class="confidence" id="confidence">—</span>
+            </div>
+
+            <div class="ai-summary">
+                <details>
+                    <summary style="cursor: pointer; color: #f5a623; margin-bottom: 8px;">AI Analysis Details</summary>
+                    <div id="summaryContent">Loading...</div>
+                </details>
+            </div>
+
+            <div class="risk-flags" id="riskFlags"></div>
+
+            <div class="actions">
+                <button class="ai-recommend" id="aiRecommendBtn" onclick="decide('ai')">✅ Approve AI Route</button>
+
+                <div class="alt-actions">
+                    <button class="alt-btn" onclick="showOverrideModal('BUSINESS')">💼 Business</button>
+                    <button class="alt-btn" onclick="showOverrideModal('FINANCE')">💰 Finance</button>
+                    <button class="alt-btn" onclick="showOverrideModal('LEGAL')">⚖️ Legal</button>
+                    <button class="alt-btn" onclick="showOverrideModal('OPERATIONS')">⚙️ Operations</button>
+                    <button class="alt-btn" onclick="showOverrideModal('PERSONAL')" title="Non-business documents (receipts, family, personal legal)">👤 Personal</button>
+                </div>
+                
+                <div class="secondary-actions">
+                    <button class="alt-btn" onclick="showOverrideModal('ARCHIVE')">📦 Archive</button>
+                    <button class="alt-btn" onclick="showOverrideModal('REJECT')">🚫 Reject</button>
+                    <button class="discard-btn" onclick="showDiscardModal()">📋 Mark for Discard</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discard Confirmation Modal -->
+        <div id="discardModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>📋 Mark for Discard (Review Required)</h3>
+                <p>You are marking this file for discard.</p>
+                <p><strong>This does NOT delete the file.</strong></p>
+                <p>It moves it to TRASH_PENDING. Retention policy still applies.</p>
+                <br>
+                <p><strong>Reason for discard:</strong></p>
+                <select id="discardReason">
+                    <option value="">Select reason...</option>
+                    <option value="duplicate">Duplicate file</option>
+                    <option value="irrelevant">Not relevant to any department</option>
+                    <option value="corrupted">File is corrupted</option>
+                    <option value="test_data">Test or sample data</option>
+                    <option value="other">Other (explain in notes)</option>
+                </select>
+                <br><br>
+                <label>
+                    <input type="checkbox" id="discardConfirm" style="margin-right: 8px;">
+                    I understand this file will not be deleted automatically
+                </label>
+                <br><br>
+                <textarea id="discardNotes" placeholder="Additional notes..."></textarea>
+                <br><br>
+                <button onclick="confirmDiscard()">📋 Confirm Mark for Discard</button>
+                <button onclick="closeDiscardModal()">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Override Reason Modal -->
+        <div id="overrideModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <h3>🔄 Override AI Recommendation</h3>
+                <p>Why are you routing this file to <strong id="overrideDept"></strong> instead of the AI's recommendation?</p>
+                <p><strong>Reason for override:</strong></p>
+                <select id="overrideReason">
+                    <option value="">Select reason...</option>
+                    <option value="content_mismatch">Content doesn't match department</option>
+                    <option value="better_fit">Better fit for another department</option>
+                    <option value="policy">Company policy or compliance</option>
+                    <option value="urgency">Urgent or time-sensitive</option>
+                    <option value="sender_request">Specific sender request</option>
+                    <option value="other">Other (explain in notes)</option>
+                </select>
+                <br><br>
+                <textarea id="overrideNotes" placeholder="Additional notes..."></textarea>
+                <br><br>
+                <button onclick="confirmOverride()">✅ Confirm Override</button>
+                <button onclick="closeOverrideModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log("NAVI PRESENTER LOADED");
+
+        let items = [];
+        let currentIndex = 0;
+        let decisions = []; // Track decisions made
+        let sessionStartTime = new Date();
+        let currentLane = 'all';
+        let filteredItems = [];
+        let pendingChoice = null;
+        let dataReady = false; // 🔒 DATA-READY GATE
+
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("DOM READY");
+            // 🔒 INITIAL STATE: Disable all interactive elements until data is ready
+            setInteractiveElementsEnabled(false);
+            loadData();
+
+            // Add triage lane listeners
+            document.querySelectorAll('.lane-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // 🔒 BLOCK FILTER ACTIONS IF DATA NOT READY
+                    if (!dataReady) {
+                        console.warn("Filter action blocked: data not ready");
+                        return;
+                    }
+                    
+                    currentLane = btn.dataset.lane;
+                    document.querySelectorAll('.lane-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterItems();
+                    currentIndex = 0;
+                    render();
+                });
+            });
+        });
+
+        let presenterData = null;
+
+        // 🔒 FUNCTION TO ENABLE/DISABLE INTERACTIVE ELEMENTS
+        function setInteractiveElementsEnabled(enabled) {
+            const buttons = document.querySelectorAll('.lane-btn, .alt-btn, .ai-recommend, .discard-btn');
+            buttons.forEach(btn => {
+                btn.disabled = !enabled;
+                btn.style.opacity = enabled ? '1' : '0.5';
+                btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+            });
+        }
+
+        function filterItems() {
+            if (currentLane === 'all') {
+                filteredItems = items;
+            } else {
+                filteredItems = items.filter(item => {
+                    const ai = item.ai || {};
+                    const riskFlags = ai.risk_flags || item.risk_flags || [];
+                    const confidence = ai.confidence || item.confidence || 0;
+                    const summary = ai.summary || (item.ai_summary && item.ai_summary.length > 0 ? item.ai_summary.join(' ') : '');
+
+                    switch (currentLane) {
+                        case 'high-risk':
+                            return riskFlags.includes('executable') || riskFlags.includes('missing_summary') || item.state === 'QUARANTINED';
+                        case 'low-confidence':
+                            return confidence < 70;
+                        case 'unparseable':
+                            return riskFlags.includes('missing_summary') || !summary || summary.trim() === '';
+                        case 'ambiguous':
+                            return confidence >= 70 && confidence < 85;
+                        default:
+                            return true;
+                    }
+                });
+            }
+            document.getElementById("exceptionCount").textContent = `Review Required ${currentIndex + 1} of ${filteredItems.length}`;
+        }
+
+        async function loadData() {
+            try {
+                console.log("LOADING DATA...");
+                // 🔒 CONSOLIDATE LOADING STATES INTO ONE MESSAGE
+                document.getElementById("snapshotHeader").textContent = "Waiting for snapshot data...";
+                document.getElementById("exceptionCount").textContent = "Waiting for snapshot data...";
+                
+                const response = await fetch('./generated/presenter.json');
+                const data = await response.json();
+                presenterData = data;
+                items = data.items || [];
+
+                // LEGACY SUPPORT:
+                // item.ai_summary, item.risk_flags, trust.exception_count
+                // Remove after all snapshots < 2025-12-21 are archived
+                const trust = data.trust_header;
+                if (trust?.exception_count !== undefined) {
+                    console.warn("Legacy presenter schema detected (trust.exception_count)");
+                }
+
+                // Filter items based on current lane
+                filterItems();
+                if (trust?.exception_count !== undefined) {
+                    console.warn("Legacy presenter schema detected (trust.exception_count)");
+                }
+
+                // Update snapshot header
+                if (trust) {
+                    const timestamp = new Date(trust.rendered_at).toISOString().slice(0, 19).replace('T', ' ');
+                    const reviewCount = data.counters?.review_required ?? trust.exception_count ?? data.items.filter(i => i.state === "REVIEW_REQUIRED").length;
+                    document.getElementById("snapshotHeader").textContent = `Snapshot: ${timestamp}Z | Review Required: ${reviewCount}`;
+                }
+
+                if (items.length === 0) {
+                    document.getElementById("app").innerHTML = `
+                        <div class="completion">
+                            <h2>Snapshot received — no exceptions 🎉</h2>
+                            <p>All files have been automatically routed.</p>
+                            <p style="color: #7a8299; font-size: 14px; margin-top: 16px;">Waiting for new inbox file...</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                console.log("LOADED", items.length, "items");
+                // Update exception count
+                // document.getElementById("exceptionCount").textContent = `Exception 1 of ${items.length}`;
+                
+                // 🔒 SET DATA READY GATE
+                dataReady = true;
+                setInteractiveElementsEnabled(true);
+                
+                render();
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                // 🔒 CONSOLIDATE LOADING STATES - Keep waiting message
+                document.getElementById("snapshotHeader").textContent = "Waiting for snapshot data...";
+                document.getElementById("exceptionCount").textContent = "Waiting for snapshot data...";
+                
+                // Auto-refresh every 5 seconds when waiting
+                setTimeout(() => loadData(), 5000);
+                return;
+            }
+        }
+
+        function render() {
+            // 🔒 DATA-READY GATE: Block all rendering until data is ready
+            if (!dataReady) {
+                document.getElementById("fileCard").style.display = "none";
+                document.getElementById("exceptionCount").textContent = "Waiting for snapshot data...";
+                return;
+            }
+            
+            // Show the file card now that data is ready
+            document.getElementById("fileCard").style.display = "block";
+            
+            const item = filteredItems[currentIndex];
+
+            // LEGACY SUPPORT:
+            // item.ai_summary, item.risk_flags, trust.exception_count
+            // Remove after all snapshots < 2025-12-21 are archived
+            if (item.ai_summary) {
+                console.warn("Legacy presenter schema detected (item.ai_summary)");
+            }
+
+            // Update exception count
+            document.getElementById("exceptionCount").textContent = `Review Required ${currentIndex + 1} of ${filteredItems.length}`;
+
+            // 🎯 ADD "WHY THIS NEEDS REVIEW" LINE
+            const aiConfidence = item.ai?.confidence ?? item.confidence ?? 0;
+            let reviewReason = "";
+            if (aiConfidence < 70) {
+                reviewReason = "Needs review because confidence < 70%";
+            } else if (aiConfidence < 85) {
+                reviewReason = "Needs review because confidence < 85%";
+            } else if (item.ai?.risk_flags?.length > 0) {
+                reviewReason = `Needs review: ${item.ai.risk_flags.join(', ')}`;
+            } else {
+                reviewReason = "Needs human verification";
+            }
+            document.getElementById("reviewReason").textContent = reviewReason;
+
+            // Update file info
+            const isReceipt = item.ai?.is_receipt || item.is_receipt;
+            const receiptBadge = isReceipt ? '<span class="receipt-badge">🧾 RECEIPT</span>' : '';
+            document.getElementById("fileName").innerHTML = `${item.filename} ${receiptBadge}`;
+            document.getElementById("fileType").textContent = item.file_type || item.filename.split('.').pop().toUpperCase();
+            document.getElementById("confidence").textContent = (item.ai?.confidence ?? item.confidence) + "% confidence";
+
+            // Update AI recommendation display
+            const aiGuess = item.ai?.guess || item.routed_to || 'Unknown';
+            const aiConfidence = item.ai?.confidence ?? item.confidence ?? 0;
+            
+            // Color-code based on recommendation
+            let colorClass = '';
+            let emoji = '';
+            if (aiGuess === 'Quarantine') {
+                colorClass = 'quarantine';
+                emoji = '🟠';
+            } else if (aiGuess === 'Personal') {
+                colorClass = 'personal';
+                emoji = '👤';
+            } else {
+                colorClass = 'department';
+                emoji = '🟢';
+            }
+            
+            document.getElementById("recommendationText").innerHTML = `${emoji} AI recommends: ${aiGuess}`;
+            document.getElementById("recommendationText").className = `recommendation-text ${colorClass}`;
+            document.getElementById("recommendationConfidence").textContent = `${aiConfidence}% confidence`; 
+            
+            // Update AI banner with reasoning
+            const reasons = item.ai?.reasons || item.reasons || [];
+            const primaryReason = reasons.length > 1 ? reasons[1] : reasons[0] || 'AI analysis';
+            document.getElementById("bannerContent").textContent = `AI recommends: ${aiGuess} (${aiConfidence}% confidence) - ${primaryReason}`;
+
+            // Update AI summary
+            const aiSummary = item.ai?.summary || (item.ai_summary && item.ai_summary.length > 0 ? item.ai_summary.join('\n') : null);
+            const summaryContent = aiSummary ? `<p>${aiSummary.replace(/\n/g, '</p><p>')}</p>` : '<p>No summary available</p>';
+            document.getElementById("summaryContent").innerHTML = summaryContent;
+
+            // Update risk flags
+            const riskFlagsDiv = document.getElementById("riskFlags");
+            const riskFlags = item.ai?.risk_flags || item.risk_flags || [];
+            if (riskFlags.length > 0) {
+                riskFlagsDiv.innerHTML = riskFlags.map(flag => `<span class="risk-flag">${flag}</span>`).join('');
+            } else {
+                riskFlagsDiv.innerHTML = '';
+            }
+
+            // Update AI recommend button - 🔒 MAKE RECOMMENDATION EXPLICIT OR BLOCK APPROVAL
+            const aiBtn = document.getElementById("aiRecommendBtn");
+            const aiGuess = item.ai?.guess || item.routed_to || 'Unknown';
+            const aiConfidence = item.ai?.confidence ?? item.confidence ?? 0;
+            
+            if (aiGuess && aiGuess !== 'Unknown') {
+                aiBtn.textContent = `✅ Approve AI Route → ${aiGuess} (${aiConfidence}%)`;
+                aiBtn.disabled = false;
+                aiBtn.style.opacity = '1';
+                aiBtn.style.cursor = 'pointer';
+                aiBtn.title = `Approve AI recommendation: route to ${aiGuess}`;
+            } else {
+                aiBtn.textContent = `❌ AI Recommendation Not Available`;
+                aiBtn.disabled = true;
+                aiBtn.style.opacity = '0.5';
+                aiBtn.style.cursor = 'not-allowed';
+                aiBtn.title = `AI recommendation not available - cannot approve`;
+            }
+
+            console.log("RENDERED ITEM", currentIndex + 1, "of", items.length, "-", item.filename);
+        }
+
+        function decide(choice) {
+            // 🔒 BLOCK ACTION IF NO CURRENT ITEM
+            if (!dataReady || !filteredItems[currentIndex]) {
+                console.warn("Action blocked: no active item or data not ready");
+                return;
+            }
+            
+            if (choice === 'ai') {
+                // Direct approval, no reason needed
+                executeDecision(choice);
+            } else {
+                // Show override modal
+                pendingChoice = choice;
+                document.getElementById("overrideDept").textContent = choice;
+                document.getElementById("overrideModal").style.display = "flex";
+            }
+        }
+
+        function executeDecision(choice, human_reason = null) {
+            const item = filteredItems[currentIndex];
+            let dept;
+
+            if (choice === 'ai') {
+                dept = item.routed_to; // Use AI suggested route
+            } else {
+                dept = choice;
+            }
+
+            // Track the decision
+            decisions.push({
+                filename: item.filename,
+                original_route: item.ai?.guess || item.routed_to,
+                final_route: dept,
+                confidence: item.ai?.confidence ?? item.confidence,
+                timestamp: new Date().toISOString(),
+                human_reason: human_reason
+            });
+
+            console.log("DECISION:", dept, "for", item.filename);
+
+            currentIndex++;
+
+            if (currentIndex >= filteredItems.length) {
+                showCompletion();
+            } else {
+                render();
+            }
+        }
+
+        function showDiscardModal() {
+            // 🔒 BLOCK ACTION IF NO CURRENT ITEM
+            if (!dataReady || !filteredItems[currentIndex]) {
+                console.warn("Action blocked: no active item or data not ready");
+                return;
+            }
+            
+            const item = filteredItems[currentIndex];
+            const isReceipt = item.ai?.is_receipt || item.is_receipt;
+            
+            if (isReceipt) {
+                // Special warning for receipts
+                if (!confirm("⚠️ RECEIPT DETECTED ⚠️\n\nThis file has been identified as a RECEIPT.\n\nReceipts are protected from discard to prevent accidental data loss.\n\nAre you absolutely sure you want to mark this receipt for discard?\n\nThis action requires explicit confirmation.")) {
+                    return;
+                }
+            }
+            
+            document.getElementById("discardModal").style.display = "flex";
+        }
+
+        function closeDiscardModal() {
+            document.getElementById("discardModal").style.display = "none";
+        }
+
+        function showOverrideModal(choice) {
+            // 🔒 BLOCK ACTION IF NO CURRENT ITEM
+            if (!dataReady || !filteredItems[currentIndex]) {
+                console.warn("Action blocked: no active item or data not ready");
+                return;
+            }
+            
+            pendingChoice = choice;
+            document.getElementById("overrideDept").textContent = choice;
+            document.getElementById("overrideModal").style.display = "flex";
+        }
+
+        function closeOverrideModal() {
+            document.getElementById("overrideModal").style.display = "none";
+            pendingChoice = null;
+        }
+
+        function confirmOverride() {
+            const reason = document.getElementById("overrideReason").value;
+            const notes = document.getElementById("overrideNotes").value;
+            
+            // Require either a reason OR at least 10 characters of notes (soft requirement)
+            if (!reason && (!notes || notes.trim().length < 10)) {
+                alert("Please select a reason or add detailed notes (>10 chars) for the override.");
+                return;
+            }
+
+            const human_reason = `${reason}${notes ? ': ' + notes : ''}`;
+            executeDecision(pendingChoice, human_reason);
+            closeOverrideModal();
+        }
+
+        function confirmDiscard() {
+            const reason = document.getElementById("discardReason").value;
+            const notes = document.getElementById("discardNotes").value;
+            const confirmed = document.getElementById("discardConfirm").checked;
+            
+            if (!reason) {
+                alert("Please select a reason for discard.");
+                return;
+            }
+            
+            if (!confirmed) {
+                alert("Please confirm that you understand this file will not be deleted automatically.");
+                return;
+            }
+
+            const item = filteredItems[currentIndex];
+            const human_reason = `${reason}${notes ? ': ' + notes : ''}`;
+
+            decisions.push({
+                filename: item.filename,
+                original_route: item.ai?.guess || item.routed_to,
+                final_route: 'TRASH_PENDING',
+                confidence: item.ai?.confidence ?? item.confidence,
+                timestamp: new Date().toISOString(),
+                human_reason: human_reason
+            });
+
+            console.log("DISCARD DECISION:", item.filename, "reason:", human_reason);
+
+            closeDiscardModal();
+            currentIndex++;
+
+            if (currentIndex >= filteredItems.length) {
+                showCompletion();
+            } else {
+                render();
+            }
+        }
+
+        async function showCompletion() {
+            // Safety invariant: ensure every review-required item has a human decision
+            const missingDecisions = filteredItems.filter(fi => !decisions.find(d => d.filename === fi.filename));
+            if (missingDecisions.length > 0) {
+                showToast('Some review-required items have no decision.', true);
+                return;
+            }
+
+            // First, persist human decisions to backend
+            try {
+                console.log("PERSISTING DECISIONS:", decisions);
+                const response = await fetch('/clear_exceptions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ decisions: decisions })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                console.log("DECISIONS PERSISTED SUCCESSFULLY");
+            } catch (error) {
+                console.error("FAILED TO PERSIST DECISIONS:", error);
+                // Continue anyway - decisions are still in memory
+            }
+
+            // Reload presenter data to get updated human_routed_files
+            try {
+                const response = await fetch('./generated/presenter.json');
+                const updatedData = await response.json();
+                presenterData = updatedData;
+                console.log("PRESENTER DATA RELOADED WITH HUMAN ROUTINGS");
+            } catch (error) {
+                console.error("FAILED TO RELOAD PRESENTER DATA:", error);
+                // Continue with current data
+            }
+
+            // Now build authoritative summary from backend data
+            const trust = presenterData.trust_header;
+            const aiRoutedCount = (presenterData.ai_routed_files || []).length;
+            const humanRoutedCount = (presenterData.human_routed_files || []).length;
+            const totalFiles = aiRoutedCount + humanRoutedCount;
+            const autoRouted = aiRoutedCount;
+            const humanResolved = humanRoutedCount;
+
+            // Build destinations from authoritative backend data
+            const destinations = {};
+            const fileMovements = [];
+
+            // Add AI-routed files
+            const aiFiles = presenterData.ai_routed_files || [];
+            aiFiles.forEach(file => {
+                const dest = file.routed_to || 'UNKNOWN';
+                if (!destinations[dest]) destinations[dest] = [];
+                destinations[dest].push(file.name);
+                fileMovements.push(`${file.name} → ${dest} (AI)`);
+            });
+
+            // Add human-routed files
+            const humanFiles = presenterData.human_routed_files || [];
+            humanFiles.forEach(file => {
+                const dest = file.final_route || file.routed_to || 'UNKNOWN';
+                if (!destinations[dest]) destinations[dest] = [];
+                destinations[dest].push(file.filename || file.name);
+                fileMovements.push(`${file.filename || file.name} → ${dest} (Human)`);
+            });
+
+            // Generate audit log reference
+            const sessionEndTime = new Date();
+            const auditTimestamp = sessionStartTime.toISOString().slice(0, 19).replace(/:/g, '-').replace('T', '_');
+
+            // Build destinations breakdown HTML
+            const destinationsBreakdown = Object.entries(destinations)
+                .sort(([a], [b]) => a.localeCompare(b))
+                .map(([dept, files]) => `<div class="routing-item"><span>${dept}:</span><span>${files.length} files</span></div>`)
+                .join('');
+
+            // Build file movements HTML
+            const fileMovementsHtml = fileMovements.length > 0 ? 
+                `<details class="file-movements">
+                    <summary>▼ Show file movements</summary>
+                    <div class="movements-list">
+                        ${fileMovements.map(movement => `<div class="movement-item">${movement}</div>`).join('')}
+                    </div>
+                </details>` : '';
+
+            document.getElementById("app").innerHTML = `
+                <div class="completion">
+                    <h2>All exceptions cleared ✅</h2>
+
+                    <div class="batch-summary">
+                        <h3>Batch Summary</h3>
+                        <div class="summary-item">
+                            <span class="summary-label">Total files processed:</span>
+                            <span class="summary-value">${totalFiles}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Auto-routed by AI:</span>
+                            <span class="summary-value">${autoRouted}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Human exceptions resolved:</span>
+                            <span class="summary-value">${humanResolved}</span>
+                        </div>
+                        <div class="routing-breakdown">
+                            <div class="summary-item" style="border-bottom: none; padding-bottom: 0;">
+                                <span class="summary-label">Final destinations:</span>
+                                <span></span>
+                            </div>
+                            ${destinationsBreakdown}
+                        </div>
+                        ${fileMovementsHtml}
+                    </div>
+
+                    <div class="audit-log">
+                        <p>Audit log saved:</p>
+                        <div class="audit-reference">${auditTimestamp}_batch.log</div>
+                    </div>
+
+                    <div class="completion-actions">
+                        <button class="completion-btn print-btn" onclick="window.print()">🖨️ Print / Save Log</button>
+                        <button class="completion-btn" onclick="location.reload()">🔁 Return to Inbox</button>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

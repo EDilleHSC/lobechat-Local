@@ -1,0 +1,133 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T05:31:43.236Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "filename": "test1.pdf",
+      "type": "PDF",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 92,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending",
+      "action": "auto_routed",
+      "dept": "Intake"
+    },
+    {
+      "filename": "test2.docx",
+      "type": "DOCX",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 98,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending",
+      "action": "auto_trashed",
+      "dept": "Trash"
+    },
+    {
+      "filename": "test5.jpg",
+      "type": "JPG",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 42,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Image file - low AI confidence"
+      ],
+      "state": "pending",
+      "action": "exception_routed",
+      "dept": "Intake"
+    },
+    {
+      "filename": "test_watcher.txt",
+      "type": "TXT",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 97,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending",
+      "action": "auto_routed",
+      "dept": "Intake"
+    }
+  ],
+  "exceptions": [
+    {
+      "filename": "25_VS_AGENT_MASTER_EXECUTION_PLAN.md",
+      "type": "MD",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 76,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "26_SANDBOX_DECISION_GUIDE.md",
+      "type": "MD",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 83,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test3.txt",
+      "type": "TXT",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 59,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test4.xlsx",
+      "type": "XLSX",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 52,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "test_file.txt",
+      "type": "TXT",
+      "received": "2025-12-21",
+      "route": "INBOX",
+      "confidence": 87,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    }
+  ],
+  "totalFiles": 9,
+  "autoRoutedCount": 4,
+  "exceptionCount": 5,
+  "status": "processed"
+}

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVI Mail Room — Review</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0e27;
+            color: #f0f0f0;
+            font-family: 'Atkinson Hyperlegible', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4ac04a;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #7a8299;
+            font-size: 14px;
+        }
+
+        .file-card {
+            background: #1e2749;
+            border: 1px solid #2a3a6b;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .file-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #f0f0f0;
+        }
+
+        .file-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #7a8299;
+        }
+
+        .file-type {
+            background: #2a3a6b;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .confidence {
+            color: #f5a623;
+            font-weight: 500;
+        }
+
+        .ai-insight {
+            background: #0f1433;
+            border: 1px solid #1e2749;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .ai-guess {
+            color: #4ac04a;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .ai-suggest {
+            color: #7a8299;
+            font-size: 14px;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ai-recommend {
+            background: linear-gradient(135deg, #4ac04a 0%, #5ad05a 100%);
+            color: #0a0e27;
+            border: none;
+            border-radius: 8px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(74, 192, 74, 0.3);
+        }
+
+        .ai-recommend:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(74, 192, 74, 0.4);
+        }
+
+        .alt-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .alt-btn {
+            background: #2a3a6b;
+            color: #f0f0f0;
+            border: 1px solid #3a4a7b;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .alt-btn:hover {
+            background: #3a4a7b;
+            border-color: #4a5a8b;
+        }
+
+        .trash-btn {
+            background: #e74c3c;
+            color: #f0f0f0;
+            border: 1px solid #f44336;
+            grid-column: span 2;
+        }
+
+        .trash-btn:hover {
+            background: #f44336;
+            border-color: #ff5c4c;
+        }
+
+        .completion {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .completion h2 {
+            color: #4ac04a;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .completion p {
+            color: #7a8299;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <div class="header">
+            <h1>NAVI Mail Room</h1>
+            <p>AI is unsure. Where should this go?</p>
+        </div>
+
+        <div class="file-card" id="fileCard">
+            <div class="file-name" id="fileName">Loading...</div>
+            <div class="file-meta">
+                <span class="file-type" id="fileType">—</span>
+                <span class="confidence" id="confidence">—</span>
+            </div>
+
+            <div class="ai-insight">
+                <div class="ai-guess" id="aiGuess">AI is analyzing...</div>
+                <div class="ai-suggest" id="aiSuggest">AI suggests: —</div>
+            </div>
+
+            <div class="actions">
+                <button class="ai-recommend" id="aiRecommendBtn" onclick="decide('ai')">✅ Send to — (AI Recommendation)</button>
+
+                <div class="alt-actions">
+                    <button class="alt-btn" onclick="decide('Account')">📊 Account</button>
+                    <button class="alt-btn" onclick="decide('Legal')">⚖️ Legal</button>
+                    <button class="alt-btn" onclick="decide('Finance')">💰 Finance</button>
+                    <button class="alt-btn" onclick="decide('Intake')">📥 Intake</button>
+                    <button class="alt-btn trash-btn" onclick="decide('Trash')">🗑️ Trash</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log("NAVI PRESENTER LOADED");
+
+        let items = [];
+        let currentIndex = 0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("DOM READY");
+            loadData();
+        });
+
+        async function loadData() {
+            try {
+                console.log("LOADING DATA...");
+                const response = await fetch('./generated/presenter.json');
+                const data = await response.json();
+                items = data.items || [];
+
+                if (items.length === 0) {
+                    document.getElementById("app").innerHTML = `
+                        <div class="completion">
+                            <h2>No exceptions to review 🎉</h2>
+                            <p>All files have been automatically routed.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                console.log("LOADED", items.length, "items");
+                render();
+            } catch (error) {
+                console.error('Failed to load data:', error);
+                // Fallback demo data
+                items = [
+                    {
+                        filename: 'Q4_invoice_final.pdf',
+                        file_type: 'PDF',
+                        confidence: 79,
+                        routed_to: 'Finance',
+                        reasons: ['Looks like a financial invoice', 'Contains payment terms', 'PDF format typical for invoices']
+                    },
+                    {
+                        filename: 'team_photo_holiday.jpg',
+                        file_type: 'JPG',
+                        confidence: 72,
+                        routed_to: 'Intake',
+                        reasons: ['Appears to be a photo/media asset', 'Holiday-themed content', 'JPG format typical for images']
+                    },
+                    {
+                        filename: 'vendor_contract_draft.docx',
+                        file_type: 'DOCX',
+                        confidence: 89,
+                        routed_to: 'Legal',
+                        reasons: ['Contains legal contract language', 'Vendor agreement terms', 'DOCX format typical for contracts']
+                    }
+                ];
+                console.log("USING FALLBACK DATA");
+                render();
+            }
+        }
+
+        function render() {
+            const item = items[currentIndex];
+
+            // Update file info
+            document.getElementById("fileName").textContent = item.filename;
+            document.getElementById("fileType").textContent = item.file_type;
+            document.getElementById("confidence").textContent = item.confidence + "% confidence";
+
+            // Generate AI guess from reasons
+            const aiGuess = generateAIGuess(item);
+            document.getElementById("aiGuess").textContent = aiGuess;
+
+            // AI suggestion
+            const aiDept = item.routed_to || "Intake";
+            document.getElementById("aiSuggest").textContent = "AI suggests: " + aiDept;
+
+            // Update AI recommend button
+            const recommendBtn = document.getElementById("aiRecommendBtn");
+            recommendBtn.textContent = `✅ Send to ${aiDept} (AI Recommendation)`;
+
+            console.log("RENDERED ITEM", currentIndex + 1, "of", items.length, "-", item.filename);
+        }
+
+        function generateAIGuess(item) {
+            // Generate human-readable AI guess from reasons
+            if (item.reasons && item.reasons.length > 0) {
+                return item.reasons[0]; // Use first reason as the main guess
+            }
+
+            // Fallback based on file type and routing
+            const type = item.file_type.toLowerCase();
+            const route = item.routed_to?.toLowerCase();
+
+            if (type === 'pdf' && route === 'finance') return "Looks like a financial document or invoice";
+            if (type === 'jpg' && route === 'intake') return "Appears to be a photo or media asset";
+            if (type === 'docx' && route === 'legal') return "Seems to be a contract or legal document";
+
+            return "AI is analyzing this " + type.toUpperCase() + " file";
+        }
+
+        function decide(choice) {
+            const item = items[currentIndex];
+            let dept;
+
+            if (choice === 'ai') {
+                dept = item.routed_to || "Intake";
+            } else {
+                dept = choice;
+            }
+
+            console.log("DECISION:", dept, "for", item.filename);
+            alert("Decision recorded: " + dept + " for " + item.filename);
+
+            currentIndex++;
+
+            if (currentIndex >= items.length) {
+                document.getElementById("app").innerHTML = `
+                    <div class="completion">
+                        <h2>All done! ✅</h2>
+                        <p>${items.length} files have been reviewed and routed.</p>
+                    </div>
+                `;
+            } else {
+                render();
+            }
+        }
+    </script>
+</body>
+</html>

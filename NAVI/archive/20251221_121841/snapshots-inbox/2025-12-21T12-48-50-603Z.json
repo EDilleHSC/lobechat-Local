@@ -1,0 +1,70 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T12:48:50.603Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "id": "d704b8897f6a30e18c2fd2d367b286ee7dc9b43604ddc23b0957f56eb84a038b",
+      "filename": "test_receipt.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\test_receipt.txt",
+      "state": "MOVED",
+      "ai": {
+        "guess": "Finance",
+        "confidence": 94,
+        "reasons": [
+          "AI analysis",
+          "Contains financial keywords"
+        ],
+        "summary": "File: test_receipt.txt, Size: 379 bytes, Type: .txt\n- Appears to be a financial document",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T12:48:50.602Z",
+        "analyzed": "2025-12-21T12:48:50.602Z",
+        "decided": null,
+        "moved": "2025-12-21T12:48:50.603Z"
+      }
+    }
+  ],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 79,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe",
+        "risk_flags": [
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T12:48:50.602Z",
+        "analyzed": "2025-12-21T12:48:50.602Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    }
+  ],
+  "totalFiles": 2,
+  "autoRoutedCount": 1,
+  "reviewRequiredCount": 1,
+  "status": "processed"
+}

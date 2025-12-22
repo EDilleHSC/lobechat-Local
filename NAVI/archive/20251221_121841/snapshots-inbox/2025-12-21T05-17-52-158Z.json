@@ -1,0 +1,66 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T05:17:52.158Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [
+    {
+      "filename": "NAVI_SYSTEM_PROMPT_LOBEHUIB_FINAL.md",
+      "type": "MD",
+      "received": "2025-12-09",
+      "route": "INBOX",
+      "confidence": 93,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending",
+      "action": "auto_routed",
+      "dept": "Intake"
+    }
+  ],
+  "exceptions": [
+    {
+      "filename": "25_VS_AGENT_MASTER_EXECUTION_PLAN.md",
+      "type": "MD",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 55,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "26_SANDBOX_DECISION_GUIDE.md",
+      "type": "MD",
+      "received": "2025-12-11",
+      "route": "INBOX",
+      "confidence": 55,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis",
+        "Low confidence, needs review"
+      ],
+      "state": "pending"
+    },
+    {
+      "filename": "NAVI_HYBRID_FILE_INTAKE_SYSTEM.md",
+      "type": "MD",
+      "received": "2025-12-09",
+      "route": "INBOX",
+      "confidence": 68,
+      "guessedDept": "Intake",
+      "reasons": [
+        "AI analysis"
+      ],
+      "state": "pending"
+    }
+  ],
+  "totalFiles": 4,
+  "autoRoutedCount": 1,
+  "exceptionCount": 3,
+  "status": "processed"
+}

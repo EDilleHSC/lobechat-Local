@@ -1,0 +1,94 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-21T12:46:08.835Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "reviewRequired": [
+    {
+      "id": "87ea30aed7e69f3ebcb35c200fee521800eb4e01ba3bf869ad1ce464e12f6993",
+      "filename": "Binary_File.exe",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Binary_File.exe",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Quarantine",
+        "confidence": 63,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Binary_File.exe, Size: 8 bytes, Type: .exe",
+        "risk_flags": [
+          "executable"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T12:46:08.834Z",
+        "analyzed": "2025-12-21T12:46:08.834Z",
+        "decided": null,
+        "moved": null
+      },
+      "final_state": "QUARANTINED"
+    },
+    {
+      "id": "6122cedb33f10752411ae82dcc6c778e4e95c508e27533e26035c3e90f01db08",
+      "filename": "Employment_Amendment_JohnSmith.doc",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Employment_Amendment_JohnSmith.doc",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 77,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Employment_Amendment_JohnSmith.doc, Size: 197 bytes, Type: .doc",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T12:46:08.834Z",
+        "analyzed": "2025-12-21T12:46:08.834Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "c721dff577b09b83904dede691689fdb3bbeebe1edb7955962f874c9a909ed91",
+      "filename": "Settlement_Agreement_JaneDoe_MegaCorp.doc",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Settlement_Agreement_JaneDoe_MegaCorp.doc",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 87,
+        "reasons": [
+          "AI analysis"
+        ],
+        "summary": "File: Settlement_Agreement_JaneDoe_MegaCorp.doc, Size: 206 bytes, Type: .doc",
+        "risk_flags": []
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-21T12:46:08.834Z",
+        "analyzed": "2025-12-21T12:46:08.834Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 3,
+  "autoRoutedCount": 0,
+  "reviewRequiredCount": 3,
+  "status": "processed"
+}
