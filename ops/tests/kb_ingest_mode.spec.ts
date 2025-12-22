@@ -48,19 +48,20 @@ test('KB ingest mode prevents auto-route and exposes KB banner', async () => {
 
     const data = await waitForPresenter(PRESENTER_URL);
 
-    // Assertions per SOP: KB mode flag present, no auto-routes, all items require review
-    expect(data.kb_mode).toBeTruthy();
+    // Assertions per SOP: KB mode flag present and no auto-routes
+    // Use delta-based checks to avoid relying on global inbox counts
+    expect(data.kb_mode).toBe(true);
     expect(data.kb_banner).toBeDefined();
 
     expect(data.counters.auto_routed).toBe(0);
-    expect(data.counters.review_required).toBe(files.length);
 
-    // Assertions per SOP: KB mode flag present, no auto-routes, all items require review
-    expect(data.kb_mode).toBeTruthy();
-    expect(data.kb_banner).toBeDefined();
-
-    expect(data.counters.auto_routed).toBe(0);
-    expect(data.counters.review_required).toBe(files.length);
+    // Delta-based assertion: assert only about the test files we injected
+    const filenames = files;
+    const reviewed = data.items.filter(item => filenames.includes(item.filename));
+    expect(reviewed.length).toBe(filenames.length);
+    for (const item of reviewed) {
+      expect(item.state).toBe('KB_REVIEW_REQUIRED');
+    }
 
   } finally {
     // Cleanup: move test files to HOLDING (safer than delete)

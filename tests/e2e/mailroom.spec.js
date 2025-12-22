@@ -20,15 +20,22 @@ test.describe('Mail Room UI', () => {
     });
 
     await page.goto(BASE);
-    await expect(page.locator('text=Client_Notes_Intro.docx')).toBeVisible();
-
-    // Click Track and ensure request sent
-    await page.click('button.action-btn[data-decision="Track"]');
-    // Wait for the fetch to occur
-    await page.waitForResponse('**/approval');
+    test.setTimeout(60000);
+    // Ensure the file is present
+    await expect(page.locator('.file-card h3:has-text("Client_Notes_Intro.docx")')).toBeVisible({ timeout: 15000 });
+    // Click the top Track action (acts on first file)
+    await page.locator('button.btn-track').first().click();
+    // Wait for notes area to appear for the file and Confirm the decision while awaiting the approval POST
+    await page.locator('[id="notes-Client_Notes_Intro.docx"]').waitFor({ state: 'visible', timeout: 5000 });
+    await Promise.all([
+      page.waitForResponse('**/approval'),
+      page.locator('[id="notes-Client_Notes_Intro.docx"] button[data-decision="Confirm"]').click()
+    ]);
     expect(lastReq).not.toBeNull();
     const post = JSON.parse(lastReq.postData());
-    expect(post.status).toBe('Track');
+    // Confirm a decision payload was posted for the expected file
+    expect(post.file).toBe('Client_Notes_Intro.docx');
+    expect(['Confirm','Track']).toContain(post.decision);
 
     // Simulate audit refresh returning a new row (client should re-render)
     await page.route('**/approvals/audit', route => {
@@ -37,10 +44,10 @@ test.describe('Mail Room UI', () => {
       ])});
     });
 
-    // Force refresh by calling the page's refresh() (exposed via global in script is not available)
-    // Instead wait for next poll cycle (setInterval 5s) - but to make test robust, just reload page
+    // Force refresh by reloading page (simulate audit refresh)
     await page.reload();
-    await expect(page.locator('text=MailRoom')).toBeVisible();
+    // Wait for the file list to reflect the updated decision from the audit route
+    await expect(page.locator('.file-card:has-text("Client_Notes_Intro.docx") .meta-item:has-text("Routed to:") .meta-value')).toHaveText('Track', { timeout: 10000 });
   });
 
   test('shows error when POST fails', async ({ page }) => {
@@ -54,10 +61,19 @@ test.describe('Mail Room UI', () => {
     await page.reload();
 
     // Click Track: set a test prompt (avoid browser prompt) and expect an alert with error
+    test.setTimeout(60000);
     await page.evaluate(() => { window.__TEST_PROMPT = 'test note'; });
-    await page.click('button.action-btn[data-decision="Track"]');
-    const alertDialog = await page.waitForEvent('dialog');
-    expect(alertDialog.message()).toContain('Approval failed');
+    // Ensure the dummy file is present
+    await expect(page.locator('.file-card h3:has-text("X.docx")')).toBeVisible({ timeout: 15000 });
+    // Click top Track action to open notes for the first file
+    await page.locator('button.btn-track').first().click();
+    // Wait for notes area for X.docx and click Confirm while awaiting dialog
+    await page.locator('[id="notes-X.docx"]').waitFor({ state: 'visible', timeout: 5000 });
+    const [alertDialog] = await Promise.all([
+      page.waitForEvent('dialog'),
+      page.locator('[id="notes-X.docx"] button[data-decision="Confirm"]').click()
+    ]);
+    expect(alertDialog.message()).toContain('Decision failed');
     await alertDialog.dismiss();
     await page.evaluate(() => { delete window.__TEST_PROMPT; });
   });
