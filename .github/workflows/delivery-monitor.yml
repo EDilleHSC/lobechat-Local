@@ -1,0 +1,43 @@
+name: Delivery Monitor
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # daily at 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check-delivery:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        uses: microsoft/setup-powershell@v2
+        with:
+          powershell-version: '7.4'
+
+      - name: Run delivery status check
+        id: run_check
+        shell: pwsh
+        run: |
+          $NAVI = "$GITHUB_WORKSPACE/NAVI"
+          $report = Join-Path $GITHUB_WORKSPACE 'delivery_status_report.json'
+          pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/check_delivery_status.ps1 -NaviRoot $NAVI -ReportPath $report -FailOnEmpty
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: delivery-status-report-${{ github.run_id }}
+          path: delivery_status_report.json
+          retention-days: 30
+
+      - name: Slack alert on failure
+        if: failure()
+        shell: pwsh
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          $report = Get-Content -Raw delivery_status_report.json | ConvertFrom-Json
+          $text = "Delivery Monitor: Failures detected on run $($env:GITHUB_RUN_ID)\n" + ($report.failures | ConvertTo-Json -Depth 5)
+          $body = @{ text = $text } | ConvertTo-Json
+          Invoke-RestMethod -Uri $env:SLACK_WEBHOOK_URL -Method Post -Body $body -ContentType 'application/json'
