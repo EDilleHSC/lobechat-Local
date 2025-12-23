@@ -16,8 +16,9 @@ foreach ($o in $offices) {
     $report.failures += "missing_inbox:$($o.Name)"
     continue
   }
-  $files = Get-ChildItem -Path $inbox -File -ErrorAction SilentlyContinue
-  $fileCount = if ($files) { $files.Count } else { 0 }
+  # exclude sidecars and meta files from file list
+  $files = Get-ChildItem -Path $inbox -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike '*.navi.json' -and $_.Name -notlike '*.meta.json' }
+  $fileCount = ($files | Measure-Object).Count
   $badFiles = @()
   foreach ($f in $files) {
     $sidecar = $f.FullName + '.navi.json'

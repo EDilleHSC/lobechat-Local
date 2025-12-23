@@ -1,86 +1,177 @@
 {
-  "_comment": "NAVI Mail Room Configuration (draft)",
-  "_version": "1.0",
+  "_version": "2.0",
+  "_updated": "2025-12-23",
+  "_description": "NAVI Mail Room Routing Configuration",
+
   "navi_root": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI",
-  "canonical_presenter_dir": null,
   "use_navi_root": true,
-  "enable_mailroom_routing": false,
-  "entities": {
-    "HSC": {
-      "name": "Home Stagers Choice",
-      "type": "business",
-      "functions": ["Finance","Legal","Ops","Sales","Marketing"],
-      "signals": { "names": ["Home Stagers Choice","Home Stagers Choice Ltd","HSC"], "addresses": ["3870 Mallow Rd"] }
-    },
-    "LHI": {
-      "name": "Loric Homes & Interiors",
-      "type": "business",
-      "functions": ["Finance","Legal","Ops"],
-      "signals": { "names": ["Loric Homes","LORIC","Loric Homes and Interiors","LORIC HOMES AND INTERIORS LLC"] }
-    },
-    "LTD": {
-      "name": "Loric Trading Desk",
-      "type": "business",
-      "functions": ["Finance","Ops"],
-      "signals": { "names": ["Loric Trading","LTD"] }
-    },
-    "DDM": {
-      "name": "D&D Manor",
-      "type": "personal",
-      "functions": ["Finance","Legal","Ops"],
-      "signals": { "names": ["Eric Dille","Eric Lloyd Dille","Lori Dailing"], "addresses": ["2473 Hatch Cir"] }
-    },
-    "VB": { "name": "VBoarder", "type": "system", "functions": ["Tech"], "signals": { "names": ["VBoarder","VB"] } }
-  },
+  "enable_mailroom_routing": true,
+
   "routing_rules": {
     "confidence_threshold": 70,
-    "finance_auto_route_threshold": 0.7,
-    "auto_route_entities": ["DESK","DDM","LHI"],
-    "legal_entities": ["LEGAL","RISK","CLO"],
-    "conflict_top_entities_threshold": 0.6,
-    "default_route": "DESK",
-    "address_conflict_resolution": "DESK",
-    "priority_order": ["HSC","LHI","LTD","VB","DDM"]
+    "default_route": "EXEC",
+    "escalation_route": "COS"
   },
+
+  "agents": {
+    "GYFOLE": { "name": "Gyfole", "title": "AI Partner", "level": 0 },
+    "COS": { "name": "Alex", "title": "Chief of Staff", "level": 1 },
+    "AIR": { "name": "Air", "title": "Chief Knowledge Officer", "level": 2 },
+    "EXEC": { "name": "Clara", "title": "Executive Secretary", "level": 3 },
+    "CFO": { "name": "Finn", "title": "Chief Financial Officer", "level": 3 },
+    "CLO": { "name": "Luca", "title": "Chief Legal Officer", "level": 3 },
+    "COO": { "name": "Omar", "title": "Chief Operating Officer", "level": 3 },
+    "CSO": { "name": "Sage", "title": "Chief Sales Officer", "level": 3 },
+    "CMO": { "name": "Maya", "title": "Chief Marketing Officer", "level": 3 },
+    "CTO": { "name": "Tara", "title": "Chief Technology Officer", "level": 3 },
+    "NAVI": { "name": "NAVI", "title": "Intake Agent", "level": 4 },
+    "DREW": { "name": "Drew", "title": "DevOps Engineer", "level": 4 }
+  },
+
+  "entities": {
+    "HSC": { "name": "Home Stagers Choice", "type": "business" },
+    "LHI": { "name": "Loric Homes & Interiors", "type": "business" },
+    "LTD": { "name": "Loric Trading Desk", "type": "business" },
+    "DDM": { "name": "D&D Manor", "type": "personal" }
+  },
+
+  "entity_signals": {
+    "HSC": {
+      "names": ["Home Stagers Choice", "Home Stagers Choice Ltd", "HSC"],
+      "addresses": ["3870 Mallow Rd"]
+    },
+    "LHI": {
+      "names": ["Loric Homes", "LORIC", "Loric Homes and Interiors", "LORIC HOMES AND INTERIORS LLC"],
+      "addresses": ["3870 Mallow Rd"]
+    },
+    "LTD": {
+      "names": ["Loric Trading", "LTD", "Loric Trading Desk"],
+      "addresses": []
+    },
+    "DDM": {
+      "names": ["Eric Dille", "Eric Lloyd Dille", "Eric L Dille", "Lori Dailing", "Lori E Dailing"],
+      "addresses": ["2473 Hatch Cir", "2473 Hatch Circle"]
+    }
+  },
+
+  "function_to_office": {
+    "Finance": "CFO",
+    "Legal": "CLO",
+    "Ops": "COO",
+    "Sales": "CSO",
+    "Marketing": "CMO",
+    "Tech": "CTO",
+    "DevOps": "DREW",
+    "Exec": "EXEC",
+    "Knowledge": "AIR",
+    "DESK": "COS"
+  },
+
   "doc_type_to_function": {
     "bill": "Finance",
     "invoice": "Finance",
     "receipt": "Finance",
     "statement": "Finance",
+    "tax_form": "Finance",
+    "insurance_policy": "Finance",
+    "mortgage": "Finance",
+    "utility_bill": "Finance",
+    "debt_collection": "Finance",
+
     "contract": "Legal",
-    "license": "Legal",
     "agreement": "Legal",
+    "license": "Legal",
+    "permit": "Legal",
+    "legal_notice": "Legal",
+    "certificate": "Legal",
+    "filing": "Legal",
+    "compliance": "Legal",
+
+    "work_order": "Ops",
     "schedule": "Ops",
+    "manifest": "Ops",
+    "inspection_report": "Ops",
+    "maintenance": "Ops",
     "inventory": "Ops",
+
     "quote": "Sales",
+    "proposal": "Sales",
+    "order": "Sales",
+    "lead": "Sales",
+    "sales_contract": "Sales",
+
+    "photo": "Marketing",
     "listing": "Marketing",
-    "documentation": "Tech"
+    "ad": "Marketing",
+    "design": "Marketing",
+    "content": "Marketing",
+
+    "code": "Tech",
+    "config": "Tech",
+    "documentation": "Tech",
+    "log": "Tech",
+    "schema": "Tech",
+
+    "deploy": "DevOps",
+    "infrastructure": "DevOps",
+    "pipeline": "DevOps"
   },
-  "route_paths": {
-    "DDM.Finance": "sorted/DDM/Finance/INBOX",
-    "DESK.Finance": "sorted/DESK/Finance/INBOX",
-    "LHI.Finance": "sorted/LHI/Finance/INBOX",
-    "HSC.Finance": "sorted/HSC/Finance/INBOX",
-    "DESK.Sales": "sorted/DESK/Sales/INBOX",
-    "HSC.Sales": "sorted/HSC/Sales/INBOX",
-    "LHI.Sales": "sorted/LHI/Sales/INBOX",
-    "DESK.Sales.SENT": "sorted/DESK/Sales/SENT",
-    "mail_room.review_required": "mail_room/review_required"
+
+  "keywords_to_function": {
+    "Finance": [
+      "bill", "invoice", "payment", "amount due", "due date", "past due",
+      "bank", "deposit", "withdrawal", "mortgage", "loan", "interest",
+      "credit card", "visa", "mastercard", "amex", "tax", "1099", "W-2", "IRS",
+      "premium", "insurance", "collection", "debt", "receipt", "paid",
+      "budget", "expense", "electric", "gas", "water", "utility", "statement"
+    ],
+    "Legal": [
+      "contract", "agreement", "terms", "license", "permit", "renewal",
+      "notice", "summons", "subpoena", "court", "lawsuit", "compliance",
+      "LLC", "corporation", "trademark", "copyright", "NDA", "deed", "title",
+      "attorney", "legal", "law", "regulation"
+    ],
+    "Ops": [
+      "schedule", "appointment", "booking", "vendor", "supplier",
+      "inventory", "stock", "warehouse", "shipping", "delivery", "tracking",
+      "maintenance", "repair", "work order", "equipment", "vehicle", "truck",
+      "dispatch", "route", "logistics", "facility"
+    ],
+    "Sales": [
+      "lead", "prospect", "inquiry", "quote", "estimate", "proposal",
+      "order", "booking", "client", "customer", "commission", "staging",
+      "consultation", "pipeline", "opportunity", "close", "deal"
+    ],
+    "Marketing": [
+      "photo", "image", "listing", "MLS", "social media", "facebook",
+      "instagram", "ad", "campaign", "brand", "logo", "content", "blog",
+      "website", "SEO", "press", "promotion"
+    ],
+    "Tech": [
+      "code", "script", "git", "commit", "config", "database", "SQL",
+      "API", "security", "authentication", "bug", "feature", "test"
+    ],
+    "DevOps": [
+      "server", "deploy", "infrastructure", "CI/CD", "pipeline",
+      "docker", "container", "kubernetes", "AWS", "cloud", "Azure",
+      "monitoring", "logs", "backup", "restore"
+    ],
+    "Exec": [
+      "schedule", "calendar", "meeting", "appointment", "call",
+      "correspondence", "letter", "memo", "message", "admin",
+      "unclear", "unknown"
+    ],
+    "Knowledge": [
+      "what is", "how do", "find", "lookup", "search", "research",
+      "policy", "procedure", "history", "previous", "remember"
+    ]
   },
-  "function_to_office": {
-    "Finance": "CFO_OFFICE",
-    "Legal": "CLO_OFFICE",
-    "Ops": "COO_OFFICE",
-    "Sales": "CSO_OFFICE",
-    "Marketing": "CMO_OFFICE",
-    "Tech": "CTO_OFFICE",
-    "Exec": "EXEC_OFFICE",
-    "DESK": "COS_OFFICE"
+
+  "urgency_keywords": {
+    "urgent": ["urgent", "ASAP", "immediately", "critical", "emergency", "today"],
+    "high": ["important", "priority", "deadline", "due soon", "time-sensitive"],
+    "past_due": ["past due", "overdue", "final notice", "collections", "late", "delinquent"]
   },
-  "urgency_rules": {
-    "urgent_keywords": ["past due","final notice","due today","immediate"],
-    "urgent_if_past_due": true,
-    "urgent_if_due_within_days": 1,
-    "high_if_due_within_days": 7
-  }
+
+  "priority_order": ["Legal", "Finance", "Sales", "Ops", "Marketing", "Tech", "DevOps", "Exec"]
 }
