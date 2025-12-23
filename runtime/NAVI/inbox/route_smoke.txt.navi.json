@@ -1,0 +1,12 @@
+{
+  "generated_at": "2025-12-23T04:22:51.590Z",
+  "filename": "route_smoke.txt",
+  "entity": "DESK",
+  "function": null,
+  "route": "mail_room.review_required",
+  "confidence": 0,
+  "autoRoute": false,
+  "reasons": [
+    "Will require review (autoRoute=false)"
+  ]
+}

@@ -1,0 +1,3 @@
+Subject: Meeting Setup for CEO
+Priority: URGENT
+Message: "Receptionist, please book a meeting room for the CEO and 3 guests at 2 PM today. Also, ensure there's a projector and whiteboard available."

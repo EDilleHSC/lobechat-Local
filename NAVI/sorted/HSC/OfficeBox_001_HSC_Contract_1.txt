@@ -1,0 +1,5 @@
+Office Box Move-In: Contract 1
+Client: Example Co.
+Department: HSC
+Document Type: Contract
+Notes: Please route to HSC Legal - Housing Standards Committee for storage and review.
