@@ -56,6 +56,27 @@
     "listing": "Marketing",
     "documentation": "Tech"
   },
+  "route_paths": {
+    "DDM.Finance": "sorted/DDM/Finance/INBOX",
+    "DESK.Finance": "sorted/DESK/Finance/INBOX",
+    "LHI.Finance": "sorted/LHI/Finance/INBOX",
+    "HSC.Finance": "sorted/HSC/Finance/INBOX",
+    "DESK.Sales": "sorted/DESK/Sales/INBOX",
+    "HSC.Sales": "sorted/HSC/Sales/INBOX",
+    "LHI.Sales": "sorted/LHI/Sales/INBOX",
+    "DESK.Sales.SENT": "sorted/DESK/Sales/SENT",
+    "mail_room.review_required": "mail_room/review_required"
+  },
+  "function_to_office": {
+    "Finance": "CFO_OFFICE",
+    "Legal": "CLO_OFFICE",
+    "Ops": "COO_OFFICE",
+    "Sales": "CSO_OFFICE",
+    "Marketing": "CMO_OFFICE",
+    "Tech": "CTO_OFFICE",
+    "Exec": "EXEC_OFFICE",
+    "DESK": "COS_OFFICE"
+  },
   "urgency_rules": {
     "urgent_keywords": ["past due","final notice","due today","immediate"],
     "urgent_if_past_due": true,
