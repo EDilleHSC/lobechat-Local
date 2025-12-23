@@ -111,8 +111,31 @@
             </form>
 
             <p class="small muted" style="margin-top:12px">If POST returns 403/503: restart the server ensuring <code>MCP_APPROVAL_TOKEN</code> is set in the server process environment.</p>
-        </div>
 
+            <!-- Demo mode (used for unit tests) -->
+            <div style="margin-top:18px">
+                <button id="btnDemoToggle" class="btn-secondary" type="button">Toggle Demo Mode</button>
+            </div>
+
+            <div id="demoModal" role="dialog" aria-hidden="true" style="display:none;margin-top:12px;background:#07102a;padding:12px;border-radius:8px">
+                <h4>Demo Mode</h4>
+                <p class="small muted">Use demo mode to simulate quick approvals</p>
+                <label for="signatureName">Name</label>
+                <input id="signatureName" type="text" placeholder="Signature name" style="width:100%;padding:8px;margin-bottom:8px">
+                <div id="demoChecklist">
+                    <ul style="list-style:disc;padding-left:20px">
+                        <li>Step 1: Inspect layout</li>
+                        <li>Step 2: Check accessibility</li>
+                        <li>Step 3: Quick QA</li>
+                        <li>Step 4: Confirm production
+                        </li>
+                    </ul>
+                </div>
+                <div style="margin-top:8px">
+                    <button id="btnApprove" class="btn">Approve demo</button>
+                    <button onclick="resetDemo()" class="btn-secondary" type="button">Reset demo</button>
+                </div>
+            </div>
   </div>
 
   <script>
@@ -288,6 +311,41 @@
       if (formEl) { formEl.addEventListener('submit', handleSubmit); console.log('handleSubmit bound to form'); window.__handleSubmitBound = true; }
       const submitButtonElement2 = document.querySelector('[data-testid="submit-approval"]');
       if (submitButtonElement2) { submitButtonElement2.addEventListener('click', handleSubmit); console.log('handleSubmit bound to submit button'); window.__handleSubmitBoundButton = true; }
+
+      // Simple demo-mode behaviors used by unit tests
+      const demoToggle = document.getElementById('btnDemoToggle');
+      const demoModal = document.getElementById('demoModal');
+      const btnApprove = document.getElementById('btnApprove');
+      function openDemo() {
+        if (!demoModal) return;
+        demoModal.style.display = 'block';
+        demoModal.classList.add('open');
+        demoModal.setAttribute('aria-hidden', 'false');
+      }
+      function closeDemo() {
+        if (!demoModal) return;
+        demoModal.style.display = 'none';
+        demoModal.classList.remove('open');
+        demoModal.setAttribute('aria-hidden', 'true');
+      }
+      function toggleDemo() { if (demoModal && demoModal.getAttribute('aria-hidden') === 'true') openDemo(); else closeDemo(); }
+      function resetDemo(){
+        const items = demoModal ? demoModal.querySelectorAll('#demoChecklist li') : [];
+        items.forEach(i => i.classList.remove('complete'));
+      }
+      if (demoToggle) demoToggle.addEventListener('click', toggleDemo);
+      if (btnApprove) btnApprove.addEventListener('click', () => {
+        // Mark some items as complete to simulate progress
+        const items = demoModal ? demoModal.querySelectorAll('#demoChecklist li') : [];
+        if (items.length >= 3) {
+          items[0].classList.add('complete');
+          items[2].classList.add('complete');
+        }
+        closeDemo();
+      });
+
+      // Expose the reset helper globally for inline onclick-driven tests
+      window.resetDemo = resetDemo;
 
     })();
   </script>

@@ -26,7 +26,6 @@ app.get('/approvals/audit', async (req, res) => {
     res.status(500).json({ error: 'could not read audit log' });
   }
 });
-
 app.listen(PORT, () => {
   console.log(`✅ Approval server listening on http://localhost:${PORT}`);
 });
