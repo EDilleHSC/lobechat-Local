@@ -82,3 +82,35 @@ See `NAVI/config/routing_config.json` for the authoritative settings:
 ---
 
 If you want, I can also add an `EXAMPLES.md` with the example sidecars from the 7 bills for reference. Let me know which docs or examples you'd like next.
+
+---
+
+### How to run the mail room dry-run
+
+From `runtime/current`:
+
+```bash
+# 1. Run OCR + update sidecars for inbox PDFs
+node tools/ocr_and_update_sidecars.js \
+  --inbox "../../NAVI/inbox" \
+  --poppler-path "./tools/poppler/Library/bin" \
+  --tesseract-path "C:/Program Files/Tesseract-OCR/tesseract.exe"
+
+# 2. Run the router in dry-run mode (no file moves)
+node router.js \
+  --config "./routing_config.json" \
+  --navi-root "../../NAVI" \
+  --dry-run
+```
+
+This will:
+- OCR all eligible PDFs in `NAVI/inbox` and write/update `.navi.json` sidecars with `ai.*` fields and `routing.*` audit metadata
+- Print a summary of routing results (e.g., `DDM.Finance: 3`, `mail_room.review_required: 4`)
+
+Notes:
+- Adjust the `--poppler-path` and `--tesseract-path` arguments as needed for your environment
+- If you want to persist moves (not a dry-run), update `router.js` to remove `--dry-run` behavior or use the appropriate flag/entrypoint in your deployment
+
+---
+
+If you'd like, I can also add a small `scripts/run_mailroom_dryrun.ps1` wrapper that runs these commands end-to-end and captures a summary output.

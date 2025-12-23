@@ -204,8 +204,26 @@ function decideRoute(item, routingConfig) {
   };
 }
 
+function getPathsForRoute(route, routingConfig) {
+  // route like 'DDM.Finance' or 'mail_room.review_required'
+  const rp = routingConfig.route_paths || {};
+  const fp = routingConfig.function_to_office || {};
+  const naviRoot = routingConfig.navi_root || path.resolve(__dirname, '..', '..', 'NAVI');
+
+  const storageRel = rp[route] || null;
+  const storage = storageRel ? path.normalize(path.join(naviRoot, storageRel)) : null;
+
+  // map function (after dot) to office name
+  const func = (route || '').split('.')[1] || null;
+  const officeName = func && fp[func] ? fp[func] : null;
+  const officeInbox = officeName ? path.normalize(path.join(naviRoot, 'offices', officeName, 'inbox')) : null;
+
+  return { route, storage, storageRel, officeName, officeInbox };
+}
+
 module.exports = {
   decideRoute,
   matchEntity,
-  guessDocType
+  guessDocType,
+  getPathsForRoute
 };
