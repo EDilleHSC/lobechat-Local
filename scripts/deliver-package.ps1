@@ -23,11 +23,49 @@ function Append-Audit {
   Add-Content -Path $log -Value $EntryJson -Encoding UTF8
 }
 
+function Ensure-RoutePathsExist {
+  # Create any configured route_paths under NAVI if they don't already exist
+  $configPath = Join-Path $NaviRoot 'config\routing_config.json'
+  if (-not (Test-Path $configPath)) { return }
+  try { $cfg = Get-Content $configPath -Raw | ConvertFrom-Json } catch { $cfg = $null }
+  if ($cfg -and $cfg.route_paths) {
+    foreach ($p in $cfg.route_paths.PSObject.Properties) {
+      $rel = $p.Value
+      $abs = if ([System.IO.Path]::IsPathRooted($rel)) { $rel } else { Join-Path $NaviRoot $rel }
+      if (-not (Test-Path $abs)) {
+        New-Item -ItemType Directory -Path $abs -Force | Out-Null
+        Write-Host "Created route path: $abs"
+      }
+    }
+  }
+}
+
+# Ensure configured route paths exist before processing
+Ensure-RoutePathsExist
+
 function Destination-For-Route {
   param($route)
-  $mapFile = Join-Path $NaviRoot "config\office_map.json"
-  if (Test-Path $mapFile) {
-    try { $map = Get-Content $mapFile -Raw | ConvertFrom-Json; if ($map.$route) { return $map.$route } } catch {}
+  # Prefer configured route_paths in routing_config.json, fallback to offices/<seg>/inbox
+  $configPath = Join-Path $NaviRoot 'config\routing_config.json'
+  if (Test-Path $configPath) {
+    try { $cfg = Get-Content $configPath -Raw | ConvertFrom-Json } catch { $cfg = $null }
+    if ($cfg -and $cfg.route_paths) {
+      # exact match (case-insensitive)
+      foreach ($p in $cfg.route_paths.PSObject.Properties) {
+        if ($p.Name.ToLower() -eq $route.ToLower()) {
+          $rel = $p.Value
+          return if ([System.IO.Path]::IsPathRooted($rel)) { $rel } else { Join-Path $NaviRoot $rel }
+        }
+      }
+      # try suffix match (e.g., DESK.Finance -> matches Finance)
+      foreach ($p in $cfg.route_paths.PSObject.Properties) {
+        $parts = $p.Name -split '\.'
+        if ($parts[-1].ToLower() -eq $route.ToLower()) {
+          $rel = $p.Value
+          return if ([System.IO.Path]::IsPathRooted($rel)) { $rel } else { Join-Path $NaviRoot $rel }
+        }
+      }
+    }
   }
   $seg = $route.Split('.')[0]
   return Join-Path $NaviRoot "offices\$seg\inbox"
