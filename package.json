@@ -19,6 +19,7 @@
   "scripts": {
     "test:unit": "jest --config jest.config.cjs",
     "test:e2e": "npx playwright test tests/e2e --retries=1",
+    "test:e2e:local": "node tests/e2e/router.e2e.js --silent",
     "test:integration": "jest --config jest.config.cjs --runInBand --testPathPattern=tests/integration",
     "test": "npm run test:unit && npm run test:e2e"
   }
