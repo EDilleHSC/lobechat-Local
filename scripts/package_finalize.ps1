@@ -142,11 +142,37 @@ foreach ($r in $rows) {
 }
 
 if ($failures.Count -gt 0) {
+  $status = 'failed'
   Write-Host "Verification FAILED with issues:`n" + ($failures -join "`n")
-  if ($DryRun) { exit 2 } else { exit 3 }
 } else {
+  $status = 'passed'
   Write-Host "Verification passed: all files exist and have delivered sidecars."
 }
+
+# Create verification report (always write, even on DryRun)
+$report = [ordered]@{
+  package = $PackageName
+  checked_at = (Get-Date).ToString('o')
+  status = $status
+  failures = $failures
+  files = @()
+}
+foreach ($r in $rows) {
+  $report.files += [ordered]@{
+    filename = $r.filename
+    route = $r.route
+    applied_at = $r.applied_at
+    delivered_to = $r.delivered_to
+    delivered_at = $r.delivered_at
+    delivered_file = $r.delivered_file
+    sha256 = if ($r.delivered_sha256) { $r.delivered_sha256 } else { $null }
+  }
+}
+$reportPath = Join-Path $pkgDir 'verify_report.json'
+$tmpReport = $reportPath + '.tmp'
+$report | ConvertTo-Json -Depth 10 | Out-File -FilePath $tmpReport -Encoding utf8
+Move-Item -Path $tmpReport -Destination $reportPath -Force
+Write-Host "Wrote verification report: $reportPath"
 
 # Archive package
 $archiveRoot = Join-Path $NaviRoot 'archive\packages'
@@ -155,7 +181,10 @@ $archivedName = "$PackageName-archived-" + (Get-Date -Format 'yyyyMMdd_HHmmss')
 $archivedPath = Join-Path $archiveRoot $archivedName
 if (-not $DryRun) {
   Move-Item -Path $pkgDir -Destination $archivedPath -Force
+  # ensure report moved too
   Write-Host "Archived package to: $archivedPath"
-} else { Write-Host "Dry-run: would archive $pkgDir -> $archivedPath" }
+  Write-Host "Verification status: $status"
+  if ($status -ne 'passed') { exit 3 }
+} else { Write-Host "Dry-run: would archive $pkgDir -> $archivedPath"; if ($status -ne 'passed') { exit 2 } }
 
 Write-Host "Done."

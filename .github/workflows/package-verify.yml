@@ -29,3 +29,25 @@ jobs:
             Write-Host "Verifying package: $($p.Name)"
             pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/package_finalize.ps1 -PackageName $p.Name -NaviRoot $NAVI -DryRun
           }
+
+      - name: Check for verify reports
+        id: check_reports
+        shell: pwsh
+        run: |
+          $glob = 'NAVI/archive/packages/**/verify_report.json'
+          $files = Get-ChildItem -Path $glob -ErrorAction SilentlyContinue -File -Force -Recurse
+          if ($files) {
+            Write-Host "Found $($files.Count) report(s)"
+            echo "found=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "No verify reports found"
+            echo "found=false" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Upload verification reports
+        if: ${{ steps.check_reports.outputs.found == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-verify-reports-${{ github.run_id }}
+          path: 'NAVI/archive/packages/**/verify_report.json'
+          retention-days: 30
