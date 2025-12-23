@@ -1,77 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Design Approval — NAVI</title>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <style>
-    body{font-family:Segoe UI,Arial,sans-serif;background:#0a0e27;color:#f0f0f0;padding:24px}
-    .card{background:#0f1433;padding:20px;border-radius:8px;border-left:5px solid #4a90e2;max-width:900px;margin:0 auto}
-    h1{font-size:20px;margin-bottom:8px}
-    label{display:block;margin:10px 0 4px;color:#a0a8c0}
-    input[type=text],textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #27314f;background:#07102a;color:#fff}
-    .checklist{display:flex;gap:12px;flex-wrap:wrap}
-    .check{background:#0f1433;padding:8px;border-radius:6px;border:1px solid #1b2340}
-    .btn{display:inline-block;padding:10px 14px;border-radius:6px;background:#4ac04a;color:#04201a;border:none;cursor:pointer;margin-top:12px}
-    .btn-secondary{background:#1e2749;color:#c8d0e0}
-    .success{background:#0b3f2e;color:#b6f7d2;padding:12px;border-radius:6px;margin-top:12px;display:none}
-    .tooltip{border-bottom:1px dotted #7a8299;cursor:help}
-    .small{font-size:12px;color:#9ea6c0}
-    .actions{display:flex;gap:8px;align-items:center;margin-top:12px}
-    .muted{color:#8b93b0}
-    .link{color:#a0c8ff}
-  </style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>NAVI Design Approval</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        * { box-sizing: border-box; }
+        body{font-family:Segoe UI,Arial,sans-serif;background:#0a0e27;color:#f0f0f0;padding:24px}
+        .container{max-width:1100px;margin:0 auto}
+        .header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+        .header h1{font-size:24px;margin:0}
+
+        .content-grid{display:grid;grid-template-columns:320px 1fr;gap:24px}
+        @media (max-width:768px){ .content-grid{grid-template-columns:1fr} }
+
+        .actions-section{display:flex;flex-direction:column;gap:12px}
+        .action-btn{display:flex;align-items:center;gap:12px;padding:16px;border-radius:8px;background:#0f1433;border:2px solid #27314f;color:#fff;cursor:pointer}
+        .action-btn .action-icon{font-size:20px}
+
+        .file-card{background:#0f1433;padding:20px;border-radius:8px;border-left:5px solid #4a90e2}
+        .file-card h3{margin:0 0 12px 0}
+        .file-meta{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+        .meta-label{color:#a0a8c0;min-width:110px}
+
+        /* Approval form inside file-card */
+        .approval-form label{display:block;margin:10px 0 6px;color:#a0a8c0}
+        input[type=text],textarea,select{width:100%;padding:10px;border-radius:6px;border:1px solid #27314f;background:#07102a;color:#fff}
+        .checklist{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0}
+        .check{background:#0f1433;padding:8px;border-radius:6px;border:1px solid #1b2340}
+        .btn{display:inline-block;padding:10px 14px;border-radius:6px;background:#4ac04a;color:#04201a;border:none;cursor:pointer;margin-top:12px}
+        .btn-secondary{background:#1e2749;color:#c8d0e0;border:1px solid #27314f}
+        .small{font-size:12px;color:#9ea6c0}
+        .success{background:#0b3f2e;color:#b6f7d2;padding:12px;border-radius:6px;margin-top:12px;display:none}
+
+        .footer{margin-top:24px;background:#0f1433;padding:12px;border-radius:6px;border-top:2px solid #1e2749;color:#7a8299}
+    </style>
 </head>
 <body>
-  <div class="card">
-    <h1>✅ Design Approval</h1>
-    <p class="small">Submit an operator approval to persist a signed record for this presenter snapshot. The server must be started with an approval token (MCP_APPROVAL_TOKEN).</p>
+<div class="container">
+    <div class="header">
+        <div style="font-size:28px">📬</div>
+        <div>
+            <h1>NAVI Design Approval</h1>
+            <div class="small">Operator-facing UI for persisting approvals (MCP_APPROVAL_TOKEN required)</div>
+        </div>
+    </div>
 
-    <div id="trust" class="small muted">Snapshot: <span id="snapshot">UNKNOWN</span> <button id="copySnapshot" class="btn-secondary">Copy snapshot ID</button></div>
+    <div class="content-grid">
+        <div class="actions-section">
+            <button class="action-btn btn-track" data-testid="action-track"><div class="action-icon">🟢</div><div>Track</div></button>
+            <button class="action-btn btn-hold" data-testid="action-hold"><div class="action-icon">🟡</div><div>Hold</div></button>
+            <button class="action-btn btn-escalate" data-testid="action-escalate"><div class="action-icon">🔴</div><div>Escalate</div></button>
+        </div>
 
-    <form id="approvalForm">
-      <label>Approval token <span class="small muted">(paste token given by operator)</span></label>
-      <input type="text" id="token" placeholder="X-MCP-APPROVAL-TOKEN" required>
+        <div class="file-card">
+            <h3>Design Approval</h3>
+            <div class="file-meta">
+                <div><span class="meta-label">Snapshot:</span> <span id="snapshot" data-testid="snapshot">UNKNOWN</span> <button id="copySnapshot" class="btn-secondary" data-testid="copy-snapshot">Copy snapshot ID</button></div>
+                <div><span class="meta-label">Context:</span> <span class="small muted">Operator approval form — persist approvals to NAVI/approvals</span></div>
+            </div>
 
-      <label>Approved by</label>
-      <input type="text" id="approvedBy" placeholder="Operator name" required>
+            <form id="approvalForm" class="approval-form">
+                <label for="file">File</label>
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+                  <input id="fileInput" name="file" data-testid="file-input" aria-label="File name or path" placeholder="e.g., Client_Notes_Intro.docx">
+                  <button type="button" id="openFile" class="btn-secondary" data-testid="open-file">Open</button>
+                  <button type="button" id="previewFile" class="btn-secondary" data-testid="preview-file">Preview</button>
+                </div>
+                <div id="preview" style="margin-bottom:8px;display:none"><iframe id="previewFrame" style="width:100%;height:300px;border:1px solid #27314f;border-radius:6px"></iframe></div>
 
-      <label>Role</label>
-      <input type="text" id="role" placeholder="e.g., UX, Engineering">
+                <label for="token">Approval token <span class="small muted">(paste token given by operator)</span></label>
+                <input id="token" name="token" data-testid="token-input" aria-label="Approval token" placeholder="X-MCP-APPROVAL-TOKEN">
+                <div id="tokenError" class="small" role="alert" style="display:none;color:#f9b7b7" data-testid="token-error">Approval token is required</div>
 
-      <label>Checklist <span class="small muted">(hover items for details)</span></label>
-      <div class="checklist">
-        <label class="check" title="Layout has been reviewed and matches spec"><input type="checkbox" id="cl_layout"> <span class="tooltip">Layout</span></label>
-        <label class="check" title="Basic accessibility checks performed (contrast, keyboard)"><input type="checkbox" id="cl_accessibility"> <span class="tooltip">Accessibility</span></label>
-        <label class="check" title="Known bugs fixed or documented"><input type="checkbox" id="cl_bug"> <span class="tooltip">Bug fixes</span></label>
-        <label class="check" title="Ready for production release (unstable if unchecked)"><input type="checkbox" id="cl_prod"> <span class="tooltip">Production ready</span></label>
-      </div>
+                <label for="approvedBy">Approved by</label>
+                <input id="approvedBy" name="approvedBy" data-testid="approvedBy-input" aria-label="Approved by" placeholder="Operator name">
 
-      <label>Notes</label>
-      <textarea id="notes" rows="4" placeholder="Observations or follow-ups"></textarea>
+                <label for="role">Role</label>
+                <input id="role" name="role" data-testid="role-input" aria-label="Role" placeholder="e.g., UX, Engineering">
 
-      <label>Status</label>
-      <div>
-        <label><input type="radio" name="status" value="approved" checked> Approved</label>
-        <label style="margin-left:12px"><input type="radio" name="status" value="rejected"> Rejected</label>
-      </div>
+                <label>Decision <span class="small muted">(choose one)</span></label>
+                <div class="checklist" role="radiogroup" aria-label="Decision">
+                    <button type="button" class="check" id="decTrack" data-testid="action-track">Track</button>
+                    <button type="button" class="check" id="decHold" data-testid="action-hold">Hold</button>
+                    <button type="button" class="check" id="decEsc" data-testid="action-escalate">Escalate</button>
+                </div>
+                <input type="hidden" id="statusHidden" name="status">
 
-      <div class="actions">
-        <button type="submit" class="btn">Submit approval</button>
-        <button type="button" id="viewAudit" class="btn-secondary">View audit log</button>
-      </div>
+                <label>Checklist <span class="small muted">(hover items for details)</span></label>
+                <div class="checklist">
+                    <label class="check"><input type="checkbox" id="cl_layout" data-testid="check-layout"> Layout</label>
+                    <label class="check"><input type="checkbox" id="cl_accessibility" data-testid="check-accessibility"> Accessibility</label>
+                    <label class="check"><input type="checkbox" id="cl_bug" data-testid="check-bug"> Bug fixes</label>
+                    <label class="check"><input type="checkbox" id="cl_prod" data-testid="check-prod"> Production ready</label>
+                </div>
 
-      <div id="result" class="success"></div>
-    </form>
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" rows="4" data-testid="notes-input" placeholder="Observations or follow-ups"></textarea>
 
-    <p class="small muted" style="margin-top:12px">If POST returns 403/503: restart the server ensuring `MCP_APPROVAL_TOKEN` is set in the server process environment.</p>
+                <div style="margin-top:12px">
+                    <button type="submit" class="btn" data-testid="submit-approval">Submit approval</button>
+                    <button type="button" id="viewAudit" class="btn-secondary" data-testid="view-audit">View audit log</button>
+                </div>
+
+                <div id="result" data-testid="result" class="success" role="status" aria-live="polite"></div>
+                <div id="error" data-testid="error" role="alert" aria-live="assertive" style="display:none;color:#f9b7b7;margin-top:8px"></div>
+            </form>
+
+            <p class="small muted" style="margin-top:12px">If POST returns 403/503: restart the server ensuring <code>MCP_APPROVAL_TOKEN</code> is set in the server process environment.</p>
+        </div>
+
   </div>
 
   <script>
     (function(){
+      console.log('design-approval script loaded, form present:', !!document.getElementById('approvalForm'));
       // Extract TRUST_HEADER from the HTML (if present) to show snapshot_id
       function parseTrustHeader() {
         try {
@@ -103,33 +149,94 @@
           this.textContent = 'Copied!';
           setTimeout(()=>{ this.textContent = 'Copy snapshot ID'; }, 1500);
         } catch (e) {
-          alert('Copy failed: ' + (e && e.message));
+          const errEl = document.getElementById('error');
+          if (errEl) { errEl.style.display='block'; errEl.textContent = 'Copy failed: ' + (e && e.message); }
         }
       });
 
-      document.getElementById('viewAudit').addEventListener('click', function(){
-        window.open('/approvals/audit', '_blank');
+      // File open / preview helpers
+      function isViewable(file) {
+        return file && (file.endsWith('.pdf') || file.endsWith('.txt') || file.endsWith('.html'));
+      }
+
+      document.getElementById('openFile').addEventListener('click', function(){
+        const file = (document.getElementById('fileInput').value || '').trim();
+        if (!file) return alert('Enter a file name to open');
+        const url = '/' + file.replace(/^\/+/, '');
+        // Try to open in a new tab (download will be handled by browser/system)
+        window.open(url, '_blank');
       });
 
-      document.getElementById('approvalForm').addEventListener('submit', async function(ev){
-        ev.preventDefault();
-        const token = document.getElementById('token').value.trim();
-        if (!token) { alert('Approval token is required'); return; }
-        const payload = {
-          approvedBy: document.getElementById('approvedBy').value.trim() || 'anon',
-          date: new Date().toISOString(),
-          role: document.getElementById('role').value.trim() || null,
-          notes: document.getElementById('notes').value.trim() || null,
-          checklist: {
-            layout: !!document.getElementById('cl_layout').checked,
-            accessibility: !!document.getElementById('cl_accessibility').checked,
-            bugFixed: !!document.getElementById('cl_bug').checked,
-            production: !!document.getElementById('cl_prod').checked
-          },
-          status: document.querySelector('input[name="status"]:checked').value
-        };
+      document.getElementById('previewFile').addEventListener('click', function(){
+        const file = (document.getElementById('fileInput').value || '').trim();
+        const preview = document.getElementById('preview');
+        const frame = document.getElementById('previewFrame');
+        if (!file) { preview.style.display='none'; return; }
+        const url = '/' + file.replace(/^\/+/, '');
+        if (isViewable(file)) {
+          frame.src = url;
+          preview.style.display = 'block';
+        } else {
+          // For binary files, just open / download
+          window.open(url, '_blank');
+        }
+      });
+      // Decision button handling
+      let selectedStatus = null;
+      function setDecision(status) {
+        selectedStatus = status;
+        document.getElementById('statusHidden').value = status;
+        ['decTrack','decHold','decEsc'].forEach(id => { const el=document.getElementById(id); if(el){ el.style.borderColor = '#27314f'; }});
+        const sel = { 'Track':'decTrack','Hold':'decHold','Escalate':'decEsc' }[status];
+        if (sel) { document.getElementById(sel).style.borderColor = '#4ac04a'; }
+      }
+      document.getElementById('decTrack').addEventListener('click', () => setDecision('Track'));
+      document.getElementById('decHold').addEventListener('click', () => setDecision('Hold'));
+      document.getElementById('decEsc').addEventListener('click', () => setDecision('Escalate'));
 
+      const submitButtonElement = document.querySelector('[data-testid="submit-approval"]');
+      if (submitButtonElement) { submitButtonElement.addEventListener('click', () => console.log('submit clicked')); }
+      async function handleSubmit(ev){
+        if (ev && ev.preventDefault) ev.preventDefault();
+        console.log('handleSubmit invoked');
         try {
+          const token = document.getElementById('token').value.trim();
+          console.log('handleSubmit token:', token);
+          if (!token) {
+            // show inline validation message and focus token
+            const err = document.getElementById('tokenError');
+            if (err) { err.style.display = 'block'; }
+            document.getElementById('token').focus();
+            return;
+          } else {
+            const err = document.getElementById('tokenError');
+            if (err) { err.style.display = 'none'; }
+          }
+
+          const payload = {
+            approvedBy: document.getElementById('approvedBy').value.trim() || 'anon',
+            date: new Date().toISOString(),
+            role: document.getElementById('role').value.trim() || null,
+            notes: document.getElementById('notes').value.trim() || null,
+            snapshot: snapshotSpan.textContent || null,
+            file: document.getElementById('fileInput').value.trim() || null,
+            checklist: {
+              layout: !!document.getElementById('cl_layout').checked,
+              accessibility: !!document.getElementById('cl_accessibility').checked,
+              bugFixed: !!document.getElementById('cl_bug').checked,
+              production: !!document.getElementById('cl_prod').checked
+            },
+            status: selectedStatus || 'Track'
+          };
+
+          const submitBtn = document.querySelector('[data-testid="submit-approval"]');
+          const out = document.getElementById('result');
+          const errEl = document.getElementById('error');
+
+          submitBtn.disabled = true;
+          submitBtn.setAttribute('aria-busy', 'true');
+
+          console.log('SUBMITTING approval', payload);
           const res = await fetch('/approval', {
             method: 'POST',
             headers: {
@@ -139,13 +246,15 @@
             body: JSON.stringify(payload)
           });
 
+          console.log('RESPONSE status', res.status);
           const text = await res.text();
+          console.log('RESPONSE text', text);
           if (res.status === 201) {
             let info = {};
             try { info = JSON.parse(text); } catch(e) {}
-            const out = document.getElementById('result');
             out.style.display = 'block';
             out.textContent = '✅ Approval persisted: ' + (info.file || 'unknown path');
+            out.setAttribute('role','status');
             // Show a small link to audit
             const link = document.createElement('a');
             link.href = '/approvals/audit';
@@ -156,15 +265,29 @@
             out.appendChild(link);
             // Also clear token for security
             document.getElementById('token').value = '';
+            if (errEl) { errEl.style.display = 'none'; errEl.textContent = ''; }
           } else {
             let msg = text || ('HTTP ' + res.status);
-            alert('Approval failed: ' + msg);
+            if (errEl) { errEl.style.display = 'block'; errEl.setAttribute('aria-hidden','false'); errEl.textContent = 'Approval failed: ' + msg; }
+            if (out) { out.style.display = 'none'; }
           }
 
         } catch (e) {
-          alert('Approval request failed: ' + (e && e.message));
+          const errEl = document.getElementById('error');
+          if (errEl) { errEl.style.display = 'block'; errEl.textContent = 'Approval request failed: ' + (e && e.message); }
+          const out = document.getElementById('result');
+          if (out) { out.style.display = 'none'; }
+        } finally {
+          const submitBtn = document.querySelector('[data-testid="submit-approval"]');
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.removeAttribute('aria-busy'); }
         }
-      });
+      }
+
+      // attach handler to both submit event and button clicks to ensure handlers fire in all cases
+      const formEl = document.getElementById('approvalForm');
+      if (formEl) { formEl.addEventListener('submit', handleSubmit); console.log('handleSubmit bound to form'); window.__handleSubmitBound = true; }
+      const submitButtonElement2 = document.querySelector('[data-testid="submit-approval"]');
+      if (submitButtonElement2) { submitButtonElement2.addEventListener('click', handleSubmit); console.log('handleSubmit bound to submit button'); window.__handleSubmitBoundButton = true; }
 
     })();
   </script>

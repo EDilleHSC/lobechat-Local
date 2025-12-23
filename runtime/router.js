@@ -62,12 +62,12 @@ function route() {
     const metaTmp = metaPath + '.tmp';
     fs.writeFileSync(metaTmp, JSON.stringify(meta, null, 2), 'utf8');
     fs.renameSync(metaTmp, metaPath);
-    console.log(`[ROUTER] Wrote meta: ${metaPath}`);
+    console.info(`[ROUTER] Wrote meta: ${metaPath}`);
 
     routed.push(name);
   }
 
-  console.log(`[ROUTER] Completed: routed ${routed.length} files to agent1 (snapshot=${path.basename(snapPath)})`);
+  console.info(`[ROUTER] Completed: routed ${routed.length} files to agent1 (snapshot=${path.basename(snapPath)})`);
   const out = { routed_to: 'agent1', routed_files: routed, snapshot: path.basename(snapPath), timestamp: new Date().toISOString() };
   console.log(JSON.stringify(out));
   return 0;

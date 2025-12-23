@@ -19,7 +19,7 @@ services:
     container_name: lobe-postgres
     environment:
       POSTGRES_USER: lobe
-      POSTGRES_PASSWORD: REDACTED_DB_PASSWORD
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-REPLACE_ME}
       POSTGRES_DB: lobechat
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -30,8 +30,8 @@ services:
     container_name: lobe-minio
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: lobe
-      MINIO_ROOT_PASSWORD: REDACTED_MINIO_PASSWORD
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-lobe}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-REPLACE_ME}
     ports:
       - "9000:9000"   # MinIO API
       - "9001:9001"   # MinIO Console

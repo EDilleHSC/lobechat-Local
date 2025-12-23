@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 const Ajv = require('ajv');
 const addFormats = require('ajv-formats');
 const ajv = new Ajv({ allErrors: true });
@@ -10,7 +10,7 @@ const approvalSchema = require('./schemas/approval.schema.json');
 const validateApproval = ajv.compile(approvalSchema);
 
 // Explicit Python runtime for predictable execution
-const PYTHON = 'D:\\Python312\\python.exe';
+const PYTHON = 'D:\\02_SOFTWARE\\Python312\\python.exe';
 // Beta-0 trust mode: when true, regenerate presenter from snapshot and skip routing/mailroom
 // For Beta-1 we default to OFF so mailroom routing executes by default; set env BETA0_TRUST_MODE=1 to keep Beta-0 behavior
 const BETA0_TRUST_MODE = (process.env.BETA0_TRUST_MODE || '0') === '1'; // default OFF for Beta-1 workflow
@@ -20,8 +20,41 @@ const INBOX_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox";
 const SNAPSHOT_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\snapshots\\inbox";
 // Approvals directory for persistent approval objects and audit log
 const APPROVAL_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\approvals";
+// mcp_server.js lives at: VBoarder/runtime/triage_xxx/mcp_server.js
+// so project root is two levels up from __dirname
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
+const NAVI_DIR = path.join(PROJECT_ROOT, 'NAVI');
+const PRESENTER_DIR = path.join(NAVI_DIR, 'presenter');
+const PRESENTER_GENERATED_DIR = path.join(PRESENTER_DIR, 'generated');
+
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.css':  'text/css; charset=utf-8',
+  '.js':   'application/javascript; charset=utf-8',
+  '.png':  'image/png',
+  '.jpg':  'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.svg':  'image/svg+xml',
+  '.ico':  'image/x-icon',
+  '.txt':  'text/plain; charset=utf-8',
+};
+
 // Server port can be overridden with the PORT env var for testing/CI
 const PORT = Number(process.env.PORT) || 8005;
+
+// Track last activity for health
+let lastSnapshotTime = null;
+let lastPresenterTime = null;
+
+// Log paths for verification
+console.log(`[PATHS] __dirname=${__dirname}`);
+console.log(`[PATHS] PROJECT_ROOT=${PROJECT_ROOT}`);
+console.log(`[PATHS] NAVI_DIR=${NAVI_DIR}`);
+console.log(`[PATHS] INBOX_DIR=${INBOX_DIR}`);
+console.log(`[PATHS] SNAPSHOT_DIR=${SNAPSHOT_DIR}`);
+console.log(`[PATHS] APPROVAL_DIR=${APPROVAL_DIR}`);
+console.log(`[PATHS] PRESENTER_DIR=${PRESENTER_DIR}`);
 
 // Utility functions
 function normalizePath(p) {
@@ -105,6 +138,8 @@ function takeSnapshot() {
         fs.writeFileSync(snapshotPath, JSON.stringify(snapshot, null, 2));
         console.log(`[SNAPSHOT] Saved: ${snapshotFilename}`);
 
+        lastSnapshotTime = new Date().toISOString();
+
         return { success: true, snapshotPath, fileCount: files.length };
 
     } catch (err) {
@@ -165,7 +200,7 @@ function regeneratePresenter(snapshotResult) {
                 }
             }
 
-            const agentsDir = path.join(__dirname, '..', 'NAVI', 'agents');
+            const agentsDir = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\agents";
 
             for (const sItem of snapshotItems) {
                 const filename = sItem.name;
@@ -231,6 +266,8 @@ function regeneratePresenter(snapshotResult) {
             fs.writeFileSync(jsonTmp, JSON.stringify(data, null, 2), 'utf8');
             fs.renameSync(jsonTmp, jsonPath);
             log(`[PRESENTER] Wrote generated JSON: ${jsonPath}`);
+
+            lastPresenterTime = new Date().toISOString();
         } catch (jErr) {
             log(`[ERROR] Failed to write presenter JSON: ${jErr.message}`);
             if (fs.existsSync(jsonTmp)) try { fs.unlinkSync(jsonTmp); } catch(e){}
@@ -279,6 +316,48 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason, promise) => {
     log('[ERROR] Unhandled Rejection at: ' + promise + ' reason: ' + reason);
 });
+
+function serveStaticFile(req, res, baseDir, urlPath) {
+  try {
+    // strip querystring
+    const cleanPath = (urlPath || '').split('?')[0];
+
+    // map "/presenter/..." to file path inside baseDir
+    const rel = cleanPath.replace(/^\/presenter\/?/, '');
+    const filePath = path.join(baseDir, rel);
+
+    // prevent path traversal
+    const resolvedBase = path.resolve(baseDir);
+    const resolvedFile = path.resolve(filePath);
+    if (!resolvedFile.startsWith(resolvedBase)) {
+      res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+      return res.end('Forbidden');
+    }
+
+    if (!fs.existsSync(resolvedFile) || fs.statSync(resolvedFile).isDirectory()) {
+      res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+      return res.end('Not found');
+    }
+
+    const ext = path.extname(resolvedFile).toLowerCase();
+    const ct = MIME_TYPES[ext] || 'application/octet-stream';
+
+    const buf = fs.readFileSync(resolvedFile);
+    res.writeHead(200, {
+      'Content-Type': ct,
+      'Cache-Control': 'no-store',
+    });
+    if (req.method === 'HEAD') {
+      res.end();
+    } else {
+      res.end(buf);
+    }
+  } catch (err) {
+    console.error('[PRESENTER] serveStaticFile error:', err);
+    res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Server error');
+  }
+}
 
 // NOTE: Startup messages are emitted by startServer() so they only appear when the HTTP server
 // is actually started (guards prevent duplicate listen() calls and noisy logs when this module
@@ -346,25 +425,31 @@ const server = http.createServer((req, res) => {
                 const MAILROOM = path.join(__dirname, '..', 'mailroom_runner.py');
 
                 // Capture stdout so mailroom can return JSON metadata about routing
-                const out = execSync(`"${PYTHON}" "${MAILROOM}"`, { encoding: 'utf8' });
-                log('[MAILROOM] Completed successfully. Output: ' + out.trim());
-                try {
-                    mailroomInfo = JSON.parse(out);
-                } catch (e) {
-                    log('[MAILROOM] Warning: could not parse mailroom output as JSON');
+const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
+          const out = (proc.stdout || '').trim();
+          const err = (proc.stderr || '').trim();
+          log('[MAILROOM] Completed successfully. Output: ' + out);
+          if (err) log('[MAILROOM] Stderr: ' + err);
+          try {
+              mailroomInfo = JSON.parse(out);
+          } catch (e) {
+              log('[MAILROOM] Warning: could not parse mailroom output as JSON: ' + e.message);
                 }
 
                 // Run router to generate metadata files and enforce agent contract (Beta-1 POC)
                 try {
                     const ROUTER = path.join(__dirname, '..', 'router.js');
-                    const routOut = execSync(`node "${ROUTER}"`, { encoding: 'utf8' });
-                    log('[ROUTER] Completed successfully. Output: ' + routOut.trim());
+                    const proc = spawnSync('node', [ROUTER], { encoding: 'utf8' });
+                    const routOut = (proc.stdout || '').trim();
+                    const routErr = (proc.stderr || '').trim();
+                    log('[ROUTER] Completed successfully. Output: ' + routOut);
+                    if (routErr) log('[ROUTER] Stderr: ' + routErr);
                     try {
                         // optional: expose router result if needed
                         const routInfo = JSON.parse(routOut);
                         log(`[ROUTER] Routed ${routInfo.routed_files.length} files to ${routInfo.routed_to}`);
                     } catch (e) {
-                        log('[ROUTER] Warning: could not parse router output as JSON');
+                        log('[ROUTER] Warning: could not parse router output as JSON: ' + e.message);
                     }
                 } catch (rErr) {
                     log('[WARN] Router execution failed: ' + rErr.message);
@@ -580,13 +665,14 @@ const server = http.createServer((req, res) => {
                 }));
             }
         });
-    } else if (req.method === 'GET' && req.url.startsWith('/presenter')) {
+    } else if ((req.method === 'GET' || req.method === 'HEAD') && req.url.startsWith('/presenter')) {
         // Serve static files from the canonical presenter folder (operator-approved UI)
         try {
-            let rel = req.url.replace(/^\/presenter/, '') || '/index.html';
+            const urlPath = req.url.split('?')[0];
+            let rel = urlPath.replace(/^\/presenter/, '') || '/index.html';
             if (rel === '' || rel === '/') rel = '/index.html';
             // Use canonical presenter directory to ensure operator-approved UI is served
-            const presenterDir = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\presenter";
+            const presenterDir = PRESENTER_DIR;
             let filePath = path.join(presenterDir, rel);
             filePath = path.normalize(filePath);
 
@@ -619,64 +705,19 @@ const server = http.createServer((req, res) => {
             };
             const mime = mimeTypes[ext] || 'application/octet-stream';
 
-            // For HTML files, inject a deterministic Trust Header before serving
-            if (ext === '.html') {
-                try {
-                    let html = fs.readFileSync(filePath, 'utf8');
 
-                    // Deterministic values: UTC timestamp, latest snapshot filename, items count from latest snapshot
-                    const rendered_at = new Date().toISOString();
-                    let snapshot_id = 'UNKNOWN';
-                    let items_processed = 'UNKNOWN';
 
-                    try {
-                        if (fs.existsSync(SNAPSHOT_DIR)) {
-                            const snaps = fs.readdirSync(SNAPSHOT_DIR).filter(f => f.endsWith('.json'));
-                            if (snaps.length > 0) {
-                                snaps.sort();
-                                const latest = snaps[snaps.length - 1];
-                                snapshot_id = latest;
-                                try {
-                                    const sdata = JSON.parse(fs.readFileSync(path.join(SNAPSHOT_DIR, latest), 'utf8'));
-                                    if (Array.isArray(sdata.items)) {
-                                        items_processed = sdata.items.length;
-                                    }
-                                } catch (e) {
-                                    // ignore parse errors, keep UNKNOWN
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        // ignore snapshot read errors
-                    }
+            res.writeHead(200, {
+              'Content-Type': mime,
+              'Cache-Control': 'no-store'
+            });
 
-                    const trust_header = `<!-- TRUST_HEADER\nrendered_at: ${rendered_at}\nsnapshot_id: ${snapshot_id}\nitems_processed: ${items_processed}\n-->`;
-
-                    // If the file already includes a TRUST_HEADER (e.g., generated by the presenter), do not inject another one.
-                    if (html.indexOf('<!-- TRUST_HEADER') !== -1) {
-                        log('[PRESENTER] Existing TRUST_HEADER found in file; serving file as-is (no inject)');
-                        res.writeHead(200, { 'Content-Type': mime, 'Cache-Control': 'no-store' });
-                        res.end(html, 'utf8');
-                        return;
-                    }
-
-                    if (html.indexOf('<body>') !== -1) {
-                        html = html.replace('<body>', '<body>\n' + trust_header);
-                    } else {
-                        html = trust_header + '\n' + html;
-                    }
-
-                    res.writeHead(200, { 'Content-Type': mime, 'Cache-Control': 'no-store' });
-                    res.end(html, 'utf8');
-                    return;
-                } catch (e) {
-                    log('[ERROR] Serving presenter HTML with Trust Header: ' + e.message);
-                    // fallthrough to stream fallback
-                }
+            if (req.method === 'HEAD') {
+              res.end();
+            } else {
+              const data = fs.readFileSync(filePath);
+              res.end(data);
             }
-
-            const stream = fs.createReadStream(filePath);
-            stream.pipe(res);
         } catch (err) {
             log('[ERROR] Serving presenter file: ' + err.message);
             res.writeHead(500, { 'Content-Type': 'text/plain' });
@@ -749,67 +790,121 @@ const server = http.createServer((req, res) => {
                     return;
                 }
 
-                // Persist (keep atomic write semantics)
+                // Persist approval file
                 try {
+                    const correctNAVI_DIR = path.join(PROJECT_ROOT, 'NAVI');
                     if (!fs.existsSync(APPROVAL_DIR)) fs.mkdirSync(APPROVAL_DIR, { recursive: true });
-                    const d = new Date();
-                    const dateDir = path.join(APPROVAL_DIR, d.toISOString().slice(0,10));
+                    const { reviewer, status, snapshot_id, timestamp, items } = payload;
+                    const dateDir = path.join(APPROVAL_DIR, new Date().toISOString().slice(0,10));
                     if (!fs.existsSync(dateDir)) fs.mkdirSync(dateDir, { recursive: true });
 
-                    const record = {
-                        approvedBy: payload.approvedBy,
-                        date: payload.date || d.toISOString(),
-                        role: payload.role || null,
-                        notes: payload.notes || null,
-                        checklist: payload.checklist,
-                        status: payload.status
-                    };
-
-                    const safeName = (record.approvedBy || 'anon').replace(/[^a-z0-9\-\_]/gi, '-').slice(0,40);
-                    const fname = `${d.toISOString().replace(/[:.]/g,'-')}-${safeName}.approval.json`;
-                    const fpath = path.join(dateDir, fname);
+                    const approvalFile = `${snapshot_id}.${reviewer.replace(/[^a-z0-9]/gi, '_')}.${Date.now()}.approval.json`;
+                    const approvalPath = path.join(dateDir, approvalFile);
 
                     try {
-                        const tmp = fpath + '.tmp';
-                        fs.writeFileSync(tmp, JSON.stringify(record, null, 2), 'utf8');
-                        fs.renameSync(tmp, fpath);
+                        const tmp = approvalPath + '.tmp';
+                        fs.writeFileSync(tmp, JSON.stringify(payload, null, 2), 'utf8');
+                        fs.renameSync(tmp, approvalPath);
 
-                        // Rotate audit log if it grows too large (5MB)
+                        // Append to audit log
                         const auditPath = path.join(APPROVAL_DIR, 'audit.log');
-                        try {
-                            if (fs.existsSync(auditPath)) {
-                                const st = fs.statSync(auditPath);
-                                if (st.size > 5 * 1024 * 1024) {
-                                    const rot = auditPath + '.' + Date.now();
-                                    fs.renameSync(auditPath, rot);
-                                    console.log('[MCP] Rotated audit log to', rot);
+                        const timestamp = new Date().toISOString().slice(0,19) + 'Z';
+                        const auditLine = `[${timestamp}] ${reviewer} routed ${items.length} items → ${approvalFile}\n`;
+                        fs.appendFileSync(auditPath, auditLine, 'utf8');
+
+                        // Enforcement move pass
+                        const moveResults = [];
+                        for (const item of items) {
+                            const { filename, decision } = item;
+                            const { dept, sensitivity } = decision;
+                            
+                            // Skip dotfiles
+                            if (filename.startsWith('.')) {
+                                moveResults.push({ filename, status: 'skipped', reason: 'dotfile' });
+                                continue;
+                            }
+
+                            // Guard against path traversal
+                            const safe = path.basename(filename);
+                            if (safe !== filename) {
+                                moveResults.push({ filename, status: 'error', error: 'unsafe filename' });
+                                continue;
+                            }
+
+                            // Compute destBase
+                            let bucket;
+                            if (dept === 'Trash') {
+                                bucket = 'rejected';
+                            } else if (sensitivity !== 'normal') {
+                                bucket = 'escalated';
+                            } else {
+                                bucket = 'processed';
+                            }
+
+                            const destDir = path.join(correctNAVI_DIR, bucket, dept);
+                            fs.mkdirSync(destDir, { recursive: true });
+
+                            const src = path.join(INBOX_DIR, safe);
+                            let dest = path.join(destDir, safe);
+
+                            // Avoid overwrite
+                            if (fs.existsSync(dest)) {
+                                const ext = path.extname(filename);
+                                const base = path.basename(filename, ext);
+                                let counter = 1;
+                                do {
+                                    dest = path.join(destDir, `${base}.dup-${counter}${ext}`);
+                                    counter++;
+                                } while (fs.existsSync(dest));
+                            }
+
+                            if (!fs.existsSync(src)) {
+                                moveResults.push({ filename, status: 'missing' });
+                                continue;
+                            }
+
+                            try {
+                                // Try rename first
+                                fs.renameSync(src, dest);
+                                moveResults.push({ filename, status: 'moved', to: dest, bucket });
+                            } catch (moveErr) {
+                                try {
+                                    // Fallback to copy + unlink
+                                    fs.copyFileSync(src, dest);
+                                    fs.unlinkSync(src);
+                                    moveResults.push({ filename, status: 'moved', to: dest, bucket, method: 'copy+unlink' });
+                                } catch (fallbackErr) {
+                                    moveResults.push({ filename, status: 'error', error: fallbackErr.message });
                                 }
                             }
-                        } catch (e) { console.warn('[MCP] Audit rotation failed', e); }
+                        }
 
-                        const auditLine = `${new Date().toISOString()}\t${record.status}\t${record.approvedBy}\t${fpath}\n`;
-                        fs.appendFileSync(auditPath, auditLine, 'utf8');
+                        // Compute summary counts
+                        const moved_processed = moveResults.filter(r => r.bucket === 'processed').length;
+                        const moved_escalated = moveResults.filter(r => r.bucket === 'escalated').length;
+                        const moved_rejected = moveResults.filter(r => r.bucket === 'rejected').length;
+                        const missing_count = moveResults.filter(r => r.status === 'missing').length;
+                        const error_count = moveResults.filter(r => r.status === 'error').length;
+
                         res.writeHead(201, { 'Content-Type': 'application/json' });
-                        res.end(JSON.stringify({ ok: true, file: fpath }));
-                        console.log('[MCP] Approval persisted:', fpath);
-                    } catch (e) {
-                        console.error('[MCP] Failed to persist approval (atomic):', e);
-                        try { if (fs.existsSync(fpath + '.tmp')) fs.unlinkSync(fpath + '.tmp'); } catch (e2){}
+                        res.end(JSON.stringify({ ok: true, file: approvalPath, move_results: moveResults, moved_processed, moved_escalated, moved_rejected, missing_count, error_count }));
+                        console.log('[MCP] Approval persisted:', approvalPath);
+                    } catch (writeErr) {
+                        console.error('[MCP] Failed to write approval file:', writeErr);
                         res.writeHead(500, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify({ error: 'Failed to persist approval' }));
                     }
-                } catch (e) {
-                    console.error('[MCP] Failed to persist approval:', e);
+                } catch (dirErr) {
+                    console.error('[MCP] Failed to create approval directory:', dirErr);
                     res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({ error: 'Failed to persist approval' }));
+                    res.end(JSON.stringify({ error: 'Failed to create approval directory' }));
                 }
             } catch (e) {
-                console.error('[MCP] /approval handler error:', e);
+                console.error('[MCP] Approval processing error:', e);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ error: 'Internal server error' }));
             }
         });
-        return;
     } else if (req.method === 'GET' && req.url === '/approvals/audit') {
         // Serve approvals audit log (basic visibility)
         try {
@@ -833,8 +928,11 @@ const server = http.createServer((req, res) => {
         // Minimal health endpoint for monitoring
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({
-            status: 'ok',
+            ok: true,
+            pid: process.pid,
             uptime: process.uptime(),
+            snapshot_last: lastSnapshotTime,
+            presenter_last: lastPresenterTime,
             timestamp: new Date().toISOString()
         }));
     } else {

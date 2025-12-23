@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>NAVI Mail Room Update</title>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* ... same styles as index.html (omitted here for brevity) ... */
+    /* Keep styles consistent with index.html */
+    body{background:#0a0e27;color:#f0f0f0;font-family:'Atkinson Hyperlegible',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:32px 24px;line-height:1.8}
+    .container{max-width:1000px;margin:0 auto}
+    .header{display:flex;align-items:center;gap:16px;margin-bottom:40px;padding-bottom:24px;border-bottom:3px solid #1e2749}
+    .header-icon{font-size:32px}
+    .header-content h1{font-size:28px;font-weight:700;margin-bottom:6px;letter-spacing:0.3px}
+    .header-content p{font-size:16px;color:#a0a8c0}
+    .summary-card{background:#0f1433;border-left:5px solid #4a90e2;padding:24px;margin-bottom:32px;border-radius:8px}
+    .content-grid{display:grid;grid-template-columns:300px 1fr;gap:32px;margin-bottom:40px}
+    @media (max-width:768px){.content-grid{grid-template-columns:1fr}}
+    .file-card{background:#0f1433;border-left:5px solid #f5a623;padding:28px;border-radius:8px}
+    .action-btn{display:flex;align-items:center;gap:16px;padding:20px;border:2px solid;border-radius:8px;background:#0f1433;cursor:pointer;transition:all .2s ease;font-size:18px;font-weight:600}
+    .btn-track{border-color:#4ac04a;color:#7cff7c}
+    .btn-hold{border-color:#f5a623;color:#ffc107}
+    .btn-escalate{border-color:#e74c3c;color:#ff6b6b}
+    .notes-area{margin-top:12px;display:none}
+    .notes-area textarea{width:100%;height:80px;padding:8px;border-radius:6px;border:1px solid #27314f;background:#07102a;color:#fff}
+    .notes-area .controls{display:flex;gap:8px;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-icon">📬</div>
+      <div class="header-content">
+        <h1>NAVI Mail Room Update</h1>
+        <p id="snapshot-info">Processed at N/A</p>
+      </div>
+      <div style="margin-left:auto">
+        <label style="font-size:14px;color:#9ea6c0">Token: <input id="token" placeholder="X-MCP-APPROVAL-TOKEN" style="padding:6px;border-radius:6px;border:1px solid #27314f;background:#07102a;color:#fff"></label>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <h2>Summary</h2>
+      <p id="summary-count">0 incoming requests processed</p>
+      <p>Items routed to ACTIVE, WAITING, or DONE</p>
+    </div>
+
+    <div class="content-grid">
+      <div class="actions-section">
+        <button class="action-btn btn-track" onclick="onTopAction('Track')"> <div class="action-icon">🟢</div><div class="action-title">Track</div></button>
+        <button class="action-btn btn-hold" onclick="onTopAction('Hold')"> <div class="action-icon">🟡</div><div class="action-title">Hold</div></button>
+        <button class="action-btn btn-escalate" onclick="onTopAction('Escalate')"> <div class="action-icon">🔴</div><div class="action-title">Escalate</div></button>
+      </div>
+
+      <div id="file-list"></div>
+    </div>
+
+    <div class="reasoning">
+      <h4>Why did NAVI think this?</h4>
+      <ul class="reason-list">
+        <li class="reason-item">Matched priority keywords: <strong>important, urgent, priority</strong></li>
+        <li class="reason-item">File type allowed for work intake</li>
+        <li class="reason-item">No exclusion rules triggered</li>
+      </ul>
+    </div>
+
+    <div class="footer">
+      <div class="footer-item">✓ Presenter is advisory only</div>
+    </div>
+  </div>
+
+  <script>
+    async function fetchAudit(){
+      const res = await fetch('/approvals/audit'); if(!res.ok) return []; return await res.json();
+    }
+
+    function renderFileCard(file, info){
+      const el = document.createElement('div'); el.className='file-card';
+      el.innerHTML = `
+        <h3>📄 ${file}</h3>
+        <div class="file-meta">
+          <div class="meta-item"><span class="meta-label">Routed to:</span><span class="meta-value">${info.decision || 'ACTIVE'}</span></div>
+          <div class="meta-item"><span class="meta-label">Confidence:</span><span class="confidence-badge">${info.confidence || '90% (High)'}</span></div>
+          <div class="meta-item"><span class="meta-label">File type:</span><span class="meta-value">${file.split('.').pop().toUpperCase()}</span></div>
+          <div class="meta-item"><span class="meta-label">Received:</span><span class="meta-value">${(info.timestamp||'').slice(0,10)||'N/A'}</span></div>
+        </div>
+        <div id="notes-${file}" class="notes-area">
+          <textarea id="ta-${file}" maxlength="280" placeholder="Optional note (max 280 chars)"></textarea>
+          <div class="controls"><button data-file="${file}" data-decision="Confirm" onclick="confirmDecision(event)">Confirm</button><button onclick="cancelNotes(event)">Cancel</button></div>
+        </div>
+      `;
+      return el;
+    }
+
+    async function refresh(){
+      const entries = await fetchAudit(); const map=new Map(); for(const e of entries) if(!map.has(e.file)) map.set(e.file,e);
+      const list=document.getElementById('file-list'); list.innerHTML=''; for(const [file,info] of map) { list.appendChild(renderFileCard(file,info)); }
+      document.getElementById('summary-count').textContent = `${map.size} incoming requests processed`;
+      document.getElementById('snapshot-info').textContent = `Processed at ${new Date().toLocaleTimeString()}`;
+    }
+
+    function onTopAction(decision){
+      // act on the first file in the list
+      const first = document.querySelector('.file-card');
+      if(!first) return alert('No file to act on');
+      const file = first.querySelector('h3').textContent.replace('📄 ','').trim();
+      // reveal notes area
+      const notesEl = document.getElementById('notes-' + file);
+      if(notesEl) { notesEl.style.display='block'; document.getElementById('ta-' + file).focus(); notesEl.dataset.decision = decision; }
+    }
+
+    async function confirmDecision(e){
+      const file = e.target.dataset.file;
+      const decision = e.target.dataset.decision || e.target.getAttribute('data-decision') || document.getElementById('notes-' + file).dataset.decision;
+      const notes = document.getElementById('ta-' + file).value || '';
+      await submitDecision(decision, file, notes);
+    }
+
+    function cancelNotes(e){
+      const parent = e.target.closest('.notes-area'); if(parent) parent.style.display='none';
+    }
+
+    async function submitDecision(decision, file, notes=''){
+      const payload = { file: file, decision, operator: 'Eric', notes };
+      const token = window.MCP_APPROVAL_TOKEN || document.getElementById('token')?.value || 'TEST_APPROVAL';
+      const res = await fetch('/approval',{ method:'POST', headers:{ 'Content-Type':'application/json', 'X-MCP-APPROVAL-TOKEN': token }, body: JSON.stringify(payload)});
+      if(!res.ok){ alert('Decision failed'); return; }
+      // optimistic UI update
+      const firstMeta = document.querySelector('.meta-value');
+      if(firstMeta){ firstMeta.textContent = decision === 'Track' ? 'ACTIVE' : decision === 'Hold' ? 'WAITING' : 'DONE'; }
+      await refresh();
+    }
+
+    refresh(); setInterval(refresh,6000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+{
+  "_comment": "NAVI Mail Room Configuration (draft)",
+  "_version": "1.0",
+  "navi_root": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI",
+  "canonical_presenter_dir": null,
+  "use_navi_root": true,
+  "enable_mailroom_routing": false,
+  "entities": {
+    "HSC": {
+      "name": "Home Stagers Choice",
+      "type": "business",
+      "functions": ["Finance","Legal","Ops","Sales","Marketing"],
+      "signals": { "names": ["Home Stagers Choice","Home Stagers Choice Ltd","HSC"], "addresses": ["3870 Mallow Rd"] }
+    },
+    "LHI": {
+      "name": "Loric Homes & Interiors",
+      "type": "business",
+      "functions": ["Finance","Legal","Ops"],
+      "signals": { "names": ["Loric Homes","LORIC","Loric Homes and Interiors","LORIC HOMES AND INTERIORS LLC"] }
+    },
+    "LTD": {
+      "name": "Loric Trading Desk",
+      "type": "business",
+      "functions": ["Finance","Ops"],
+      "signals": { "names": ["Loric Trading","LTD"] }
+    },
+    "DDM": {
+      "name": "D&D Manor",
+      "type": "personal",
+      "functions": ["Finance","Legal","Ops"],
+      "signals": { "names": ["Eric Dille","Eric Lloyd Dille","Lori Dailing"], "addresses": ["2473 Hatch Cir"] }
+    },
+    "VB": { "name": "VBoarder", "type": "system", "functions": ["Tech"], "signals": { "names": ["VBoarder","VB"] } }
+  },
+  "routing_rules": {
+    "confidence_threshold": 70,
+    "finance_auto_route_threshold": 0.7,
+    "auto_route_entities": ["DESK","DDM","LHI"],
+    "legal_entities": ["LEGAL","RISK","CLO"],
+    "conflict_top_entities_threshold": 0.6,
+    "default_route": "DESK",
+    "address_conflict_resolution": "DESK",
+    "priority_order": ["HSC","LHI","LTD","VB","DDM"]
+  },
+  "doc_type_to_function": {
+    "bill": "Finance",
+    "invoice": "Finance",
+    "receipt": "Finance",
+    "statement": "Finance",
+    "contract": "Legal",
+    "license": "Legal",
+    "agreement": "Legal",
+    "schedule": "Ops",
+    "inventory": "Ops",
+    "quote": "Sales",
+    "listing": "Marketing",
+    "documentation": "Tech"
+  },
+  "route_paths": {
+    "DDM.Finance": "sorted/DDM/Finance/INBOX",
+    "DESK.Finance": "sorted/DESK/Finance/INBOX",
+    "LHI.Finance": "sorted/LHI/Finance/INBOX",
+    "HSC.Finance": "sorted/HSC/Finance/INBOX",
+    "DESK.Sales": "sorted/DESK/Sales/INBOX",
+    "HSC.Sales": "sorted/HSC/Sales/INBOX",
+    "LHI.Sales": "sorted/LHI/Sales/INBOX",
+    "DESK.Sales.SENT": "sorted/DESK/Sales/SENT",
+    "mail_room.review_required": "mail_room/review_required"
+  },
+  "function_to_office": {
+    "Finance": "CFO_OFFICE",
+    "Legal": "CLO_OFFICE",
+    "Ops": "COO_OFFICE",
+    "Sales": "CSO_OFFICE",
+    "Marketing": "CMO_OFFICE",
+    "Tech": "CTO_OFFICE",
+    "Exec": "EXEC_OFFICE",
+    "DESK": "COS_OFFICE"
+  },
+  "urgency_rules": {
+    "urgent_keywords": ["past due","final notice","due today","immediate"],
+    "urgent_if_past_due": true,
+    "urgent_if_due_within_days": 1,
+    "high_if_due_within_days": 7
+  }
+}

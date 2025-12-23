@@ -1,5 +1,26 @@
 # Beta‑0 Trust Loop — README
 
+---
+
+## NAVI PRODUCT EXECUTION RULES (BETA)
+
+**1. One Screen Rule**
+- There is one primary screen per phase. The Beta primary screen is **NAVI Mail Room Update**. Anything else is supporting infrastructure. If work does not improve the primary screen, stop.
+
+**2. No Shadow UIs**
+- Supporting UIs must embed into the primary UI or be invisible to the user. Standalone pages are temporary only.
+
+**3. Visible State Change Requirement**
+- Every user action must change something on screen within the same flow immediately. Logs without UI reflection = incomplete.
+
+**4. Tests Follow Product, Not Infrastructure**
+- Tests verify what the user sees, not internal-only effects. If tests pass but the UI still looks wrong, the test is lying.
+
+**5. "Stop & Re-anchor" Check**
+- At the start of every day, answer in one sentence: “What will look different in Mail Room tonight?” If the answer is unclear — do not code yet.
+
+---
+
 ## Purpose
 This document records the Beta‑0 trust contract: a minimal, deterministic verification loop that proves the system authoritatively generates the NAVI presenter artifact (`index.html`) and that the artifact contains a deterministic TRUST_HEADER for provenance.
 
@@ -111,3 +132,53 @@ This repository will be tagged `v0.1.0-beta0` to mark the Beta‑0 trust baselin
 
 ---
 For questions or to propose Beta‑1 features (mailroom restoration, routing, richer tests), open an issue or PR referencing this document.
+
+🟢 main is now the production NAVI mailroom processor — clean, tested, ready for intake.
+
+## Playwright E2E Tests ✅
+
+To run the E2E tests locally:
+
+```bash
+# Run all Playwright e2e tests
+npx playwright test tests/e2e
+```
+
+To update visual snapshots locally (rebaseline):
+
+```bash
+# Re-generate failing visual baselines
+npx playwright test --update-snapshots
+```
+
+What GitHub Actions does for these tests:
+
+- Runs `npx playwright test` using the `playwright.yml` workflow on push/PR to `main`.
+- The workflow starts a lightweight static server using `npx http-server . -p 8005 -c-1` (configured via `playwright.config.js:webServer`).
+- Failed snapshot diffs and test artifacts are uploaded as `playwright-report/` and `test-results/` artifacts to the workflow run.
+
+If you see visual differences in CI, download the artifacts from the failing run, validate the diffs locally, and update snapshots locally using `npx playwright test --update-snapshots` if the change is expected.
+
+## Mail Room & audit log
+
+The Mail Room UI (`presenter/index.html`) reads `NAVI/approvals/audit.log` via the server endpoint `GET /approvals/audit` and renders the latest decision per file.
+
+Use the Track/Hold/Escalate buttons to open a small notes prompt and submit the same payload as the Design Approval page (`POST /approval`). The server appends a line to `NAVI/approvals/audit.log` and the Mail Room will pick it up on its next refresh.
+
+To run the Mail Room UI locally:
+
+```bash
+# Start the dev server with a test token
+$env:MCP_APPROVAL_TOKEN='TEST_APPROVAL'
+node scripts/dev_server.js
+# Open http://localhost:8005/presenter/index.html
+```
+
+To test via Playwright locally:
+
+```bash
+npx playwright test tests/e2e/mailroom.spec.js
+```
+
+<!-- CI trigger: whitespace -->
+

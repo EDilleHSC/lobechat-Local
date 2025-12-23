@@ -1,65 +1,820 @@
 {
-  "trust_header": {
-    "rendered_at": "2025-12-18T12:34:58.202Z",
-    "snapshot_id": "2025-12-18T12-34-56-943Z.json",
-    "items_processed": 6,
-    "routed_to": "agent1"
-  },
+  "batchId": "2025-12-23T05-01-35-340Z.json",
+  "snapshotTimestamp": "2025-12-23T05:01:35.453Z",
   "items": [
     {
-      "filename": "agent_receive_smoke.txt",
-      "routed_to": "UNKNOWN",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-18",
-      "meta_path": null,
-      "checksum_sha256": "5f0957970a1add47517091eb3c259aa5f086380eca27b6cc5ce51bf1b732dae0"
+      "id": "2abe7dc20e846a198590b3b480dd529e5f008faf796ec8b19ebf151674562900",
+      "filename": "Bill_09052025_0001.pdf.testcopy",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_09052025_0001.pdf.testcopy",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 44,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_09052025_0001.pdf.testcopy, Size: 186228 bytes, Type: .testcopy\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.333Z",
+        "analyzed": "2025-12-23T05:01:35.333Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "Navi_Complete_Personal_Identity.md",
-      "routed_to": "UNKNOWN",
-      "confidence": null,
-      "file_type": "MD",
-      "received": "2025-12-13",
-      "meta_path": null,
-      "checksum_sha256": "e63276e9392d9173d77058f0fba177b8ef802896cbbd18dda1dc96f72e5309f0"
+      "id": "9d09a3097954817b41af1fc5ae05629a25671497ed90574de2e40aeddc6f1b28",
+      "filename": "Bill_09052025_0001.pdf.testcopy.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_09052025_0001.pdf.testcopy.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 36,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_09052025_0001.pdf.testcopy.navi.json, Size: 3825 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.333Z",
+        "analyzed": "2025-12-23T05:01:35.333Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "Navi_KB_00_Master_Index.md",
-      "routed_to": "UNKNOWN",
-      "confidence": null,
-      "file_type": "MD",
-      "received": "2025-12-13",
-      "meta_path": null,
-      "checksum_sha256": "d81d1c89618f73049d1b9ede3c15c97f8dd8b713fda352c124ddfe0c4e8d91b7"
+      "id": "8459f3e240bf44089153c56bc6900ccd6373a78fd3956a1c9e49da4207927f8f",
+      "filename": "Bill_09052025_0001.pdf.testcopy.navi.json.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_09052025_0001.pdf.testcopy.navi.json.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 35,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_09052025_0001.pdf.testcopy.navi.json.navi.json, Size: 4790 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.333Z",
+        "analyzed": "2025-12-23T05:01:35.333Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "Navi_KB_01_Communication_Style.md",
-      "routed_to": "UNKNOWN",
-      "confidence": null,
-      "file_type": "MD",
-      "received": "2025-12-13",
-      "meta_path": null,
-      "checksum_sha256": "9c6c56e2f561bc94808c98fbafb6b9b59202be578f9364c91988ca0e2eae59af"
+      "id": "918312bcc28da6ce7716296ba392ba847a0a2e6db85363b895f4b4c7314e073b",
+      "filename": "Bill_09172025_0001.pdf.testcopy",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_09172025_0001.pdf.testcopy",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 33,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_09172025_0001.pdf.testcopy, Size: 186956 bytes, Type: .testcopy\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "route_smoke.txt",
-      "routed_to": "UNKNOWN",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-18",
-      "meta_path": null,
-      "checksum_sha256": "c53869adb27d4ce70f80586643a19cbe36cab0d053777db18434ddacb76d5666"
+      "id": "d86546a7ad27b3a947dfdd90222422bedd92b65a7644f3a2841c545690556302",
+      "filename": "Bill_09172025_0001.pdf.testcopy.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_09172025_0001.pdf.testcopy.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 42,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_09172025_0001.pdf.testcopy.navi.json, Size: 3774 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
     },
     {
-      "filename": "smoke_mail.txt",
-      "routed_to": "UNKNOWN",
-      "confidence": null,
-      "file_type": "TXT",
-      "received": "2025-12-18",
-      "meta_path": null,
-      "checksum_sha256": "7b2a6fd77c3c21f23617df98b04d431eadb0b59dffda9ef516e66cb45c9494ab"
+      "id": "ca52452156054ee8ac83707c19a9ce3e6c0abf4e5c3a81eb6db74ad1383b27d1",
+      "filename": "Bill_09172025_0001.pdf.testcopy.navi.json.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_09172025_0001.pdf.testcopy.navi.json.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 40,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_09172025_0001.pdf.testcopy.navi.json.navi.json, Size: 4945 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "8d66309dfbafa427329dafb07aa48a421ef70ee4e539275145db3eacedc59af6",
+      "filename": "Bill_10062025_0001.pdf.testcopy",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_10062025_0001.pdf.testcopy",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 31,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_10062025_0001.pdf.testcopy, Size: 336965 bytes, Type: .testcopy\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "8aa00351ec9f415e45cecaac2c6866a6924344c07c3d8b1e8e8e619418c12e1d",
+      "filename": "Bill_10062025_0001.pdf.testcopy.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_10062025_0001.pdf.testcopy.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 32,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_10062025_0001.pdf.testcopy.navi.json, Size: 6770 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "8d3f952437c892f4d70ba0891f5996a28df88cf0ec506625a0bb300b5e08e022",
+      "filename": "Bill_10062025_0001.pdf.testcopy.navi.json.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_10062025_0001.pdf.testcopy.navi.json.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 32,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_10062025_0001.pdf.testcopy.navi.json.navi.json, Size: 8218 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "2e16e22841dbaeede89b62e93df1897bdd26f22a16345257b2e0cd56c6cd5609",
+      "filename": "Bill_10162025_0001.pdf.testcopy",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_10162025_0001.pdf.testcopy",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 45,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_10162025_0001.pdf.testcopy, Size: 217167 bytes, Type: .testcopy\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "786acc1aa9692c5a60e49d8fd91ed7382a6caec9cd893f09f77ec8d44bea5938",
+      "filename": "Bill_10162025_0001.pdf.testcopy.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_10162025_0001.pdf.testcopy.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 34,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_10162025_0001.pdf.testcopy.navi.json, Size: 4542 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "353740daed86b11493edff7c41132eb55e49c0fdedd22fc1f1fc9c1cb4590040",
+      "filename": "Bill_10162025_0001.pdf.testcopy.navi.json.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_10162025_0001.pdf.testcopy.navi.json.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 39,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_10162025_0001.pdf.testcopy.navi.json.navi.json, Size: 5663 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "9c6fa678b213b3770591bcc60eec8a999a74b0ee614f3d53e0f816e31e306e51",
+      "filename": "Bill_10282025_0001.pdf.testcopy",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_10282025_0001.pdf.testcopy",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 35,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_10282025_0001.pdf.testcopy, Size: 382673 bytes, Type: .testcopy\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "a44bc517cafa4cadcf677739e3a536528241cb07637baed9f7aa6db476afae34",
+      "filename": "Bill_10282025_0001.pdf.testcopy.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_10282025_0001.pdf.testcopy.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 38,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_10282025_0001.pdf.testcopy.navi.json, Size: 19801 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.334Z",
+        "analyzed": "2025-12-23T05:01:35.334Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "a81293847b29c93146e57c1add83b7f5de41d0e56240a85b7dee75065419206f",
+      "filename": "Bill_10282025_0001.pdf.testcopy.navi.json.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_10282025_0001.pdf.testcopy.navi.json.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 35,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_10282025_0001.pdf.testcopy.navi.json.navi.json, Size: 13989 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.335Z",
+        "analyzed": "2025-12-23T05:01:35.335Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "6286cfaf18b63eab5eba6c22839f7f3ea989bd46d4a34e500541b4b14d2d2126",
+      "filename": "Bill_11162025_0001.pdf.testcopy",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_11162025_0001.pdf.testcopy",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 41,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_11162025_0001.pdf.testcopy, Size: 103146 bytes, Type: .testcopy\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.335Z",
+        "analyzed": "2025-12-23T05:01:35.335Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "c8725132135905bf7c607b0480c21cb799cd713aa21c043dc3ba4f88f160245d",
+      "filename": "Bill_11162025_0001.pdf.testcopy.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_11162025_0001.pdf.testcopy.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 50,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_11162025_0001.pdf.testcopy.navi.json, Size: 19608 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.335Z",
+        "analyzed": "2025-12-23T05:01:35.335Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "e9736b707b487c1ae1c08ac307ec9d2a1a880474d54d03cce286daac43aacb29",
+      "filename": "Bill_11162025_0001.pdf.testcopy.navi.json.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Bill_11162025_0001.pdf.testcopy.navi.json.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 47,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Bill_11162025_0001.pdf.testcopy.navi.json.navi.json, Size: 13942 bytes, Type: .json\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.335Z",
+        "analyzed": "2025-12-23T05:01:35.335Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "6b76af8742c6f975bb4afe5333b062b864cb7410ba1e74b90e2a61ec0cbe89aa",
+      "filename": "Receipt_04012025_0001.pdf.testcopy",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Receipt_04012025_0001.pdf.testcopy",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 57,
+        "reasons": [
+          "AI analysis",
+          "Receipt indicators detected",
+          "No clear ownership indicators"
+        ],
+        "summary": "File: Receipt_04012025_0001.pdf.testcopy, Size: 325316 bytes, Type: .testcopy\n- Receipt-like file detected\n- Ownership unclear: requires human review",
+        "risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.335Z",
+        "analyzed": "2025-12-23T05:01:35.335Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "03f84483a6c67e726c8759afcab57fe73731eb88d5cd597f699c5a1f29b159c8",
+      "filename": "Receipt_04012025_0001.pdf.testcopy.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Receipt_04012025_0001.pdf.testcopy.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 66,
+        "reasons": [
+          "AI analysis",
+          "Receipt indicators detected",
+          "No clear ownership indicators"
+        ],
+        "summary": "File: Receipt_04012025_0001.pdf.testcopy.navi.json, Size: 19581 bytes, Type: .json\n- Receipt-like file detected\n- Ownership unclear: requires human review",
+        "risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.335Z",
+        "analyzed": "2025-12-23T05:01:35.335Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "177788a6b712ef7d0561f1320403911a4951bbdcb1c303b4e00243cebf7438ff",
+      "filename": "Receipt_04012025_0001.pdf.testcopy.navi.json.navi.json",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Receipt_04012025_0001.pdf.testcopy.navi.json.navi.json",
+      "state": "REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 69,
+        "reasons": [
+          "AI analysis",
+          "Receipt indicators detected",
+          "No clear ownership indicators"
+        ],
+        "summary": "File: Receipt_04012025_0001.pdf.testcopy.navi.json.navi.json, Size: 13755 bytes, Type: .json\n- Receipt-like file detected\n- Ownership unclear: requires human review",
+        "risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ],
+        "extracted_text_snippet": null,
+        "entity": null,
+        "entity_confidence": 0,
+        "effective_risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ],
+        "action": "review_required",
+        "destination": null,
+        "routing_note": "Low entity confidence (0%) or risk flags present; holding for manual review."
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-23T05:01:35.335Z",
+        "analyzed": "2025-12-23T05:01:35.335Z",
+        "decided": null,
+        "moved": null
+      }
     }
   ],
-  "html_preview": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n    <title>NAVI Mail Room Update (preview)</title>\n    <style>body{font-family:Segoe UI,Arial,sans-serif;padding:24px;background:#0a0e27;color:#f0f0f0}</style>\n</head>\n<body>\n<!-- TRUST_HEADER\nrendered_at: 2025-12-18T12:34:58.202Z\nsnapshot_id: 2025-12-18T12-34-56-943Z.json\nitems_processed: 6\nmailroom_routed_to: agent1\n-->\n<div class=\"container\">\n  <h1>NAVI Mail Room Update (preview)</h1>\n  <p>Snapshot: 2025-12-18T12-34-56-943Z.json</p>\n  <p>Items: 6</p>\n  <p>Routed to: agent1</p>\n</div>\n</body>\n</html>"
+  "counters": {
+    "total": 21,
+    "review_required": 21,
+    "auto_routed": 0,
+    "moved": 0,
+    "trash_pending": 0
+  }
 }
