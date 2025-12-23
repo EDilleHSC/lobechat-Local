@@ -46,16 +46,31 @@ $changed = $false
 foreach ($r in $rows) {
   $filename = $r.filename
   # find audit entry
-  $match = $audits | Where-Object { $_.action -eq 'deliver_file' -and $_.package -eq $PackageName -and $_.file -eq $filename } | Select-Object -Last 1
+  # find deliver_file audit entries safely (some audit lines are non-JSON)
+  $match = $audits | Where-Object { (Get-Member -InputObject $_ -Name 'action' -ErrorAction SilentlyContinue) -and ($_.action -eq 'deliver_file') -and ($_.package -eq $PackageName) -and ($_.file -eq $filename) } | Select-Object -Last 1
   if ($match) {
-    $r | Add-Member -NotePropertyName delivered_to -NotePropertyValue $match.to -Force
+    # normalize 'to' into a directory and file to avoid double-joining later
+    $toVal = $match.to
+    if ($toVal) {
+      if (Test-Path $toVal -PathType Leaf -ErrorAction SilentlyContinue) {
+        $destDir = Split-Path $toVal -Parent
+        $destFile = Split-Path $toVal -Leaf
+      } else {
+        # if it looks like a file path by ending with the filename, split; otherwise assume it's dir
+        if ($toVal -like "*\$filename") { $destDir = Split-Path $toVal -Parent; $destFile = Split-Path $toVal -Leaf } else { $destDir = $toVal; $destFile = $filename }
+      }
+    } else { $destDir = $null; $destFile = $filename }
+
+    $r | Add-Member -NotePropertyName delivered_to -NotePropertyValue $destDir -Force
     $r | Add-Member -NotePropertyName delivered_at -NotePropertyValue $match.timestamp -Force
+    $r | Add-Member -NotePropertyName delivered_file -NotePropertyValue $destFile -Force
   } else {
     # attempt to resolve dest from route
     if ($r.route) {
       $destDir = Resolve-DestinationPath -route $r.route
       $r | Add-Member -NotePropertyName delivered_to -NotePropertyValue $destDir -Force
       $r | Add-Member -NotePropertyName delivered_at -NotePropertyValue '' -Force
+      $r | Add-Member -NotePropertyName delivered_file -NotePropertyValue $r.filename -Force
     }
   }
   $changed = $true
@@ -84,15 +99,46 @@ if ($changed -and -not $DryRun) {
 # Verification
 $failures = @()
 foreach ($r in $rows) {
-  $dest = $null
-  if ($r.delivered_to) { $dest = $r.delivered_to } elseif ($r.route) { $dest = Resolve-DestinationPath -route $r.route }
-  if (-not $dest) { $failures += "No destination for $($r.filename)"; continue }
-  $destPath = Join-Path $dest $r.filename
+  $destDir = $null
+  if ($r.delivered_to) { $destDir = $r.delivered_to } elseif ($r.route) { $destDir = Resolve-DestinationPath -route $r.route }
+  if (-not $destDir) { $failures += "No destination for $($r.filename)"; continue }
+  # if delivered_file present, use that; else use manifest filename
+  $fileToCheck = if ($r.delivered_file) { $r.delivered_file } else { $r.filename }
+  $destPath = if (Test-Path $destDir -PathType Leaf -ErrorAction SilentlyContinue) { $destDir } else { Join-Path $destDir $fileToCheck }
   if (-not (Test-Path $destPath)) { $failures += "Missing dest file: $destPath"; continue }
   $destNavi = $destPath + '.navi.json'
   if (-not (Test-Path $destNavi)) { $failures += "Missing dest sidecar: $destNavi"; continue }
   try { $jn = Get-Content $destNavi -Raw | ConvertFrom-Json } catch { $failures += "Unreadable sidecar: $destNavi"; continue }
   if (-not $jn.delivered) { $failures += "Sidecar missing delivered flag: $destNavi"; continue }
+
+  # compute and record SHA256 checksum for delivered file and write into destination meta
+  try {
+    $hash = (Get-FileHash -Algorithm SHA256 -Path $destPath).Hash
+    $r | Add-Member -NotePropertyName delivered_sha256 -NotePropertyValue $hash -Force
+
+    # update destination meta.json (if present) with sha256 and verified:true
+    $destMeta = $destPath + '.meta.json'
+    if (Test-Path $destMeta) {
+      try {
+        $metaObj = Get-Content $destMeta -Raw | ConvertFrom-Json -ErrorAction Stop
+      } catch { $metaObj = @{} }
+      $metaObj.sha256 = $hash
+      $metaObj.verified = $true
+      # atomic write
+      $tmpmeta = $destMeta + '.tmp'
+      $metaObj | ConvertTo-Json -Depth 10 | Out-File -FilePath $tmpmeta -Encoding utf8
+      Move-Item -Path $tmpmeta -Destination $destMeta -Force
+    } else {
+      # create meta with checksum
+      $metaObj = @{ filename = $fileToCheck; sha256 = $hash; verified = $true; updated_at = (Get-Date).ToString('o') }
+      $tmpmeta = $destMeta + '.tmp'
+      $metaObj | ConvertTo-Json -Depth 10 | Out-File -FilePath $tmpmeta -Encoding utf8
+      Move-Item -Path $tmpmeta -Destination $destMeta -Force
+    }
+  } catch {
+    $failures += "Checksum compute/update failed for $destPath : $($_.Exception.Message)"
+    continue
+  }
 }
 
 if ($failures.Count -gt 0) {
