@@ -100,8 +100,35 @@ app.get('/api/packages/:pkg/files/:filename', (req, res) => {
   }
 });
 
-// Package download (zip on demand) with caching
+// Package download (zip on demand) with caching and eviction
 const zipCreationLocks = new Map(); // pkgName -> Promise
+const ZIP_CACHE_TTL_MS = parseInt(process.env.ZIP_CACHE_TTL_MS, 10) || 24 * 60 * 60 * 1000; // default 24 hours
+const ZIP_CACHE_MAX_BYTES = parseInt(process.env.ZIP_CACHE_MAX_BYTES, 10) || (500 * 1024 * 1024); // default 500MB
+
+function pruneZipCache(packagesDir, excludePath) {
+  try {
+    const zipFiles = fs.readdirSync(packagesDir).filter(f => f.endsWith('.zip')).map(f => path.join(packagesDir, f)).filter(p => fs.existsSync(p));
+    // compute total size and sort by mtime ascending (oldest first)
+    const entries = zipFiles.map(p => ({ path: p, size: fs.statSync(p).size, mtime: fs.statSync(p).mtimeMs })).sort((a,b) => a.mtime - b.mtime);
+    let total = entries.reduce((s, e) => s + e.size, 0);
+    // evict by age (TTL) first
+    const now = Date.now();
+    entries.forEach(e => {
+      if (e.path !== excludePath && (now - e.mtime) > ZIP_CACHE_TTL_MS) {
+        try { fs.unlinkSync(e.path); total -= e.size; console.log('[CACHE] evicted old zip', e.path); } catch (e) {}
+      }
+    });
+    // If still over size, evict oldest until under limit (excluding excludePath)
+    for (const e of entries) {
+      if (total <= ZIP_CACHE_MAX_BYTES) break;
+      if (e.path === excludePath) continue;
+      try { fs.unlinkSync(e.path); total -= e.size; console.log('[CACHE] evicted zip for size', e.path); } catch (err) {}
+    }
+  } catch (err) {
+    console.error('[CACHE] prune error', err);
+  }
+}
+
 app.get('/api/packages/:pkg/download', async (req, res) => {
   try {
     const packagesDir = path.join(__dirname, '..', 'NAVI', 'packages');
@@ -118,7 +145,7 @@ app.get('/api/packages/:pkg/download', async (req, res) => {
     }
 
     const dirMax = getDirMaxMtime(pkgDir);
-    if (fs.existsSync(zipPath) && fs.statSync(zipPath).mtimeMs >= dirMax) {
+    if (fs.existsSync(zipPath) && fs.statSync(zipPath).mtimeMs >= dirMax && (Date.now() - fs.statSync(zipPath).mtimeMs) <= ZIP_CACHE_TTL_MS) {
       // cached zip is fresh; stream it
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', `attachment; filename="${pkgName}.zip"`);
@@ -160,6 +187,8 @@ app.get('/api/packages/:pkg/download', async (req, res) => {
 
     archive.finalize().then(() => {
       try { fs.renameSync(tmpZip, zipPath); } catch (e) { console.error('[API] rename zip error', e); }
+      // prune cache after successful create (don't delete the newly created file)
+      pruneZipCache(packagesDir, zipPath);
       resolveLock();
       zipCreationLocks.delete(pkgName);
     }).catch((err) => {
@@ -172,6 +201,22 @@ app.get('/api/packages/:pkg/download', async (req, res) => {
   } catch (err) {
     console.error('[API] /api/packages/:pkg/download error', err);
     return res.status(500).json({ error: 'failed to create package zip' });
+  }
+});
+
+// Purge cached zip for a package
+app.post('/api/packages/:pkg/cache/purge', (req, res) => {
+  try {
+    const packagesDir = path.join(__dirname, '..', 'NAVI', 'packages');
+    const zipPath = path.join(packagesDir, `${req.params.pkg}.zip`);
+    if (fs.existsSync(zipPath)) {
+      fs.unlinkSync(zipPath);
+      return res.status(204).end();
+    }
+    return res.status(404).json({ error: 'cached zip not found' });
+  } catch (err) {
+    console.error('[API] /api/packages/:pkg/cache/purge error', err);
+    return res.status(500).json({ error: 'failed to purge cache' });
   }
 });
 

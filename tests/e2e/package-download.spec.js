@@ -56,6 +56,19 @@ test('Playwright: download package zip from presenter', async ({ context }) => {
   const buf = await apiRes.body();
   expect(buf.length).toBeGreaterThan(0);
 
+  // assert cache file exists and mtime stable on second request
+  const zipPath = path.join(packagesDir, `${pkgName}.zip`);
+  expect(fs.existsSync(zipPath)).toBeTruthy();
+  const m1 = fs.statSync(zipPath).mtimeMs;
+
+  // second request should use cached zip (mtime unchanged)
+  const apiRes2 = await context.request.get(downloadUrl);
+  if (!apiRes2.ok()) throw new Error('Second download failed');
+  const buf2 = await apiRes2.body();
+  expect(buf2.length).toBeGreaterThan(0);
+  const m2 = fs.statSync(zipPath).mtimeMs;
+  expect(m2).toBe(m1);
+
   // cleanup
   fs.rmSync(pkgDir, { recursive: true, force: true });
 });
