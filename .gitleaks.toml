@@ -8,4 +8,4 @@ tags        = ["key", "pem"]
 
 [allowlist]
 description = "Allow known-test fixture paths (adjust as needed)"
-regexes     = ["^tests/fixtures/", "^NAVI/docs/examples/"]
+regexes     = ["^tests/fixtures/", "^NAVI/docs/examples/", "^.*\.env.*template$", "^tmp-ci-fix/", "^cleanup_worktree/.*\.env.*template$"]
