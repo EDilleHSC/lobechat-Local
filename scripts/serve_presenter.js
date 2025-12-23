@@ -100,20 +100,75 @@ app.get('/api/packages/:pkg/files/:filename', (req, res) => {
   }
 });
 
-// Package download (zip on demand)
-app.get('/api/packages/:pkg/download', (req, res) => {
+// Package download (zip on demand) with caching
+const zipCreationLocks = new Map(); // pkgName -> Promise
+app.get('/api/packages/:pkg/download', async (req, res) => {
   try {
     const packagesDir = path.join(__dirname, '..', 'NAVI', 'packages');
-    const pkgDir = path.join(packagesDir, req.params.pkg);
-    if (!fs.existsSync(pkgDir)) return res.status(404).json({ error: 'package not found' });
+    const pkgName = req.params.pkg;
+    const pkgDir = path.join(packagesDir, pkgName);
+    if (!fs.existsSync(pkgDir) || !fs.statSync(pkgDir).isDirectory()) return res.status(404).json({ error: 'package not found' });
+
+    const zipPath = path.join(packagesDir, `${pkgName}.zip`);
+
+    // helper: get latest mtime of files in package dir
+    function getDirMaxMtime(dir) {
+      const files = fs.readdirSync(dir).map(f => path.join(dir, f)).filter(p => fs.existsSync(p)).map(p => fs.statSync(p).mtimeMs);
+      return files.length ? Math.max(...files) : 0;
+    }
+
+    const dirMax = getDirMaxMtime(pkgDir);
+    if (fs.existsSync(zipPath) && fs.statSync(zipPath).mtimeMs >= dirMax) {
+      // cached zip is fresh; stream it
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename="${pkgName}.zip"`);
+      const rs = fs.createReadStream(zipPath);
+      rs.on('error', err => { console.error('[API] zip stream error', err); try { res.status(500).end(); } catch (e) {} });
+      return rs.pipe(res);
+    }
+
+    // If a zip is already being created for this package, wait for it
+    if (zipCreationLocks.has(pkgName)) {
+      await zipCreationLocks.get(pkgName);
+      // then stream cached file
+      if (fs.existsSync(zipPath)) {
+        res.setHeader('Content-Type', 'application/zip');
+        res.setHeader('Content-Disposition', `attachment; filename="${pkgName}.zip"`);
+        return fs.createReadStream(zipPath).pipe(res);
+      }
+    }
+
+    // Acquire lock and create zip to temp, stream concurrently
+    let resolveLock;
+    const lockPromise = new Promise((resolve) => { resolveLock = resolve; });
+    zipCreationLocks.set(pkgName, lockPromise);
+
     const archiver = require('archiver');
+    const tmpZip = zipPath + '.tmp';
+
+    // pipe archive to both a file and response
+    const output = fs.createWriteStream(tmpZip);
+    output.on('error', err => console.error('[API] zip write error', err));
     res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename="${req.params.pkg}.zip"`);
+    res.setHeader('Content-Disposition', `attachment; filename="${pkgName}.zip"`);
+
     const archive = archiver('zip', { zlib: { level: 6 } });
     archive.on('error', err => { console.error('[API] zip error', err); try { res.status(500).end(); } catch (e) {} });
+    archive.pipe(output);
     archive.pipe(res);
     archive.directory(pkgDir, false);
-    archive.finalize();
+
+    archive.finalize().then(() => {
+      try { fs.renameSync(tmpZip, zipPath); } catch (e) { console.error('[API] rename zip error', e); }
+      resolveLock();
+      zipCreationLocks.delete(pkgName);
+    }).catch((err) => {
+      console.error('[API] archive finalize error', err);
+      try { res.end(); } catch(e){}
+      resolveLock();
+      zipCreationLocks.delete(pkgName);
+    });
+
   } catch (err) {
     console.error('[API] /api/packages/:pkg/download error', err);
     return res.status(500).json({ error: 'failed to create package zip' });
