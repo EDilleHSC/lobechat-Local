@@ -1,0 +1,25 @@
+name: PowerShell Unit Tests
+
+on:
+  push:
+    branches: [ main, feat/presenter-zip-cache ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  pwsh-tests:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node (for any scripts)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run PowerShell unit test (deliver-package)
+        shell: pwsh
+        run: |
+          Write-Host "Running deliver-package PowerShell unit test"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File tests/unit/deliver-package.test.ps1
