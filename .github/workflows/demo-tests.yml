@@ -24,10 +24,14 @@ jobs:
       - name: Start static server
         run: npx http-server -p 8005 . &
       - name: Wait for server
-        uses: jakejarvis/wait-action@v0.1.8
-        with:
-          url: 'http://localhost:8005/presenter/design-approval.html'
-          timeout: 60
+        run: |
+          for i in {1..30}; do
+            if curl -sSf http://localhost:8005/presenter/design-approval.html >/dev/null 2>&1; then
+              echo "Server ready"; break
+            fi
+            echo "Waiting for server... ($i)"; sleep 2
+          done
+        shell: bash
       - name: Run e2e tests
         run: npm run test:e2e
       - name: Upload Playwright report
