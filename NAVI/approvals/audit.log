@@ -3,3 +3,6 @@
 [2025-12-20T08:33:08.492Z] TestOperator approved snapshot 2025-12-20T08-26-01-740Z.json with 1 items
 [2025-12-20T16:35:42.071Z] Test approved snapshot 2025-12-20T16-35-30-056Z.json with 2 items → 2025-12-20T16-35-30-056Z.json.Test.1766248542071.approval.json
 [2025-12-20T16:40:50.823Z] Test approved snapshot 2025-12-20T16-40-42-416Z.json with 2 items → 2025-12-20T16-40-42-416Z.json.Test.1766248850822.approval.json
+{"filename":"kb_test_1.txt","state":"REVIEW_REQUIRED","final_route":"LEGAL","final_state":"MOVED","resolved_by":"human","timestamp":"2025-12-22T05:00:00Z","human_reason":"test"}
+{"filename":"approve_test.txt","state":"REVIEW_REQUIRED","final_route":"Finance","final_state":"MOVED","resolved_by":"human","timestamp":"2025-12-23T04:13:23.576Z","human_reason":"Automated test"}
+{"filename":"approve_ui_company_personal_invoice_1766463204167.pdf","state":"REVIEW_REQUIRED","final_route":"Intake","final_state":"MOVED","resolved_by":"human","timestamp":"2025-12-23T04:13:25.190Z","human_reason":null}

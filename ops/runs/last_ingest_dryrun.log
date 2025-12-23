@@ -1,0 +1,5 @@
+ParserError: D:\05_AGENTS-AI\01_RUNTIME\VBoarder\ops\smoke_ingest.ps1:197:11
+Line |
+ 197 |  } finally {
+     |            ~
+     | Missing closing '}' in statement block or type definition.

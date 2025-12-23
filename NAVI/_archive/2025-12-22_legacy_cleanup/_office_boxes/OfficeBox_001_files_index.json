@@ -1,0 +1,19 @@
+{
+  "officeBoxId": "OfficeBox_001",
+  "generated_at": "2025-12-23T01:56:36.387Z",
+  "files": [
+    {
+      "filename": "OfficeBox_001_HSC_Contract_1.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\OfficeBox_001_HSC_Contract_1.txt",
+      "size": 183,
+      "sha256": "CCE284C853F01A915F9F817F697D20C8CBC8C32046D723D6B3328365DF72F3BA",
+      "last_modified": "2025-12-22T18:53:36.0594355-07:00",
+      "entity": "LEGAL",
+      "entity_confidence": 75,
+      "state": "MOVED",
+      "extracted_text_snippet": "Office Box Move-In: Contract 1\nClient: Example Co.\nDepartment: HSC\nDocument Type: Contract\nNotes: Please route to HSC Legal - Housing Standards Committee for storage and review.",
+      "snapshot_id": "2025-12-23T01-56-36-387Z.json",
+      "final_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\sorted\\HSC\\OfficeBox_001_HSC_Contract_1.txt"
+    }
+  ]
+}
