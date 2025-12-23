@@ -4,6 +4,7 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const net = require('net');
 console.log('[DEBUG] Crypto loaded:', typeof crypto, typeof crypto.createHash);
 const { execSync, spawnSync } = require('child_process');
 const Ajv = require('ajv');
@@ -24,10 +25,15 @@ console.log("Node version:", process.version);
 console.log("CWD:", process.cwd());
 
 // Configuration
-const INBOX_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox";
-const SNAPSHOT_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\snapshots\\inbox";
-// Approvals directory for persistent approval objects and audit log
-const APPROVAL_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\approvals";
+// NAVI_ROOT and related NAVI paths will be initialized AFTER configuration is loaded.
+// (See below where we set NAVI_ROOT using config.navi_root or process.env.NAVI_ROOT.)
+// Placeholder variables declared here so references don't error before initialization
+let NAVI_ROOT;
+let INBOX_DIR;
+let SNAPSHOT_DIR;
+let APPROVAL_DIR;
+
+// NAVI_ROOT will be logged after config loading.
 // mcp_server.js lives at: VBoarder/runtime/triage_xxx/mcp_server.js
 // so project root is two levels up from __dirname
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
@@ -61,6 +67,33 @@ try {
         departments: ["Account", "Legal", "Finance", "HR", "Ops", "Support", "Intake", "Trash"]
     };
 }
+
+// Try loading NAVI-specific config to pick up routing and path overrides
+const NAVI_CONFIG_PATH = path.join(PROJECT_ROOT, 'NAVI', 'config', 'routing_config.json');
+try {
+    const ncfg = JSON.parse(fs.readFileSync(NAVI_CONFIG_PATH, 'utf8'));
+    Object.assign(config, ncfg);
+    console.log(`[CONFIG] Loaded NAVI config from ${NAVI_CONFIG_PATH}`);
+} catch (e) {
+    // Not fatal; continue with main config
+}
+
+// Initialize NAVI paths now that config and PROJECT_ROOT are available
+if (config.use_navi_root === false) {
+    NAVI_ROOT = path.join(PROJECT_ROOT, 'NAVI');
+    log('[CONFIG] use_navi_root is false; using PROJECT_ROOT/NAVI');
+} else {
+    NAVI_ROOT = process.env.NAVI_ROOT || config.navi_root || path.join(PROJECT_ROOT, 'NAVI');
+}
+INBOX_DIR = path.join(NAVI_ROOT, 'inbox');
+SNAPSHOT_DIR = path.join(NAVI_ROOT, 'snapshots', 'inbox');
+// Approvals directory for persistent approval objects and audit log
+APPROVAL_DIR = path.join(NAVI_ROOT, 'approvals');
+
+console.log(`[PATHS] NAVI_ROOT=${NAVI_ROOT}`);
+console.log(`[PATHS] INBOX_DIR=${INBOX_DIR}`);
+console.log(`[PATHS] SNAPSHOT_DIR=${SNAPSHOT_DIR}`);
+console.log(`[PATHS] APPROVAL_DIR=${APPROVAL_DIR}`);
 
 // State machine definitions
 const STATES = {
@@ -100,6 +133,8 @@ const PORT = Number(process.env.PORT) || 8005;
 // Track last activity for health
 let lastSnapshotTime = null;
 let lastPresenterTime = null;
+// Last observed (files-only) inbox state (string of filenames) to deduplicate watcher triggers
+let lastInboxState = null;
 // Current process mode for /process endpoint: 'DEFAULT' or 'KB'
 let CURRENT_PROCESS_MODE = 'DEFAULT';
 
@@ -111,6 +146,7 @@ console.log(`[PATHS] INBOX_DIR=${INBOX_DIR}`);
 console.log(`[PATHS] SNAPSHOT_DIR=${SNAPSHOT_DIR}`);
 console.log(`[PATHS] APPROVAL_DIR=${APPROVAL_DIR}`);
 console.log(`[PATHS] PRESENTER_DIR=${PRESENTER_DIR}`);
+console.log('[ENV] MCP_APPROVAL_TOKEN:', process.env.MCP_APPROVAL_TOKEN ? 'SET' : 'NOT_SET');
 
 // Utility functions
 function normalizePath(p) {
@@ -174,8 +210,31 @@ function triggerProcessPipeline() {
 // Manual inbox processing function
 function processInbox(source) {
     console.log(`[PROCESS_INBOX] Triggered by ${source}`);
+
+    // Guard 1: If an ingest lock exists, skip and explain why
+    const lockPath = path.join(NAVI_DIR, '.ingest.lock');
+    if (fs.existsSync(lockPath)) {
+        log('[WATCHER] Ingest lock present — skipping auto-trigger');
+        return;
+    }
+
+    // Guard 2: Deduplicate repeated events by file-list snapshot (files only)
+    let files = [];
+    try {
+        files = fs.readdirSync(INBOX_DIR).filter(f => fs.statSync(path.join(INBOX_DIR, f)).isFile()).sort();
+    } catch (e) {
+        log('[WATCHER] Failed to read inbox for change-detection: ' + e.message);
+    }
+    const state = files.join('|');
+    if (lastInboxState && lastInboxState === state) {
+        log(`[WATCHER] No meaningful inbox change — skipping auto-trigger (${files.length} files)`);
+        return;
+    }
+
+    // Record the state and proceed
+    lastInboxState = state;
+
     // Call the same logic as /process endpoint
-    // For simplicity, trigger the pipeline
     triggerProcessPipeline();
 }
 
@@ -203,6 +262,14 @@ function takeSnapshot(dirPath) {
         });
 
         log(`[SNAPSHOT] Found ${items.length} items`);
+
+        // Update lastInboxState snapshot marker (files only)
+        try {
+            const fileNames = items.filter(i => i.type === 'file').map(i => i.name).sort();
+            lastInboxState = fileNames.join('|');
+        } catch (e) {
+            // best-effort; non-fatal
+        }
 
         // Create snapshot directory if needed
         if (!fs.existsSync(SNAPSHOT_DIR)) {
@@ -381,6 +448,68 @@ function detectReceipt(filename, stats) {
     };
 }
 
+// Text extraction helper (Phase 1): only supports .txt and .md.
+// Returns first N bytes (snippet) or null if not extractable yet.
+function extractText(filePath, maxBytes = 4096) {
+    try {
+        if (!fs.existsSync(filePath)) return null;
+        const ext = path.extname(filePath).toLowerCase();
+        if (!['.txt', '.md'].includes(ext)) {
+            // TODO: integrate OCR pipeline for PDFs and images (DeepSeek, PaddleOCR, tesseract, etc.)
+            return null;
+        }
+        const stats = fs.statSync(filePath);
+        const readBytes = Math.min(maxBytes, Math.max(0, stats.size));
+        const fd = fs.openSync(filePath, 'r');
+        const buf = Buffer.alloc(Math.min(readBytes, maxBytes));
+        fs.readSync(fd, buf, 0, buf.length, 0);
+        fs.closeSync(fd);
+        let text = buf.toString('utf8').replace(/\r\n/g, '\n').trim();
+        // Truncate to ensure snippet is not too large
+        if (text.length > maxBytes) text = text.slice(0, maxBytes);
+        return text;
+    } catch (e) {
+        log(`[EXTRACT] Failed to extract text from ${filePath}: ${e.message}`);
+        return null;
+    }
+}
+
+// Very small heuristic entity detector using text snippet (Phase 1).
+// Returns { entity: string|null, confidence: 0-100 }
+function detectEntityFromText(text) {
+    if (!text || typeof text !== 'string') return { entity: null, confidence: 0 };
+    const lc = text.toLowerCase();
+
+    // Quick special-case mappings for high-confidence phrases
+    if (lc.includes('home stagers') || lc.includes('home stagers choice')) {
+        return { entity: 'HSC', confidence: 95 };
+    }
+
+    const entityKeywords = {
+        'HSC': ['hsc', 'schoolhouse', 'school house', 'home stagers'],
+        'LHI': ['lhi', 'loric homes', 'loric'],
+        'LTD': ['ltd', 'limited', 'ltd.'],
+        'DDM': ['ddm'],
+        'VB': ['vb', 'vboarder', 'vboarder'],
+        'DESK': ['desk', 'helpdesk', 'service desk'],
+        'LEGAL': ['legal', 'contract', 'attorney', 'law'],
+        'FINANCE': ['invoice', 'receipt', 'payment', 'accounts payable', 'finance']
+    };
+    let found = null;
+    let score = 0;
+    for (const [entity, keywords] of Object.entries(entityKeywords)) {
+        for (const kw of keywords) {
+            if (lc.includes(kw)) {
+                found = entity;
+                score += 25; // each match adds 25
+            }
+        }
+    }
+    // cap confidence
+    const confidence = Math.max(0, Math.min(100, Math.round(Math.min(score, 100))));
+    return { entity: found, confidence };
+}
+
 function takeSnapshot() {
     try {
         // Create snapshot of inbox
@@ -434,6 +563,23 @@ function takeSnapshot() {
             if (!Array.isArray(risk_flags)) { risk_flags = risk_flags ? [String(risk_flags)] : []; }
             risk_flags = Array.from(new Set(risk_flags));
 
+            // Extract text snippet for text-like files (Phase 1)
+            let extracted_text_snippet = null;
+            let detected_entity = null;
+            let detected_entity_confidence = 0;
+            try {
+                extracted_text_snippet = extractText(filePath, 4096);
+                if (extracted_text_snippet) {
+                    const ent = detectEntityFromText(extracted_text_snippet);
+                    if (ent) {
+                        detected_entity = ent.entity;
+                        detected_entity_confidence = ent.confidence;
+                    }
+                }
+            } catch (e) {
+                log(`[EXTRACT] Error processing text/entity detection for ${filePath}: ${e.message}`);
+            }
+
             // Check for risky file types
             const ext = path.extname(filename).toLowerCase();
             if (['.exe', '.bat', '.scr', '.pif', '.com'].includes(ext)) {
@@ -455,7 +601,11 @@ function takeSnapshot() {
                     confidence: confidencePercent,
                     reasons,
                     summary: ai_summary.join('\n'),
-                    risk_flags
+                    risk_flags,
+                    // Phase 1 extracted text and simple entity detection
+                    extracted_text_snippet: extracted_text_snippet,
+                    entity: detected_entity,
+                    entity_confidence: detected_entity_confidence
                 },
                 human: {
                     final_route: null,
@@ -505,28 +655,58 @@ function takeSnapshot() {
                 continue;
             }
             
-            if (conf >= thresholds.auto_route && item.ai.risk_flags.length === 0) {
-                // Auto-route
-                item.state = STATES.FINAL.MOVED;
-                item.timestamps.moved = new Date().toISOString();
-                const destDir = path.join(NAVI_DIR, 'processed', item.ai.guess);
-                fs.mkdirSync(destDir, { recursive: true });
-                const src = path.join(inboxPath, item.filename);
-                const dest = path.join(destDir, item.filename);
+            // Determine which office (entity) this box belongs to
+            const office = item.ai.entity || 'DESK';
+            const entityConf = Number(item.ai.entity_confidence || 0);
+
+            // Delivery rule: High entity confidence (>=85%) allows auto-delivery unless there are real risk flags.
+            // We allow a high-confidence entity to override 'unclear_ownership' and 'low_confidence' but not strong risk flags like 'executable'.
+            const effectiveRiskFlags = item.ai.risk_flags.filter(f => !( (f === 'unclear_ownership' || f === 'low_confidence') && entityConf >= 85));
+            // Record effective risk flags for audit
+            item.ai.effective_risk_flags = effectiveRiskFlags;
+            log(`[DELIVERY CHECK] ${item.filename}: entity=${office}, entityConf=${entityConf}%, original_risks=${item.ai.risk_flags.join(', ')}, effective_risks=${effectiveRiskFlags.join(', ')}`);
+
+            if (entityConf >= 85 && effectiveRiskFlags.length === 0) {
+                // Create the office folder if it doesn't exist
+                const destDir = path.join(NAVI_DIR, 'sorted', office);
+                if (!fs.existsSync(destDir)) {
+                    fs.mkdirSync(destDir, { recursive: true });
+                }
+
+                // Move the box to the office
+                const src = item.source_path || path.join(inboxPath, item.filename);
+                const destPath = path.join(destDir, item.filename);
                 try {
-                    fs.renameSync(src, dest);
+                    fs.renameSync(src, destPath);
+                    // Use canonical final state
+                    item.state = STATES.FINAL.MOVED;
+                    item.final_state = STATES.FINAL.MOVED;
+                    item.timestamps.moved = new Date().toISOString();
+                    item.ai.routing_note = `Auto-delivered to ${office} office (entity confidence: ${entityConf}%)`;
+                    item.ai.action = 'auto_routed';
+                    item.ai.destination = `sorted/${office}/`;
                     autoRouted.push(item);
-                    log(`[AUTO-ROUTE] Auto-routed ${item.filename} to ${item.ai.guess} (conf: ${item.ai.confidence}%)`);
-                } catch (e) {
-                    console.error(`[ERROR] Failed to auto-route ${item.filename}:`, e.message);
+                    log(`[DELIVERY] ${item.filename} → sorted/${office}/`);
+                } catch (err) {
+                    console.error(`[DELIVERY ERROR] Failed to move ${item.filename}:`, err.message);
                     item.state = STATES.DECISION.REVIEW_REQUIRED;
+                    item.ai.routing_note = `Move failed: ${err.message}`;
+                    item.ai.action = 'move_failed';
+                    item.ai.destination = null;
                     reviewRequired.push(item);
                 }
             } else {
-                // Review required
+                // Leave on loading dock for human review
                 item.state = STATES.DECISION.REVIEW_REQUIRED;
+                item.ai.action = 'review_required';
+                item.ai.destination = null;
+                if (entityConf >= 85) {
+                    item.ai.routing_note = `High entity confidence (${entityConf}%) but risk flags present: ${item.ai.risk_flags.join(', ')}; holding for manual review.`;
+                } else {
+                    item.ai.routing_note = `Low entity confidence (${entityConf}%) or risk flags present; holding for manual review.`;
+                }
                 reviewRequired.push(item);
-                log(`[ROUTE] ${item.filename} requires review (conf: ${item.ai.confidence}%, risks: ${item.ai.risk_flags.join(', ')})`);
+                log(`[HOLD] ${item.filename} needs review (entity: ${office}, conf: ${entityConf}%, risk_flags: ${item.ai.risk_flags.join(', ')}, effective_risks: ${effectiveRiskFlags.join(', ')})`);
             }
         }
 
@@ -550,6 +730,43 @@ function takeSnapshot() {
             status: 'processed'
         };
 
+        // Compute batch stats for audit
+        const batchStats = {
+            files_processed: snapshot.totalFiles,
+            auto_routed: {},
+            review_required: snapshot.reviewRequiredCount || 0,
+            errors: 0,
+            duration_ms: Date.now() - (typeof batchStart === 'number' ? batchStart : Date.now()),
+            details: []
+        };
+
+        for (const it of snapshot.autoRouted.concat(snapshot.reviewRequired)) {
+            const entity = (it.ai && it.ai.entity) ? it.ai.entity : 'DESK';
+            const action = it.ai && it.ai.action ? it.ai.action : (it.state === STATES.FINAL.MOVED ? 'auto_routed' : 'review_required');
+            if (action === 'auto_routed') {
+                batchStats.auto_routed[entity] = (batchStats.auto_routed[entity] || 0) + 1;
+            }
+            if (action === 'move_failed') batchStats.errors += 1;
+
+            batchStats.details.push({
+                filename: it.filename,
+                entity: it.ai ? it.ai.entity : null,
+                entity_confidence: it.ai ? it.ai.entity_confidence : 0,
+                risk_flags: it.ai ? it.ai.risk_flags : [],
+                effective_risk_flags: it.ai ? it.ai.effective_risk_flags : [],
+                action: action,
+                destination: it.ai ? it.ai.destination : null
+            });
+        }
+
+        // Write the batch log
+        try {
+            const batchLogPath = logBatch(batchStats);
+            snapshot.batch_log = batchLogPath;
+        } catch (e) {
+            log('[BATCH LOG] Failed to write batch log: ' + e.message);
+        }
+
         // Save snapshot
         const snapshotFilename = `${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
         const snapshotPath = path.join(snapshotDir, snapshotFilename);
@@ -571,7 +788,8 @@ function takeSnapshot() {
 function regeneratePresenter(snapshotResult) {
     try {
         // Use canonical presenter directory (not runtime triage) for authoritative output
-        const CANONICAL_PRESENTER_DIR = "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\presenter";
+        // Allow canonical presenter dir to be configured (fallback to NAVI_ROOT/presenter)
+        const CANONICAL_PRESENTER_DIR = config.canonical_presenter_dir || path.join(NAVI_ROOT, 'presenter');
         const presenterDir = CANONICAL_PRESENTER_DIR;
         if (!fs.existsSync(presenterDir)) {
             fs.mkdirSync(presenterDir, { recursive: true });
@@ -1001,6 +1219,16 @@ const proc = spawnSync(PYTHON, [MAILROOM], { encoding: 'utf8' });
                 }));
             }
         });
+    } else if (req.method === 'GET' && req.url && req.url.split('?')[0] === '/batch_summary') {
+        try {
+            const summary = generateBatchSummary();
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(summary));
+        } catch (e) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: e.message }));
+        }
+        return;
     } else if ((req.method === 'GET' || req.method === 'HEAD') && req.url.startsWith('/presenter')) {
         // Serve static files from the canonical presenter folder (operator-approved UI)
         try {
@@ -1568,7 +1796,22 @@ function startServer() {
     });
 
     try {
-        server.listen(PORT, () => {
+        server.listen(PORT, '127.0.0.1', () => {
+            console.log('[BIND] server.address():', JSON.stringify(server.address()));
+            console.log('[BIND] server.listening:', server.listening);
+
+            // Self-connect checks for both IPv4 and IPv6 loopback to confirm bind
+            const tryConnect = (host) => {
+                const s = new net.Socket();
+                s.setTimeout(1000);
+                s.on('error', (e) => console.log(`[BIND] connect ${host} error:`, e && e.message));
+                s.on('timeout', () => { console.log(`[BIND] connect ${host} timeout`); s.destroy(); });
+                s.connect({ port: PORT, host }, () => { console.log(`[BIND] connect ${host} success`); s.destroy(); });
+            };
+
+            tryConnect('127.0.0.1');
+            tryConnect('::1');
+
             console.log('[MCP] Server connected and ready');
             
             // 🚨 INBOX WATCHER - Auto-trigger snapshots when files arrive
@@ -1584,12 +1827,22 @@ function startServer() {
             watcher
                 .on('add', (filePath) => {
                     const fileName = path.basename(filePath);
-                    console.log(`[WATCHER] ADD: ${filePath}`);
+                    const ingestLock = path.join(NAVI_DIR, '.ingest.lock');
+                    if (fs.existsSync(ingestLock)) {
+                        log('[WATCHER] Ingest lock present — skipping auto-trigger');
+                        return;
+                    }
+                    log(`[WATCHER] ADD: ${filePath}`);
                     processInbox('watcher:add');
                 })
                 .on('change', (filePath) => {
+                    const ingestLock = path.join(NAVI_DIR, '.ingest.lock');
+                    if (fs.existsSync(ingestLock)) {
+                        log('[WATCHER] Ingest lock present — skipping change-trigger');
+                        return;
+                    }
                     const fileName = path.basename(filePath);
-                    console.log(`[WATCHER] CHANGE: ${filePath}`);
+                    log(`[WATCHER] CHANGE: ${filePath}`);
                 })
                 .on('unlink', (filePath) => {
                     const fileName = path.basename(filePath);

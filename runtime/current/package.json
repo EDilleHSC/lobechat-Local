@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "test": "mocha --recursive"
+  },
+  "dependencies": {
+    "pdf-parse": "^2.4.5"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "chai": "^4.3.7"
+  }
+}

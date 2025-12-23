@@ -1,0 +1,369 @@
+{
+  "source": "process_endpoint",
+  "event": "inbox_snapshot",
+  "timestamp": "2025-12-22T03:31:49.989Z",
+  "path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox",
+  "autoRouted": [],
+  "reviewRequired": [
+    {
+      "id": "e20e30db1012e0c92784cd982688347a4449c84c317a35a4aa23dd6187d57c6c",
+      "filename": "kb_test_1.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\kb_test_1.txt",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 52,
+        "reasons": [
+          "AI analysis",
+          "Receipt indicators detected",
+          "No clear ownership indicators"
+        ],
+        "summary": "File: kb_test_1.txt, Size: 33 bytes, Type: .txt\n- Receipt-like file detected\n- Ownership unclear: requires human review",
+        "risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.987Z",
+        "analyzed": "2025-12-22T03:31:49.987Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "6ff7724310660b6e705a03881e99d84a936fe106750fafeab70dd33e3790d3ab",
+      "filename": "kb_test_2.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\kb_test_2.txt",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 62,
+        "reasons": [
+          "AI analysis",
+          "Receipt indicators detected",
+          "No clear ownership indicators"
+        ],
+        "summary": "File: kb_test_2.txt, Size: 33 bytes, Type: .txt\n- Receipt-like file detected\n- Ownership unclear: requires human review",
+        "risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.987Z",
+        "analyzed": "2025-12-22T03:31:49.987Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "8be55eb37435ee9194c1449b5e45e15e1e65b7953c92dc4462f28826f05bd2d5",
+      "filename": "Navi_Complete_Personal_Identity.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_Complete_Personal_Identity.md",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 38,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_Complete_Personal_Identity.md, Size: 15985 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.987Z",
+        "analyzed": "2025-12-22T03:31:49.987Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "7c31e88d879c025a9f6000a5e7d17d7bb4e1787b50525f50488ec488b9770b2a",
+      "filename": "Navi_KB_00_Master_Index.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_00_Master_Index.md",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 40,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_00_Master_Index.md, Size: 10142 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.988Z",
+        "analyzed": "2025-12-22T03:31:49.988Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "293b9358a8f2e3822b77fc92e33d8955629e28755e51a932a4198fbec1c73f71",
+      "filename": "Navi_KB_01_Communication_Style.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_01_Communication_Style.md",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 32,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_01_Communication_Style.md, Size: 9439 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.988Z",
+        "analyzed": "2025-12-22T03:31:49.988Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "aa2f0e5f71d42dda08dc559e49ae77a1b25396e1d0e707c4610b12714c65c620",
+      "filename": "Navi_KB_02_Formatting_Rules.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_02_Formatting_Rules.md",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 36,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_02_Formatting_Rules.md, Size: 11395 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.988Z",
+        "analyzed": "2025-12-22T03:31:49.988Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "4a60367e12b3879a3e1132e664e3a3e1b3d51e7cb1912c538a3b19eba66127c9",
+      "filename": "Navi_KB_03_Tool_Protocols.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_03_Tool_Protocols.md",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 42,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_03_Tool_Protocols.md, Size: 13843 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.988Z",
+        "analyzed": "2025-12-22T03:31:49.988Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "d1ab7614f4499107393e4cdd93a2d6fcc265f8eebf7b95a6187d576f2e2fe900",
+      "filename": "Navi_KB_04_User_Preferences.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_04_User_Preferences.md",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 35,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_04_User_Preferences.md, Size: 12401 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.988Z",
+        "analyzed": "2025-12-22T03:31:49.988Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "c4d5709bf920b81bd18fc9fd26defd18806b6a618eaf9c392b90c3954e748a5c",
+      "filename": "Navi_KB_05_Templates_and_Routing.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\Navi_KB_05_Templates_and_Routing.md",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 31,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: Navi_KB_05_Templates_and_Routing.md, Size: 13711 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.988Z",
+        "analyzed": "2025-12-22T03:31:49.988Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "e3725a830f121057c77737f99ebf7f13c6cbdf9583d1865e159c9671507419df",
+      "filename": "README_Installation_Guide.md",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\README_Installation_Guide.md",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 32,
+        "reasons": [
+          "AI analysis",
+          "Low confidence, needs review"
+        ],
+        "summary": "File: README_Installation_Guide.md, Size: 10582 bytes, Type: .md\n- Low confidence in classification",
+        "risk_flags": [
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.988Z",
+        "analyzed": "2025-12-22T03:31:49.988Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "649c4069a867a6ccbf9cf6b20db8d2079f9b7dad8dffb58000c095e8780bf737",
+      "filename": "urgent_ceo_meeting.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\urgent_ceo_meeting.txt",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 69,
+        "reasons": [
+          "AI analysis",
+          "Receipt indicators detected",
+          "No clear ownership indicators"
+        ],
+        "summary": "File: urgent_ceo_meeting.txt, Size: 200 bytes, Type: .txt\n- Receipt-like file detected\n- Ownership unclear: requires human review",
+        "risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.988Z",
+        "analyzed": "2025-12-22T03:31:49.988Z",
+        "decided": null,
+        "moved": null
+      }
+    },
+    {
+      "id": "1633a4d06ec328b2b1a0d07515f2d6361d0ad91f4068dbce0f312cf846960d76",
+      "filename": "We are in  Production.txt",
+      "source_path": "D:\\05_AGENTS-AI\\01_RUNTIME\\VBoarder\\NAVI\\inbox\\We are in  Production.txt",
+      "state": "KB_REVIEW_REQUIRED",
+      "ai": {
+        "guess": "Intake",
+        "confidence": 54,
+        "reasons": [
+          "AI analysis",
+          "Receipt indicators detected",
+          "No clear ownership indicators"
+        ],
+        "summary": "File: We are in  Production.txt, Size: 49 bytes, Type: .txt\n- Receipt-like file detected\n- Ownership unclear: requires human review",
+        "risk_flags": [
+          "unclear_ownership",
+          "low_confidence"
+        ]
+      },
+      "human": {
+        "final_route": null,
+        "reason": null,
+        "decided_by": null
+      },
+      "timestamps": {
+        "detected": "2025-12-22T03:31:49.988Z",
+        "analyzed": "2025-12-22T03:31:49.988Z",
+        "decided": null,
+        "moved": null
+      }
+    }
+  ],
+  "totalFiles": 12,
+  "autoRoutedCount": 0,
+  "reviewRequiredCount": 12,
+  "status": "processed"
+}
