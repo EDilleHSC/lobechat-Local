@@ -29,3 +29,7 @@ Thumbs.db
 # Ignore large LM-Studio binary added by cleanup
 NAVI/archive/**/LM-Studio-0.334-1-x64.exe
 
+# Local envs
+containers/.env
+
+
