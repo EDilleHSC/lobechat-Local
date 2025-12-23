@@ -344,6 +344,9 @@
         closeDemo();
       });
 
+      // Expose the reset helper globally for inline onclick-driven tests
+      window.resetDemo = resetDemo;
+
     })();
   </script>
 </body>

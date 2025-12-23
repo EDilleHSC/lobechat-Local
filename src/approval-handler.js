@@ -45,21 +45,16 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, approvalDir = APPROVAL_DIR_DEFA
       }
 
       // Load schema (for non-legacy payloads)
-      await fs.appendFile('debug.log', 'Loading schema...\n');
       await loadSchema();
-      await fs.appendFile('debug.log', 'Schema loaded\n');
 
       if (!legacy) {
         console.log('Validating payload:', JSON.stringify(payload, null, 2));
-        await fs.appendFile('debug.log', 'Validating payload\n');
         if (!validate(payload)) {
           const errors = validate.errors.map(e => `${e.instancePath} ${e.message}`).join('; ');
           console.log('Validation errors:', errors);
-          await fs.appendFile('debug.log', 'Validation errors: ' + errors + '\n');
           return res.status(400).json({ error: `Invalid payload: ${errors}` });
         }
         console.log('Payload valid');
-        await fs.appendFile('debug.log', 'Payload valid\n');
       }
 
       await ensureDir(approvalDir);
@@ -83,11 +78,16 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, approvalDir = APPROVAL_DIR_DEFA
         try {
           await fs.appendFile(auditPath, line, 'utf8');
           console.log('Audit log updated (legacy)');
-          await fs.appendFile('debug.log', 'Audit log updated (legacy)\n');
         } catch (e) {
           const errPath = path.join(logDir, 'audit.err.log');
           const errEntry = `Failed to append to audit.log: ${e.message}\nPayload: ${JSON.stringify(payload)}\n`;
-          await fs.appendFile(errPath, errEntry, 'utf8');
+          try {
+            await ensureDir(logDir);
+            await fs.appendFile(errPath, errEntry, 'utf8');
+          } catch (ee) {
+            // As a last resort, write to debug.log (do not mask original error)
+            try { await fs.appendFile('debug.log', 'Failed to write audit.err.log: ' + ee.message + '\n'); } catch (__) { }
+          }
           throw e;
         }
       } else {
@@ -95,11 +95,15 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, approvalDir = APPROVAL_DIR_DEFA
         try {
           await fs.appendFile(auditPath, auditLine, 'utf8');
           console.log('Audit log updated');
-          await fs.appendFile('debug.log', 'Audit log updated\n');
         } catch (e) {
           const errPath = path.join(logDir, 'audit.err.log');
           const errEntry = `Failed to append to audit.log: ${e.message}\nPayload: ${JSON.stringify(payload)}\n`;
-          await fs.appendFile(errPath, errEntry, 'utf8');
+          try {
+            await ensureDir(logDir);
+            await fs.appendFile(errPath, errEntry, 'utf8');
+          } catch (ee) {
+            try { await fs.appendFile('debug.log', 'Failed to write audit.err.log: ' + ee.message + '\n'); } catch (__) { }
+          }
           throw e;
         }
       }
