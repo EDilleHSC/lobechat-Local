@@ -6,7 +6,8 @@ OPENAI_API_BASE_URL=http://host.docker.internal:1234/v1
 OLLAMA_BASE_URL=http://host.docker.internal:11434
 
 # === OpenAI Fallback (optional)
-OPENAI_API_KEY_OPENAI=sk-REDACTED  # Your real key
+# Use an environment variable or secret — do NOT commit real keys
+OPENAI_API_KEY_OPENAI=${OPENAI_API_KEY_OPENAI:-REPLACE_ME}
 OPENAI_API_BASE_URL_OPENAI=https://api.openai.com/v1
 
 # === Postgres (Server DB mode)

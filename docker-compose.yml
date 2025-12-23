@@ -19,7 +19,7 @@ services:
     container_name: lobe-postgres
     environment:
       POSTGRES_USER: lobe
-      POSTGRES_PASSWORD: REDACTED_DB_PASSWORD
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-REPLACE_ME}
       POSTGRES_DB: lobechat
     volumes:
       - pgdata:/var/lib/postgresql/data
