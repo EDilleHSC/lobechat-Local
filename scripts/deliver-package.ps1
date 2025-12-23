@@ -54,7 +54,7 @@ function Destination-For-Route {
       foreach ($p in $cfg.route_paths.PSObject.Properties) {
         if ($p.Name.ToLower() -eq $route.ToLower()) {
           $rel = $p.Value
-          return if ([System.IO.Path]::IsPathRooted($rel)) { $rel } else { Join-Path $NaviRoot $rel }
+          if ([System.IO.Path]::IsPathRooted($rel)) { return $rel } else { return Join-Path $NaviRoot $rel }
         }
       }
       # try suffix match (e.g., DESK.Finance -> matches Finance)
@@ -62,7 +62,7 @@ function Destination-For-Route {
         $parts = $p.Name -split '\.'
         if ($parts[-1].ToLower() -eq $route.ToLower()) {
           $rel = $p.Value
-          return if ([System.IO.Path]::IsPathRooted($rel)) { $rel } else { Join-Path $NaviRoot $rel }
+          if ([System.IO.Path]::IsPathRooted($rel)) { return $rel } else { return Join-Path $NaviRoot $rel }
         }
       }
     }
