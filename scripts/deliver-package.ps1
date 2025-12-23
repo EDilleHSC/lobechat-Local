@@ -97,11 +97,12 @@ Append-Audit -Entry $startEntry
 
 # Process files
 $deliveredCount = 0
+$processed = @()
 foreach ($r in $rows) {
   $filename = if ($r.filename) { $r.filename } else { $r.Name }
   $route = if ($r.route) { $r.route } else { 'unknown' }
   $src = Join-Path $pkgDir $filename
-  if (-not (Test-Path $src)) { Write-Warning "Missing file: $src"; continue }
+  if (-not (Test-Path $src)) { Write-Warning "Missing file: $src"; $processed += [ordered]@{ filename=$filename; status='missing_source'; details=$src }; continue }
 
   $destDir = Destination-For-Route -route $route
   $destPath = Join-Path $destDir $filename
@@ -117,10 +118,11 @@ foreach ($r in $rows) {
 
   Write-Host "Plan: $filename -> $destDir (route: $route) AlreadyDelivered: $alreadyDelivered"
 
-  if (-not $Apply) { continue }
+  if (-not $Apply) { $processed += [ordered]@{ filename=$filename; status='planned'; route=$route; dest=$destDir }; continue }
 
   if ($alreadyDelivered -and -not $Force) {
     Write-Warning "Skipping already delivered file (use -Force to override): $filename"
+    $processed += [ordered]@{ filename=$filename; status='skipped_already_delivered'; route=$route; dest=$destDir }
     continue
   }
 
@@ -172,6 +174,32 @@ foreach ($r in $rows) {
   if (Test-Path $metaSrc) { Remove-Item -Path $metaSrc -Force }
 
   $deliveredCount++
+  $processed += [ordered]@{ filename=$filename; status='delivered'; route=$route; dest=$destPath; delivered_at=$now }
+}
+
+# Post-delivery verification (only on Apply)
+$verifyFailures = @()
+if ($Apply) {
+  foreach ($p in $processed) {
+    if ($p.status -eq 'delivered') {
+      $destPath = $p.dest
+      if (-not (Test-Path $destPath)) { $verifyFailures += "Missing delivered file: $destPath"; continue }
+      $destNavi = $destPath + ".navi.json"
+      if (-not (Test-Path $destNavi)) { $verifyFailures += "Missing sidecar: $destNavi"; continue }
+      try { $jn = Get-Content $destNavi -Raw | ConvertFrom-Json -ErrorAction Stop } catch { $verifyFailures += "Unreadable sidecar: $destNavi"; continue }
+      if (-not $jn.delivered) { $verifyFailures += "Sidecar missing delivered flag: $destNavi"; continue }
+    }
+  }
+
+  # Write post-delivery report
+  $reportDir = Join-Path $NaviRoot 'approvals\delivery_reports'
+  if (-not (Test-Path $reportDir)) { New-Item -ItemType Directory -Path $reportDir -Force | Out-Null }
+  $reportPath = Join-Path $reportDir ($batchId + '.json')
+  $reportObj = [ordered]@{ package = $PackageName; batch_id = $batchId; checked_at = (Get-Date).ToString('o'); failures = $verifyFailures; processed = $processed }
+  $tmp = $reportPath + '.tmp'
+  $reportObj | ConvertTo-Json -Depth 10 | Out-File -FilePath $tmp -Encoding utf8
+  Move-Item -Path $tmp -Destination $reportPath -Force
+  Append-Audit -Entry @{ timestamp=(Get-Date).ToString('o'); action='post_delivery_verification'; batch_id=$batchId; package=$PackageName; failures=$verifyFailures; report=$reportPath }
 }
 
 # Package-level completion audit
@@ -181,7 +209,7 @@ $endEntry = @{
   batch_id = $batchId
   package = $PackageName
   delivered_files = $deliveredCount
-  status = "completed"
+  status = if ($verifyFailures.Count -gt 0) { 'completed_with_failures' } else { 'completed' }
 }
 Append-Audit -Entry $endEntry
 
