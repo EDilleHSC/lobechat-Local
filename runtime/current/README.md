@@ -1,5 +1,14 @@
 # Routing rules & audit (brief)
 
+### Baseline: NAVI Mail Room v2 (Phase 2B/early 2C) ✅
+
+- This branch (`main`) is the **canonical implementation** of:
+  - OCR (Tesseract + Poppler)
+  - NAVI mail room routing (Phase 2B)
+  - C‑Suite office skeletons and `route_paths` (Phase 2C foundation)
+- Older prototypes and branches have been archived or moved to `__archive`.
+- Future work should branch from `main` only.
+
 This document describes the routing rule IDs, the audit fields added to sidecars, and how to extend the routing logic in `decideRoute()`.
 
 ---
@@ -109,8 +118,23 @@ This will:
 
 Notes:
 - Adjust the `--poppler-path` and `--tesseract-path` arguments as needed for your environment
+- The recommended safe sequence is:
+  1. Preview: `node router.js --dry-run --limit 5`
+  2. Apply (with confirmation): `node router.js --apply --limit 5` (type `yes` when prompted)
+- Advanced (testing only): to exercise apply code paths while keeping the run read-only, use:
+  `node router.js --apply --dry-run --limit 5 --force` (this is treated as a dry-run and will not move files)
 - If you want to persist moves (not a dry-run), update `router.js` to remove `--dry-run` behavior or use the appropriate flag/entrypoint in your deployment
 
 ---
 
 If you'd like, I can also add a small `scripts/run_mailroom_dryrun.ps1` wrapper that runs these commands end-to-end and captures a summary output.
+
+### CFO worker (scripts/cfo_worker.js)
+
+- Purpose: Process NAVI/offices/CFO_OFFICE/inbox into processed/ and emit a ledger JSON per doc.
+- Usage:
+   = "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI"
+  node scripts/cfo_worker.js
+- Notes:
+  - NAVI_ROOT is required (fail-fast).
+  - Worker is idempotent — it skips files already in processed/.
