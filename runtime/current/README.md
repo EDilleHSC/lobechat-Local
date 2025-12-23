@@ -1,5 +1,14 @@
 # Routing rules & audit (brief)
 
+### Baseline: NAVI Mail Room v2 (Phase 2B/early 2C) ✅
+
+- This branch (`main`) is the **canonical implementation** of:
+  - OCR (Tesseract + Poppler)
+  - NAVI mail room routing (Phase 2B)
+  - C‑Suite office skeletons and `route_paths` (Phase 2C foundation)
+- Older prototypes and branches have been archived or moved to `__archive`.
+- Future work should branch from `main` only.
+
 This document describes the routing rule IDs, the audit fields added to sidecars, and how to extend the routing logic in `decideRoute()`.
 
 ---
@@ -109,8 +118,48 @@ This will:
 
 Notes:
 - Adjust the `--poppler-path` and `--tesseract-path` arguments as needed for your environment
+- The recommended safe sequence is:
+  1. Preview: `node router.js --dry-run --limit 5`
+  2. Apply (with confirmation): `node router.js --apply --limit 5` (type `yes` when prompted)
+- Advanced (testing only): to exercise apply code paths while keeping the run read-only, use:
+  `node router.js --apply --dry-run --limit 5 --force` (this is treated as a dry-run and will not move files)
 - If you want to persist moves (not a dry-run), update `router.js` to remove `--dry-run` behavior or use the appropriate flag/entrypoint in your deployment
 
 ---
 
 If you'd like, I can also add a small `scripts/run_mailroom_dryrun.ps1` wrapper that runs these commands end-to-end and captures a summary output.
+
+### CFO worker (scripts/cfo_worker.js)
+
+- Purpose: Process NAVI/offices/CFO_OFFICE/inbox into processed/ and emit a ledger JSON per doc.
+- Usage:
+   = "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI"
+  node scripts/cfo_worker.js
+- Notes:
+  - NAVI_ROOT is required (fail-fast).
+  - Worker is idempotent — it skips files already in processed/.
+
+---
+
+## Applying human review decisions ("Secretary" script) 🔧
+
+The `scripts/apply_human_decisions.js` helper reads a saved human review file (created by the reviewer UI under `NAVI/approvals/review_decisions_*.json`) and executes a safe, idempotent mapping of decisions to filesystem actions.
+
+Usage:
+
+- Dry-run (safe, default):
+  node scripts/apply_human_decisions.js --file path/to/review_decisions.json
+
+- To actually perform file moves/copies:
+  node scripts/apply_human_decisions.js --file path/to/review_decisions.json --apply --force
+
+Important safety notes:
+- `--apply` will not run unless `--force` is also supplied. This prevents accidental destructive runs from automation or interactive shells.
+- The script is idempotent: it copies a canonical storage file (from `route_paths` in `NAVI/config/routing_config.json`) and writes an office inbox copy, skipping duplicates if destination already exists.
+- A `TRASH` or `discard` decision moves the source file to `NAVI/archive/trash`.
+- For testing, you can override the NAVI root with the `REVIEW_NAVI_ROOT` environment variable (useful in CI or local tests).
+
+Tests:
+- Unit/integration tests were added at `runtime/current/test/apply_human_decisions.spec.js` to cover dry-run and `--apply --force` behavior (route and discard cases).
+
+If you'd like, I can add a PowerShell wrapper to run the script against a set of review files and produce a short summary report (counts).

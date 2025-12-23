@@ -1,0 +1,11 @@
+title = "NAVI gitleaks config"
+
+[[rules]]
+id          = "private-key"
+description = "Private key pattern"
+regex       = '''-----BEGIN (RSA|OPENSSH|EC|DSA|PRIVATE|ENCRYPTED) KEY-----'''
+tags        = ["key", "pem"]
+
+[allowlist]
+description = "Allow known-test fixture paths (adjust as needed)"
+regexes     = ["^tests/fixtures/", "^NAVI/docs/examples/", "^.*\.env.*template$", "^tmp-ci-fix/", "^cleanup_worktree/.*\.env.*template$"]

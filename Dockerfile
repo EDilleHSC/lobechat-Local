@@ -6,11 +6,13 @@ OPENAI_API_BASE_URL=http://host.docker.internal:1234/v1
 OLLAMA_BASE_URL=http://host.docker.internal:11434
 
 # === OpenAI Fallback (optional)
-OPENAI_API_KEY_OPENAI=sk-REDACTED  # Your real key
+# Use an environment variable or secret — do NOT commit real keys
+OPENAI_API_KEY_OPENAI=${OPENAI_API_KEY_OPENAI:-REPLACE_ME}
 OPENAI_API_BASE_URL_OPENAI=https://api.openai.com/v1
 
 # === Postgres (Server DB mode)
-DATABASE_URL=postgresql://lobe:REDACTED_DB_PASSWORD@postgres:5432/lobechat
+# Use an env var for the password instead of hardcoding it
+DATABASE_URL=postgresql://lobe:${POSTGRES_PASSWORD:-REPLACE_ME}@postgres:5432/lobechat
 
 # === LobeChat
 NEXT_PUBLIC_BASE_URL=http://localhost:3210
@@ -18,8 +20,8 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3210
 # === MinIO (Object Storage)
 OBJECT_STORAGE_ENDPOINT=http://minio:9000
 OBJECT_STORAGE_BUCKET=lobe-bucket
-OBJECT_STORAGE_ACCESS_KEY=lobe
-OBJECT_STORAGE_SECRET_KEY=REDACTED_MINIO_PASSWORD
+OBJECT_STORAGE_ACCESS_KEY=${MINIO_ROOT_USER:-lobe}
+OBJECT_STORAGE_SECRET_KEY=${MINIO_ROOT_PASSWORD:-REPLACE_ME}
 
 # === Vector DB
 VECTOR_DB=chroma
