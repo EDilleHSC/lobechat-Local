@@ -138,3 +138,28 @@ If you'd like, I can also add a small `scripts/run_mailroom_dryrun.ps1` wrapper 
 - Notes:
   - NAVI_ROOT is required (fail-fast).
   - Worker is idempotent — it skips files already in processed/.
+
+---
+
+## Applying human review decisions ("Secretary" script) 🔧
+
+The `scripts/apply_human_decisions.js` helper reads a saved human review file (created by the reviewer UI under `NAVI/approvals/review_decisions_*.json`) and executes a safe, idempotent mapping of decisions to filesystem actions.
+
+Usage:
+
+- Dry-run (safe, default):
+  node scripts/apply_human_decisions.js --file path/to/review_decisions.json
+
+- To actually perform file moves/copies:
+  node scripts/apply_human_decisions.js --file path/to/review_decisions.json --apply --force
+
+Important safety notes:
+- `--apply` will not run unless `--force` is also supplied. This prevents accidental destructive runs from automation or interactive shells.
+- The script is idempotent: it copies a canonical storage file (from `route_paths` in `NAVI/config/routing_config.json`) and writes an office inbox copy, skipping duplicates if destination already exists.
+- A `TRASH` or `discard` decision moves the source file to `NAVI/archive/trash`.
+- For testing, you can override the NAVI root with the `REVIEW_NAVI_ROOT` environment variable (useful in CI or local tests).
+
+Tests:
+- Unit/integration tests were added at `runtime/current/test/apply_human_decisions.spec.js` to cover dry-run and `--apply --force` behavior (route and discard cases).
+
+If you'd like, I can add a PowerShell wrapper to run the script against a set of review files and produce a short summary report (counts).
