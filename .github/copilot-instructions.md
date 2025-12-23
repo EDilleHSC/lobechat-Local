@@ -1,134 +1,39 @@
 # Copilot / AI Agent Instructions — VBoarder (NAVI)
 
-This repository implements a small file-driven "MCP" (minimal control plane) that snapshots an inbox, runs a mailroom/router, and deterministically generates a presenter HTML artifact containing a TRUST_HEADER for provenance.
+Short summary
+- VBoarder is a deterministic mailroom + presenter: files -> snapshot -> router -> canonical presenter HTML with a single TRUST_HEADER.
 
-Purpose: enable code edits and tests without introducing regressions to the deterministic presenter's trust guarantees.
+Must preserve (critical)
+- TRUST_HEADER: exactly one comment block with keys `rendered_at` (ISO Z), `snapshot_id`, `items_processed`.
+- Atomic writes: `.tmp` -> `fs.renameSync` (avoid partial files).
+- Snapshot naming: ISO timestamp filenames with `:`/`.` -> `-`.
+- Path checks: lower-case normalization + `isPathAllowed` allow-list.
+- Approval auth: `MCP_APPROVAL_TOKEN` required for POST `/approval`.
+- Tests: add/adjust node smoke tests in `runtime/*/tests` when changing runtime behavior.
 
-Key components (big picture)
-- runtime/triage_*/mcp_server.js — HTTP server exposing endpoints used by CI/tests and by operator tooling:
-  - POST /process — take snapshot, run mailroom/router, regenerate presenter
-  - POST /mcp (JSON-RPC) — tools like list_directory (with path access checks)
-  - GET /presenter/* — serve canonical presenter UI; inject TRUST_HEADER if none exists
-  - POST /approval — token-gated approval persistence (AJV-validated against schemas/approval.schema.json)
-- runtime/mailroom_runner.py — simple mailroom stub for Beta-1 (copies latest snapshot files to agents)
-- runtime/router.js — computes per-file metadata (checksum, routing_id) and writes *.meta.json
-- NAVI/ — important directories:
-  - NAVI/inbox (incoming files)
-  - NAVI/snapshots/inbox (immutable snapshot JSON files)
-  - NAVI/presenter (operator-approved UI)
-  - NAVI/presenter/generated (automatically generated preview files)
-  - NAVI/agents/*/inbox (agent inbox directories + meta files)
+Quick dev commands
+- Start server: cd runtime/triage_*/ && PORT=8005 node mcp_server.js
+- Local smoke: ./scripts/run_local_smoke.sh or .\scripts\run_local_smoke.ps1
+- Run key tests: node runtime/triage_*/tests/smoke_presenter.js
 
-Project-specific conventions & patterns (explicit, verifiable)
-- Determinism & provenance: presenter HTML must contain exactly one TRUST_HEADER comment block with keys: rendered_at (UTC ISO8601 Z), snapshot_id (snapshot filename), items_processed (integer or UNKNOWN). See tests in runtime/*/tests (smoke_presenter.js, test_single_trust_header.js).
-- Snapshot filenames: produced from new Date().toISOString() with colons/dots replaced by `-`. Look for logic that uses `.replace(/[:.]/g,'-')`.
-- Atomic writes: use a `.tmp` file + rename pattern when persisting JSON or HTML (presenter JSON, generated index.html, approval files). Follow existing pattern to avoid partially-written files.
-- Path security: `mcp_server.js` normalizes paths to lower-case and checks against an allow-list (`isPathAllowed`). When adding list_directory or similar helpers, preserve lower-casing and the same allow-list behavior.
-- PID/lock behavior: server writes `mcp_server.pid` and enforces a single instance (stale PID cleanup). Use `process.lock` for single-run protection in /process handler.
-- Metadata: router writes `<file>.meta.json` adjacent to routed file; presenter reads these for enrichment.
+Compact architecture (ASCII)
+INBOX -> mailroom_runner.py -> snapshot -> router.js (writes <file>.meta.json) -> presenter (injects TRUST_HEADER) -> NAVI/presenter/
 
-How to run (developer workflows)
-- Start server (development):
-  - Direct: cd runtime/triage_<...> && node mcp_server.js
-  - PM2 (used in ops): pm2 start runtime/triage_<...>/ecosystem.config.js --only mcp-navi
-  - Watch logs: pm2 logs mcp-navi --lines 150
-- Run tests (no test runner configured; tests are standalone node scripts under runtime/*/tests):
-  - Example smoke + header count tests:
-    - PORT=8005 node runtime/triage_*/tests/smoke_presenter.js
-    - PORT=8005 node runtime/triage_*/tests/test_single_trust_header.js
-  - Approval tests require an approval token set: MCP_APPROVAL_TOKEN=secret PORT=8005 node runtime/triage_*/tests/approval_integration_smoke.js
+Minimal endpoint examples
+- POST /process: curl -X POST http://localhost:8005/process
+- POST /approval: curl -X POST http://localhost:8005/approval -H "X-MCP-APPROVAL-TOKEN: TOKEN" -H "Content-Type: application/json" -d '{"approvedBy":"A","date":"2025-12-18T00:00:00Z","status":"approved"}'
+- GET presenter: open http://localhost:8005/presenter/index.html
 
-**Common End-to-End Test Sequence (Copy-Paste)**
-_Local Review-Mode Smoke (most common)_
-```bash
-# 1) Start the MCP server (Review Mode)
-export PORT=8005
-export MCP_APPROVAL_TOKEN=TEST_APPROVAL
-node runtime/triage_20251216_172245/mcp_server.js
+Short CI / reviewer checklist
+- Run: smoke_presenter.js, test_single_trust_header.js (must pass)
+- Run: approval_integration_smoke.js with MCP_APPROVAL_TOKEN
+- Confirm: no duplicate TRUST_HEADER in output
+- Confirm: `.tmp` -> rename pattern used for new outputs
 
-# 2) Drop a test file into inbox
-echo "test content" > NAVI/inbox/example.txt
+For full guidance, see `.github/copilot-instructions-extended.md`
 
-# 3) Trigger processing (snapshot + presenter only)
-curl -X POST http://localhost:8005/process
+Full details moved to `.github/copilot-instructions-extended.md`.
 
-# 4) Open Review UI (read-only, advisory)
-# Browser:
-http://localhost:8005/presenter/index.html
-
-# 5) Submit an approval (persistent + audited)
-curl -X POST http://localhost:8005/approval \
-  -H "Content-Type: application/json" \
-  -H "X-MCP-APPROVAL-TOKEN: TEST_APPROVAL" \
-  -d '{
-    "approvedBy": "Operator",
-    "date": "2025-12-18T00:00:00Z",
-    "role": "QA",
-    "notes": "Review-mode approval",
-    "checklist": {
-      "layout": true,
-      "accessibility": true,
-      "bugFixed": true,
-      "production": true
-    },
-    "status": "approved"
-  }'
-
-If an approval POST returns HTTP 503 or 403, restart the server ensuring `MCP_APPROVAL_TOKEN` is set in the server's environment — restarting the helper script alone will not suffice.
-
-# 6) Verify artifacts
-ls NAVI/snapshots/inbox
-ls NAVI/approvals/YYYY-MM-DD/
-tail -n 5 NAVI/approvals/audit.log
-```
-
-**CI / Test Validation (what CI runs)**
-```bash
-# Design Approval UI smoke
-node runtime/triage_20251216_172245/tests/design_approval_smoke.js
-
-# Approval endpoint integration
-node runtime/triage_20251216_172245/tests/approval_integration_smoke.js
-
-# Negative tests
-node runtime/triage_20251216_172245/tests/approval_missing_token.js
-node runtime/triage_20251216_172245/tests/approval_invalid_json.js
-node runtime/triage_20251216_172245/tests/approval_invalid_status.js
-```
-
-- Useful env vars:
-  - PORT — override HTTP port (default 8005)
-  - BETA0_TRUST_MODE — '1' keeps Beta‑0 behavior (skip mailroom routing and just regenerate presenter)
-  - MAILROOM_STRICT — '1' makes /process fail on mailroom errors
-  - MCP_APPROVAL_TOKEN — required value for POST /approval requests
-  - ENABLE_TEST_ADMIN and MCP_SHUTDOWN_TOKEN — enable/test admin shutdown endpoint (/__mcp_shutdown)
-
-Testing notes & expectations (be conservative)
-- Tests rely on the single-TRUST_HEADER invariant and consider the canonical presenter preferred; fallback to generated preview is allowed in tests.
-- The presenter-serving endpoint injects a TRUST_HEADER only if none is present in the file; this is intentional (operator UI is authoritative). When making presenter changes, ensure you don't create duplicate headers.
-- When adding new file output, prefer the `.tmp` + `fs.renameSync` pattern used throughout the codebase.
-
-Integration points & external dependencies
-- Python (explicit runtime): mcp_server uses hard-coded Python path `D:\Python312\python.exe` to run `mailroom_runner.py`. If changing the mailroom or tests, verify the Python path and behavior on CI runners.
-- pm2 is used for process management in production/ops flows (see `ecosystem.config.js`).
-- JSON schema validation using AJV for approvals: see `schemas/approval.schema.json`.
-
-Editing guidelines for AI agents (concrete, short)
-- Preserve existing directory and write patterns (snapshot naming, tmp-then-rename, metadata filenames).
-- When touching snapshot/listing code, maintain the `isPathAllowed` logic and the lower-casing normalization — do not expand access silently.
-- For presenter changes: keep TRUST_HEADER format and single-instance guarantee; update tests in `runtime/*/tests` when you change header behavior.
-- Use the approval schema (`schemas/approval.schema.json`) as the source-of-truth for approval endpoint changes.
-- If adding a new endpoint that touches disk or routing, add a smoke test in `runtime/*/tests` and document behavior in `README_BETA0.md`.
-
-Where to look first (good entry points)
-- `runtime/*/mcp_server.js` — core behavior and request handling
-- `runtime/*/tests/*` — the test expectations and examples of how to interact with the server
-- `runtime/router.js` and `runtime/mailroom_runner.py` — routing and metadata patterns
-- `README_BETA0.md` — project purpose, trust loop, and CI expectations
-
-If anything in this file is unclear or misses project details, tell me which area you want expanded (architecture, run/debug steps, tests, or security conventions) and I’ll iterate. Thanks.
-
----
 
 ## Troubleshooting checklist ✅
 If a local smoke or CI validation fails, check these common causes and quick fixes:
