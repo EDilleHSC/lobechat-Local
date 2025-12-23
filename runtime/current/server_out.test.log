@@ -1,0 +1,39 @@
+=== NAVI SERVER BOOTING ===
+[DEBUG] Crypto loaded: object function
+Node version: v25.2.1
+CWD: D:\05_AGENTS-AI\01_RUNTIME\VBoarder\runtime\current
+[CONFIG] Failed to load config: ENOENT: no such file or directory, open 'D:\05_AGENTS-AI\01_RUNTIME\VBoarder\config.json'
+[CONFIG] Loaded NAVI config from D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\config\routing_config.json
+[PATHS] NAVI_ROOT=--recursive
+[PATHS] INBOX_DIR=--recursive\inbox
+[PATHS] SNAPSHOT_DIR=--recursive\snapshots\inbox
+[PATHS] APPROVAL_DIR=--recursive\approvals
+[PATHS] __dirname=D:\05_AGENTS-AI\01_RUNTIME\VBoarder\runtime\current
+[PATHS] PROJECT_ROOT=D:\05_AGENTS-AI\01_RUNTIME\VBoarder
+[PATHS] NAVI_DIR=D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI
+[PATHS] INBOX_DIR=--recursive\inbox
+[PATHS] SNAPSHOT_DIR=--recursive\snapshots\inbox
+[PATHS] APPROVAL_DIR=--recursive\approvals
+[PATHS] PRESENTER_DIR=D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\presenter
+[ENV] MCP_APPROVAL_TOKEN: NOT_SET
+[MCP] startServer invoked
+    at Object.<anonymous> (D:\05_AGENTS-AI\01_RUNTIME\VBoarder\runtime\current\mcp_server.js:1917:5)
+    at Module._compile (node:internal/modules/cjs/loader:1760:14)
+    at Object..js (node:internal/modules/cjs/loader:1892:10)
+    at Module.load (node:internal/modules/cjs/loader:1480:32)
+    at Module._load (node:internal/modules/cjs/loader:1299:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47
+[MCP] Starting VBoarder MCP Filesystem Server...
+[MCP] Allowed directories:
+   D:\05_AGENTS
+   D:\05_AGENTS-AI
+   D:\01_SYSTEM
+   D:\02_SOFTWARE\01_AI_MODELS
+[MCP] Server will listen on port 8005
+[MCP] Configure client to use: http://localhost:8005/mcp
+[2025-12-23T05:37:02.347Z] [MCP] Wrote PID 48196 to D:\05_AGENTS-AI\01_RUNTIME\VBoarder\runtime\current\mcp_server.pid
+[MCP] removePidFile: attempting to unlink D:\05_AGENTS-AI\01_RUNTIME\VBoarder\runtime\current\mcp_server.pid
+[MCP] removePidFile: success

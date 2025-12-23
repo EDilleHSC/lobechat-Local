@@ -1,0 +1,121 @@
+{
+  "generated_at": "2025-12-22T00:00:00Z",
+  "root": "NAVI",
+  "children": {
+    "inbox": {
+      "type": "directory",
+      "children": [
+        "kb_test_1.txt",
+        "kb_test_2.txt",
+        "Navi_Complete_Personal_Identity.md",
+        "Navi_KB_00_Master_Index.md",
+        "Navi_KB_01_Communication_Style.md",
+        "Navi_KB_02_Formatting_Rules.md",
+        "Navi_KB_03_Tool_Protocols.md",
+        "Navi_KB_04_User_Preferences.md",
+        "Navi_KB_05_Templates_and_Routing.md",
+        "README_Installation_Guide.md",
+        "urgent_ceo_meeting.txt",
+        "We are in  Production.txt"
+      ]
+    },
+    "presenter": {
+      "type": "directory",
+      "children": {
+        "approved": {
+          "type": "directory",
+          "children": [
+            "index.html"
+          ]
+        },
+        "generated": {
+          "type": "directory",
+          "children": [
+            "index.html",
+            "presenter.json"
+          ]
+        },
+        "files": [
+          "debug.log",
+          "design-approval.html",
+          "index.html",
+          "legacy/",
+          "mail-room.html",
+          "presenter.py",
+          "template.html"
+        ]
+      }
+    },
+    "approvals": {
+      "type": "directory",
+      "children": {
+        "dirs": [
+          "2025-12-19",
+          "2025-12-20"
+        ],
+        "files": [
+          "audit.log"
+        ],
+        "2025-12-20": [
+          "2025-12-20T08-26-01-740Z.json.approval.json",
+          "2025-12-20T16-35-30-056Z.json.Test.1766248542071.approval.json",
+          "2025-12-20T16-40-42-416Z.json.Test.1766248850822.approval.json"
+        ]
+      }
+    },
+    "snapshots": {
+      "type": "directory",
+      "children": {
+        "inbox": {
+          "type": "directory",
+          "children": [
+            "2025-12-21T23-21-20-216Z.json",
+            "2025-12-21T23-21-43-730Z.json",
+            "2025-12-21T23-21-43-834Z.json",
+            "2025-12-21T23-28-48-419Z.json",
+            "2025-12-22T04-40-29-288Z.json",
+            "2025-12-22T04-45-05-245Z.json",
+            "... (many more timestamped snapshots)"
+          ]
+        }
+      }
+    },
+    "processed": {
+      "type": "directory",
+      "children": {
+        "Finance": [
+          "approve_ui_company_invoice_1766365401419.pdf"
+        ]
+      }
+    },
+    "HOLDING": {
+      "type": "directory",
+      "children": [
+        "approve_test.txt",
+        "kb_seed_01/",
+        "kb_test_1.txt",
+        "kb_test_2.txt",
+        "mock_test_batch_01_final/",
+        "(additional pre_ingest and mock batch folders)"
+      ]
+    },
+    "archive": {
+      "type": "directory",
+      "children": [
+        "2025-12-18T10-32-19-286Z/",
+        "Client_Notes_Intro.docx",
+        "test_cleanup_20251216_153947/"
+      ]
+    },
+    "logs": {
+      "type": "directory",
+      "children": [
+        "server.debug.log"
+      ]
+    },
+    "other_files": [
+      "OPERATING_RULES.md",
+      "REFERENCE"
+    ]
+  }
+}
