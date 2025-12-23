@@ -1,0 +1,27 @@
+name: CI Tests
+
+on: [push, pull_request]
+
+jobs:
+  node-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install deps
+        run: npm ci
+      - name: Run Jest tests
+        run: npm test --silent
+
+  pwsh-tests:
+    runs-on: windows-latest
+    needs: node-tests
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run PowerShell packager test
+        shell: pwsh
+        run: |
+          pwsh -c 'Set-StrictMode -Version Latest; Write-Host "Running PS tests"; ./tests/unit/package_routed_files.test.ps1'
