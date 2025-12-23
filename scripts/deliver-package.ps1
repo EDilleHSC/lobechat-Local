@@ -97,11 +97,20 @@ foreach ($r in $rows) {
   # Update delivered flag atomically on destination sidecar
   $destNavi = $destPath + ".navi.json"
   if (Test-Path $destNavi) {
-    try { $obj = Get-Content $destNavi -Raw | ConvertFrom-Json } catch { $obj = @{ note = 'original_navi_unreadable'; repaired = $true } }
+    try {
+      $tmp = Get-Content $destNavi -Raw
+      $parsed = ConvertFrom-Json $tmp -ErrorAction Stop
+      # merge into an ordered hashtable so we can safely set/override keys
+      $obj = [ordered]@{}
+      foreach ($p in $parsed.psobject.properties) { $obj[$p.Name] = $p.Value }
+    } catch {
+      $obj = @{ note = 'original_navi_unreadable'; repaired = $true }
+    }
   } else {
     $obj = @{}
   }
-  $obj.delivered = @{ to = $route; delivered_at = $now; delivered_by = $env:USERNAME; package = $PackageName; method = 'copy_then_remove' }
+  # set delivered using hashtable indexing to avoid property-binding issues
+  $obj['delivered'] = @{ to = $route; delivered_at = $now; delivered_by = $env:USERNAME; package = $PackageName; method = 'copy_then_remove' }
   Atomic-WriteJson -Path $destNavi -Object $obj
 
   # Append per-file audit

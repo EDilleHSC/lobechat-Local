@@ -1,6 +1,7 @@
 Set-StrictMode -Version Latest
 $basedir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$temp = Join-Path $basedir '..\tmp_navi_deliver' | Resolve-Path -ErrorAction SilentlyContinue
+# Use a deterministic path for the temporary NAVI used by the test
+$temp = Join-Path $basedir '..\tmp_navi_deliver'
 if (Test-Path $temp) { Remove-Item -Recurse -Force $temp }
 New-Item -ItemType Directory -Path $temp -Force | Out-Null
 
