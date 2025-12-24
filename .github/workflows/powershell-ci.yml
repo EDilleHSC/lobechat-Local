@@ -28,9 +28,21 @@ jobs:
         id: run_pester
         shell: pwsh
         run: |
-          if (Test-Path "$env:GITHUB_WORKSPACE/tests/unit") {
-            Invoke-Pester -Script "$env:GITHUB_WORKSPACE/tests/unit" -OutputFormat NUnitXml -OutputFile pester-report.xml -EnableExit
-          } else { Write-Host "No PowerShell unit tests found; skipping" }
+          if (-not (Test-Path "$env:GITHUB_WORKSPACE/tests/unit")) { Write-Host "No tests folder; skipping"; exit 0 }
+
+          # Find test files by common patterns (*.test.ps1 preferred, fallback to *.Tests.ps1)
+          $tests = Get-ChildItem -Path "$env:GITHUB_WORKSPACE/tests/unit" -Recurse -Include '*.test.ps1' -File | Select-Object -ExpandProperty FullName
+          if (-not $tests) {
+            Write-Host "No '*.test.ps1' found; looking for '*.Tests.ps1'..."
+            $tests = Get-ChildItem -Path "$env:GITHUB_WORKSPACE/tests/unit" -Recurse -Include '*.Tests.ps1' -File | Select-Object -ExpandProperty FullName
+          }
+
+          if (-not $tests) { Write-Host "No PowerShell unit tests found; skipping"; exit 0 }
+
+          Write-Host "Running Pester on the following files:"; $tests | ForEach-Object { Write-Host " - $_" }
+
+          # Run Pester on all discovered files and emit a report
+          Invoke-Pester -Script $tests -EnableExit -OutputFormat Detailed -OutputFile pester-report.xml
 
       - name: Run delivery status check
         id: run_check
