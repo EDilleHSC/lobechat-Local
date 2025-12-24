@@ -17,14 +17,25 @@ function isObject(val) {
   return val && typeof val === 'object' && !Array.isArray(val);
 }
 
-function packageRoutedFiles({ routeFolder, packagesRoot, limit = 0, zip = false } = {}) {
+function sanitizeName(name) {
+  return String(name).trim().replace(/[\s\/\\]+/g, '_').replace(/[^A-Za-z0-9_\-]/g, '').toUpperCase();
+}
+
+function packageRoutedFiles({ routeFolder, packagesRoot, limit = 0, zip = false, department } = {}) {
   routeFolder = routeFolder || path.join(__dirname, '..', 'NAVI', 'HOLDING', 'review', 'unknown');
   packagesRoot = packagesRoot || path.join(__dirname, '..', 'NAVI', 'packages');
 
   ensureDir(packagesRoot);
   const now = new Date();
   const timestamp = now.toISOString().replace(/[:]/g, '-').replace(/T/, '_').split('.')[0];
-  const pkgDir = path.join(packagesRoot, `package_${timestamp}`);
+  let pkgName;
+  if (department) {
+    const dept = sanitizeName(department);
+    pkgName = `${dept}_${timestamp}`;
+  } else {
+    pkgName = `package_${timestamp}`;
+  }
+  const pkgDir = path.join(packagesRoot, pkgName);
   ensureDir(pkgDir);
 
   const allFiles = fs.readdirSync(routeFolder).filter(f => !f.endsWith('.navi.json') && !f.endsWith('.meta.json'))
@@ -117,7 +128,8 @@ if (require.main === module) {
   const routeFolder = args['routeFolder'] || args['r'];
   const packagesRoot = args['packagesRoot'] || args['p'];
   const limit = args['limit'] ? parseInt(args['limit'], 10) : 0;
-  const res = packageRoutedFiles({ routeFolder, packagesRoot, limit, zip: !!args.zip });
+  const department = args['department'] || args['d'];
+  const res = packageRoutedFiles({ routeFolder, packagesRoot, limit, zip: !!args.zip, department });
   console.log('Package created:', res.pkgDir);
 }
 
