@@ -1,0 +1,92 @@
+{
+  "timestamp": "2025-12-23T18:49:00.8190939-07:00",
+  "scope": "all",
+  "naviRoot": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI",
+  "backupDir": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900",
+  "backupZip": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900.zip",
+  "backedUp": [
+    {
+      "source": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\packages",
+      "success": true,
+      "destination": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900\\packages"
+    },
+    {
+      "source": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\offices",
+      "success": true,
+      "destination": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900\\offices"
+    },
+    {
+      "source": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\approvals",
+      "success": true,
+      "destination": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900\\approvals"
+    },
+    {
+      "source": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\presenter_cache",
+      "success": true,
+      "destination": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900\\presenter_cache"
+    },
+    {
+      "source": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\temp",
+      "success": true,
+      "destination": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900\\temp"
+    },
+    {
+      "source": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\quarantine",
+      "success": true,
+      "destination": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900\\quarantine"
+    },
+    {
+      "source": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\runtime",
+      "success": true,
+      "destination": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900\\runtime"
+    },
+    {
+      "source": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\logs",
+      "success": true,
+      "destination": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\archive\\cleanup-backup_20251223_184900\\logs"
+    }
+  ],
+  "backupFailures": [],
+  "cleared": [
+    {
+      "path": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\packages\\pkgfile.txt",
+      "success": true
+    },
+    {
+      "path": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\offices\\OPS\\inbox\\msg1.txt",
+      "success": true
+    },
+    {
+      "path": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\approvals\\delivery_reports\\old.json",
+      "success": true
+    },
+    {
+      "path": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\presenter_cache\\cache.dat",
+      "success": true
+    },
+    {
+      "path": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\temp\\tmp1",
+      "success": true
+    },
+    {
+      "path": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\quarantine\\q1",
+      "success": true
+    },
+    {
+      "path": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\approvals\\audit.log",
+      "note": "rotated and reinitialized"
+    },
+    {
+      "path": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\approvals\\run_start.json",
+      "note": "run marker created"
+    }
+  ],
+  "clearFailures": [
+    {
+      "path": "D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\presenter_cache",
+      "exception": "Cannot find path 'D:\\Temp\\navi_smoke_all_1907040699\\NAVI\\presenter_cache\\*' because it does not exist."
+    }
+  ],
+  "warnings": [],
+  "post_check": "D:\\Temp\\post_cleanup_check_20251223_184900.json"
+}
