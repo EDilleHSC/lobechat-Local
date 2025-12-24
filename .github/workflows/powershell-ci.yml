@@ -1,0 +1,60 @@
+name: PowerShell Tests & Delivery Verify
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+
+jobs:
+  ps-verify:
+    name: PowerShell unit tests & delivery check
+    runs-on: windows-latest
+    env:
+      NAVI_ROOT: ${{ github.workspace }}/NAVI
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        uses: microsoft/setup-powershell@v2
+        with:
+          powershell-version: '7.4'
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module -Name Pester -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Run Pester tests
+        id: run_pester
+        shell: pwsh
+        run: |
+          if (Test-Path "$env:GITHUB_WORKSPACE/tests/unit") {
+            Invoke-Pester -Script "$env:GITHUB_WORKSPACE/tests/unit" -OutputFormat NUnitXml -OutputFile pester-report.xml -EnableExit
+          } else { Write-Host "No PowerShell unit tests found; skipping" }
+
+      - name: Run delivery status check
+        id: run_check
+        shell: pwsh
+        run: |
+          $report = Join-Path $env:GITHUB_WORKSPACE 'delivery_status_pr_check.json'
+          pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/check_delivery_status.ps1 -NaviRoot "$env:NAVI_ROOT" -ReportPath $report -FailOnEmpty
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: delivery-ci-artifacts-${{ github.run_id }}
+          path: |
+            pester-report.xml
+            delivery_status_pr_check.json
+          retention-days: 30
+
+      - name: Post PR summary comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${process.env.GITHUB_RUN_ID}`
+            const pesterFound = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner, repo: context.repo.repo, run_id: process.env.GITHUB_RUN_ID
+            })
+            const body = `PowerShell verification completed.\n\n- Pester tests step: ${{ steps.run_pester.outcome }}\n- Delivery check step: ${{ steps.run_check.outcome }}\n\nArtifacts and logs are attached to the run: ${runUrl}`
+            await github.rest.issues.createComment({ owner: context.repo.owner, repo: context.repo.repo, issue_number: context.issue.number, body })
