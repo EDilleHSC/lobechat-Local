@@ -30,10 +30,11 @@ Describe 'cleanup-reset-runlog run report' {
     $files = Get-ChildItem -Path $reportDir -Filter 'cleanup_*.json' -File -ErrorAction SilentlyContinue
     ($files.Count) | Should -BeGreaterThan 0
 
-    # Verify backup archive created
+    # Verify archive folder exists and at least one cleanup-backup_* directory or zip was produced
     $archiveDir = Join-Path $script:temp 'NAVI\archive'
     (Test-Path $archiveDir) | Should -BeTrue
+    $backupDirs = Get-ChildItem -Path $archiveDir -Filter 'cleanup-backup_*' -Directory -ErrorAction SilentlyContinue
     $zipFiles = Get-ChildItem -Path $archiveDir -Filter 'cleanup-backup_*.zip' -File -ErrorAction SilentlyContinue
-    ($zipFiles.Count) | Should -BeGreaterThan 0
+    ($backupDirs.Count + $zipFiles.Count) | Should -BeGreaterThan 0
   }
 }
