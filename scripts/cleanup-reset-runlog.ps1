@@ -138,6 +138,8 @@ if (-not $DryRun) {
     Safe-Move -Src $auditPath -Dst $auditBak
   }
   Write-Host "Creating fresh audit.log header"
+  # Ensure approvals directory exists before writing the header
+  Ensure-Dir (Split-Path -Parent $auditPath)
   $jsonHeader = @{ timestamp=(Get-Date).ToString('o'); action='audit_reset'; note='start new runlog' } | ConvertTo-Json -Compress
   Safe-WriteAtomic -Path $auditPath -Content $jsonHeader
   $report.cleared += @{ path=$auditPath; note='rotated and reinitialized' }
