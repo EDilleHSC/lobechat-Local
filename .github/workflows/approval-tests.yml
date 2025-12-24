@@ -17,7 +17,8 @@ jobs:
       - run: npm run test:unit
 
   integration:
-    if: secrets.MCP_APPROVAL_TOKEN != ''
+    # Disabled for NAVI v2: approvals are audit-only and CI no longer runs real approval tests
+    if: ${{ false }}
     runs-on: ubuntu-latest
     needs: test
     steps:

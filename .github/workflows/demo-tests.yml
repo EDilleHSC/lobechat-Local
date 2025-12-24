@@ -8,6 +8,8 @@ on:
 
 jobs:
   tests:
+    # Disabled by default for NAVI v2; demo visual tests will be run manually or via a separate visual-test workflow
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -11,6 +11,8 @@ on:
 jobs:
   ui-smoke:
     name: UI smoke (Windows matrix)
+    # Disabled for NAVI v2: skip approval UI smoke in CI; retained for manual runs
+    if: ${{ false }}
     runs-on: windows-latest
     strategy:
       matrix:
