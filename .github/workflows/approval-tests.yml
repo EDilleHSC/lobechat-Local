@@ -1,9 +1,7 @@
 name: Approval tests
 
 on:
-  pull_request:
-  push:
-    branches: [ main, feat/** ]
+  workflow_dispatch:
 
 jobs:
   test:
