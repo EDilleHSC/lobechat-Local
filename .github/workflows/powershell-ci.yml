@@ -1,8 +1,6 @@
 name: PowerShell Tests & Delivery Verify
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 jobs:

@@ -1,9 +1,6 @@
 name: Runtime Restore Check
 
 on:
-  pull_request:
-    paths:
-      - 'runtime/**'
   workflow_dispatch:
 
 jobs:
