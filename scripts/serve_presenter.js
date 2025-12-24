@@ -529,6 +529,9 @@ async function startServerWithFallback() {
     } else {
       console.error('[SERVER] failed to start server', lastErr);
     }
+    // Return the express app so unit tests that use supertest(request(app)) can
+    // still exercise routes even when the server failed to bind (e.g., port in use).
+    return app;
   }
   return server;
 }

@@ -1,0 +1,108 @@
+name: Auto-remove global-setup fallback
+
+# Runs daily and can be manually triggered. When the 'preflight-smoke' workflow
+# has N consecutive successes, the job will create a PR to remove the temporary
+# asset-probe fallback from tests/global-setup.js (PR is opened for review).
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # daily at 02:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+jobs:
+  remove-fallback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check recent preflight runs and open PR if criteria met
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const OWNER = context.repo.owner;
+            const REPO = context.repo.repo;
+            const WORKFLOW_FILE = 'preflight-smoke.yml';
+            const N = 5; // consecutive successful runs required
+            const BRANCH = 'chore/remove-global-setup-fallback';
+            const PR_TITLE = 'chore(tests): remove temporary asset-probe fallback from global-setup';
+            const PR_BODY = `This PR removes the temporary asset-probe fallback used during presenter discovery in 
+
+tests/global-setup.js. The fallback was added temporarily to stabilize CI; the criteria of ${N} consecutive successful runs of the preflight smoke workflow has been met, so this PR removes the fallback and enforces strict presenter-style health payloads.
+
+Please review and merge when ready.`;
+            const FILE_PATH = 'tests/global-setup.js';
+
+            // Get workflow
+            const wf = await github.actions.getWorkflowByFileName({ owner: OWNER, repo: REPO, file_name: WORKFLOW_FILE }).catch(() => null);
+            if (!wf || !wf.data || !wf.data.id) {
+              core.info(`Workflow file ${WORKFLOW_FILE} not found; exiting.`);
+              return;
+            }
+
+            // List recent runs for that workflow on main branch
+            const runs = await github.actions.listWorkflowRuns({ owner: OWNER, repo: REPO, workflow_id: wf.data.id, per_page: 20, branch: 'main' });
+            const recent = (runs.data.workflow_runs || []).filter(r => r.status === 'completed' && r.event !== 'workflow_dispatch').slice(0, N);
+            if (recent.length < N) {
+              core.info(`Not enough recent runs (${recent.length}/${N}); nothing to do.`);
+              return;
+            }
+            const allSuccess = recent.every(r => r.conclusion === 'success');
+            if (!allSuccess) {
+              core.info('Not all of the last runs are successful; nothing to do.');
+              return;
+            }
+
+            core.info(`${N} consecutive workflow runs succeeded; preparing PR to remove fallback.`);
+
+            // Check for an existing open PR from this branch
+            const existingPRs = await github.pulls.list({ owner: OWNER, repo: REPO, state: 'open', head: `${OWNER}:${BRANCH}` });
+            if (existingPRs.data && existingPRs.data.length > 0) {
+              core.info('An open PR already exists for branch, skipping creation.');
+              return;
+            }
+
+            // Create branch from main
+            const mainRef = await github.git.getRef({ owner: OWNER, repo: REPO, ref: 'heads/main' });
+            const sha = mainRef.data.object.sha;
+            try {
+              await github.git.createRef({ owner: OWNER, repo: REPO, ref: `refs/heads/${BRANCH}`, sha });
+              core.info(`Created branch ${BRANCH}`);
+            } catch (err) {
+              if (err.message && err.message.includes('Reference already exists')) {
+                core.info('Branch already exists; continuing.');
+              } else {
+                throw err;
+              }
+            }
+
+            // Get file
+            const file = await github.repos.getContent({ owner: OWNER, repo: REPO, path: FILE_PATH, ref: 'main' });
+            const content = Buffer.from(file.data.content, file.data.encoding).toString('utf8');
+
+            // Remove the asset-probe fallback snippet (search for TODO marker to be robust)
+            const startMarker = "// TODO: remove this fallback after 5 consecutive green CI runs";
+            if (!content.includes(startMarker)) {
+              core.info('The fallback marker was not found in the file; it may already be removed.');
+              return;
+            }
+
+            // Remove the block between the marker and the next console.log('[global-setup] presenter not found at this port; waiting'); line
+            const regex = new RegExp(startMarker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\s\S]*?console\.log\(\'\[global-setup\] presenter not found at this port; waiting\'\);', 'g');
+            const newContent = content.replace(regex, '// Fallback removed after sufficient green CI runs');
+
+            if (newContent === content) {
+              core.info('No modification required; content unchanged.');
+              return;
+            }
+
+            // Commit updated file on the branch
+            const updated = Buffer.from(newContent, 'utf8').toString('base64');
+            await github.repos.createOrUpdateFileContents({ owner: OWNER, repo: REPO, path: FILE_PATH, message: 'chore(tests): remove temporary asset-probe fallback after N green CI runs', content: updated, branch: BRANCH, sha: file.data.sha });
+            core.info('Committed file change to branch.');
+
+            // Open PR
+            await github.pulls.create({ owner: OWNER, repo: REPO, title: PR_TITLE, head: BRANCH, base: 'main', body: PR_BODY });
+            core.info('Pull request created.');

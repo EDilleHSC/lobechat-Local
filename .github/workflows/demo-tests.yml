@@ -24,7 +24,7 @@ jobs:
       - name: Start static server
         run: npx http-server -p 8005 . &
       - name: Wait for server
-        uses: jakejarvis/wait-action@v0.1.8
+        uses: jakejarvis/wait-action@v0.1.1
         with:
           url: 'http://localhost:8005/presenter/design-approval.html'
           timeout: 60
