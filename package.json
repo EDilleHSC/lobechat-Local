@@ -21,8 +21,7 @@
   },
   "scripts": {
     "test:unit": "jest --config jest.config.cjs",
-    "test:e2e": "npx playwright test tests/e2e --retries=1",
-    "wait:presenter": "node tools/wait_for_presenter.js",
+    "test:e2e": "npx playwright test tests/e2e --retries=1",    "test:pester": "pwsh -NoProfile -Command \"Get-ChildItem tests/unit -Filter *.ps1 -File | ForEach-Object { Invoke-Pester -Script $_.FullName }\"",    "wait:presenter": "node tools/wait_for_presenter.js",
     "start:navi": "node runtime/current/mcp_server.js",
     "start:test-servers": "node scripts/start_test_servers.js",
     "start:test:servers": "node scripts/start_test_servers.js",
