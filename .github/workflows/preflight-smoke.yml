@@ -1,0 +1,46 @@
+name: Preflight — Presenter smoke
+
+on:
+  push:
+    branches:
+      - 'chore/**'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  smoke:
+    name: Smoke test (presenter discovery)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Start test servers (background)
+        env:
+          WRITE_PORT_FILE: '1'
+          FAIL_ON_PORT_CONFLICT: '1'
+        run: |
+          nohup node scripts/start_test_servers.js > test-serve.log 2>&1 &
+          sleep 4
+
+      - name: Run smoke test
+        run: npx playwright test tests/ci/smoke.spec.js --config=playwright.config.js --retries=0 --reporter=github-actions
+
+      - name: Upload server log (for debugging)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-server-log
+          path: test-serve.log
