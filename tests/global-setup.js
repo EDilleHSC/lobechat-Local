@@ -55,24 +55,9 @@ module.exports = async () => {
           return;
         }
 
-        // If we see NAVI-style health but no presenter signature, check for presenter assets
+        // NAVI-style health detected but no presenter signature; do not accept as presenter.
         if (j && (j.status === 'ok' || j.ok === true) && !(j.server && j.server.bound)) {
-          // TODO: remove this fallback after 5 consecutive green CI runs
-          console.log('[global-setup] NAVI-style health detected but no presenter signature; probing presenter assets as temporary fallback');
-          try {
-            const assetsRes = await fetch(`http://${targetHost}:${targetPort}/presenter/mail-room.html`);
-            console.log(`[global-setup] assets probe status: ${assetsRes.status}`);
-            if (assetsRes.ok) {
-              console.log('[global-setup] Presenter assets present; accepting presenter (fallback)');
-              process.env.PRESENTER_PORT = targetPort;
-              process.env.PRESENTER_HOST = targetHost;
-              return;
-            }
-          } catch (e) {
-            console.log('[global-setup] presenter assets probe failed:', e && e.message);
-            lastErrorMessage = e && e.message;
-          }
-          console.log('[global-setup] presenter not found at this port; waiting');
+          console.log('[global-setup] NAVI-style health detected but no presenter signature; continuing to wait for presenter-style health');
         }
       }
     } catch (e) {
