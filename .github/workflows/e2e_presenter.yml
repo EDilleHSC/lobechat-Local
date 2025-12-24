@@ -1,0 +1,99 @@
+name: E2E Presenter Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e-linux:
+    name: E2E (Linux)
+    runs-on: ubuntu-latest
+    env:
+      PORT: 8005
+      WRITE_PORT_FILE: '1'
+      FAIL_ON_PORT_CONFLICT: '0'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Start presenter (background)
+        run: |
+          mkdir -p logs || true
+          PORT=${{ env.PORT }} WRITE_PORT_FILE=1 npm run serve:presenter > logs/presenter.log 2>&1 & echo $! > .presenter.pid
+
+      - name: Wait for presenter (/health)
+        run: npm run wait:presenter -- --port ${{ env.PORT }} --timeout 30000
+
+      - name: Run Playwright E2E
+        run: npm run test:e2e
+
+      - name: Upload artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: presenter-artifacts-linux
+          path: |
+            logs/presenter.log
+            NAVI/approvals/run_start.json
+
+      - name: Stop presenter (cleanup)
+        if: always()
+        run: |
+          if [ -f .presenter.pid ]; then kill $(cat .presenter.pid) || true; rm -f .presenter.pid; fi
+
+  e2e-windows:
+    name: E2E (Windows)
+    runs-on: windows-latest
+    env:
+      PORT: 8005
+      WRITE_PORT_FILE: '1'
+      FAIL_ON_PORT_CONFLICT: '0'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+        shell: pwsh
+
+      - name: Start presenter (background)
+        shell: pwsh
+        run: |
+          mkdir logs -ErrorAction SilentlyContinue
+          $p = Start-Process -FilePath pwsh -ArgumentList '-NoProfile','-Command','PORT=$env:PORT; WRITE_PORT_FILE=1; npm run serve:presenter > logs/presenter.log 2>&1' -PassThru
+          $p.Id | Out-File -FilePath .presenter.pid -Encoding ascii
+
+      - name: Wait for presenter (PowerShell)
+        shell: pwsh
+        run: pwsh -NoProfile -File tools/wait_for_presenter.ps1 -Port 8005 -TimeoutSec 30
+
+      - name: Run Playwright E2E
+        shell: pwsh
+        run: npm run test:e2e
+
+      - name: Upload artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: presenter-artifacts-windows
+          path: |
+            logs/presenter.log
+            NAVI/approvals/run_start.json
+
+      - name: Stop presenter (cleanup)
+        if: always()
+        shell: pwsh
+        run: |
+          if (Test-Path .presenter.pid) { Stop-Process -Id (Get-Content .presenter.pid) -ErrorAction SilentlyContinue; Remove-Item .presenter.pid -Force -ErrorAction SilentlyContinue }
