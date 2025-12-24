@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-12-23T18:45:49.9994021-07:00",
+  "scope": "tests",
+  "naviRoot": "D:\\Temp\\navi_smoke_1894645752\\NAVI",
+  "backupDir": "D:\\Temp\\navi_smoke_1894645752\\NAVI\\archive\\cleanup-backup_20251223_184549",
+  "backupZip": "D:\\Temp\\navi_smoke_1894645752\\NAVI\\archive\\cleanup-backup_20251223_184549.zip",
+  "backedUp": [],
+  "backupFailures": [],
+  "cleared": [
+    {
+      "path": "D:\\Temp\\navi_smoke_1894645752\\NAVI\\approvals\\audit.log",
+      "note": "rotated and reinitialized"
+    },
+    {
+      "path": "D:\\Temp\\navi_smoke_1894645752\\NAVI\\approvals\\run_start.json",
+      "note": "run marker created"
+    }
+  ],
+  "clearFailures": [],
+  "warnings": [],
+  "post_check": "D:\\Temp\\post_cleanup_check_20251223_184549.json"
+}
