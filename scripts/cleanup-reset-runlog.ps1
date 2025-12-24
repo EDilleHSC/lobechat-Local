@@ -14,7 +14,6 @@ param(
   [string]$NaviRoot,
   [ValidateSet('tests','all')][string]$Scope = 'tests',
   [switch]$DryRun,
-  [switch]$Confirm,
   [string]$BackupRootOverride
 )
 
@@ -77,7 +76,7 @@ $toBackup | ForEach-Object { Write-Host " - $_" }
 Write-Host "`nItems to clear:"
 $toClear | ForEach-Object { Write-Host " - $_" }
 
-if ($DryRun) { Write-Host "`nDRY RUN mode — no changes will be made." } else { if (-not $Confirm) { throw "This operation is destructive. Rerun with -Confirm to perform the cleanup (or use -WhatIf to preview)." } }
+if ($DryRun) { Write-Host "`nDRY RUN mode — no changes will be made." } else { if (-not $PSBoundParameters.ContainsKey('Confirm')) { throw "This operation is destructive. Rerun with -Confirm to perform the cleanup (or use -WhatIf to preview)." } }
 
 # Prepare run report object
 $reportDir = Join-Path $NaviRoot 'approvals\cleanup_reports'
