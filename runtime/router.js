@@ -67,9 +67,10 @@ function route() {
     routed.push(name);
   }
 
-  console.info(`[ROUTER] Completed: routed ${routed.length} files to agent1 (snapshot=${path.basename(snapPath)})`);
+  console.log(`[ROUTER] Completed: routed ${routed.length} files to agent1 (snapshot=${path.basename(snapPath)})`);
   const out = { routed_to: 'agent1', routed_files: routed, snapshot: path.basename(snapPath), timestamp: new Date().toISOString() };
-  console.log(JSON.stringify(out));
+  // Emit structured JSON with a distinct prefix so machines can reliably parse it.
+  console.log('[ROUTER_JSON]', JSON.stringify(out));
   return 0;
 }
 

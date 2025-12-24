@@ -11,17 +11,19 @@ module.exports = defineConfig({
     ignoreHTTPSErrors: true,
     video: 'retain-on-failure',
   },
-  // NAVI server is started manually.
-  // Do NOT spawn a web server from Playwright — reuse the existing instance.
+  // NAVI server is started automatically by Playwright when needed (CI-safe).
+  // Playwright will reuse an existing server when present.
   webServer: {
-    // Use the health endpoint so Playwright sees a 200 and does not attempt to start a server
-    url: 'http://localhost:8005/health',
     reuseExistingServer: true,
-    // harmless placeholder to satisfy Playwright validation; will not be executed
-    command: 'echo "playwright: reuseExistingServer placeholder"',
+    // Start presenter + NAVI via the wrapper script for CI and reproducible testing
+    command: 'node scripts/start_test_servers.js',
+    // Wait for presenter (now started on 8006 by test wrapper)
+    port: 8006,
+    timeout: 60 * 1000,
+    env: { WRITE_PORT_FILE: '1', FAIL_ON_PORT_CONFLICT: '1' },
   },
   // Fast fail if NAVI isn't running: perform a health check in globalSetup
-  globalSetup: require.resolve('./ops/playwright_health_check.js'),
+  globalSetup: require.resolve('./tests/global-setup.js'),
   projects: [
     {
       name: 'chromium',
