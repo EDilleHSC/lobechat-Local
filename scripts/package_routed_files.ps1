@@ -2,14 +2,26 @@ param(
   [string]$RouteFolder = "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\HOLDING\review\unknown",
   [string]$PackagesRoot = "D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\packages",
   [int]$Limit = 0,            # 0 = all available
-  [switch]$Zip               # add -Zip to create a zip archive
+  [switch]$Zip,              # add -Zip to create a zip archive
+  [string]$Department       # Optional department name for package naming
 )
 
 # Prepare
 $now = Get-Date
 $timestamp = $now.ToString("yyyy-MM-dd_HH-mm-ss")
+
+function Sanitize-Name($n) {
+    return ($n -replace '[\\/\s]+', '_') -replace '[^A-Za-z0-9_\-]', '' -replace '\s+', '_' | ForEach-Object { $_.ToUpper() }
+}
+
 New-Item -ItemType Directory -Path $PackagesRoot -Force | Out-Null
-$pkgDir = Join-Path $PackagesRoot ("package_" + $timestamp)
+if ($Department) {
+    $dept = Sanitize-Name $Department
+    $pkgName = "${dept}_$timestamp"
+} else {
+    $pkgName = "package_$timestamp"
+}
+$pkgDir = Join-Path $PackagesRoot $pkgName
 New-Item -ItemType Directory -Path $pkgDir -Force | Out-Null
 
 # Find candidate files (only files, skip sidecars)

@@ -46,3 +46,14 @@ test('node packager handles object/string/array sidecars', () => {
   const n3pkg = JSON.parse(fs.readFileSync(path.join(pkgDir, 'doc3.pdf.navi.json'), 'utf8'));
   expect(n3pkg.packaged).toBe(true);
 });
+
+test('package naming includes explicit department when provided', () => {
+  const route = path.join(TEST_ROOT, 'route2');
+  fs.mkdirSync(route);
+  fs.writeFileSync(path.join(route, 'a.txt'), 'A');
+  const packagesRoot = path.join(TEST_ROOT, 'packages2');
+  const res = packageRoutedFiles({ routeFolder: route, packagesRoot, limit: 0, department: 'Finance' });
+  const pkgDir = res.pkgDir;
+  const base = path.basename(pkgDir);
+  expect(base.startsWith('FINANCE_')).toBe(true);
+});
