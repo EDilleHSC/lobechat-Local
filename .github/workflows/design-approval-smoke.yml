@@ -8,6 +8,8 @@ on:
 
 jobs:
   smoke:
+    # Disabled for NAVI v2 (approval flows are now audit-only); retained as manual workflow only
+    if: ${{ false }}
     runs-on: ubuntu-latest
     env:
       MCP_APPROVAL_TOKEN: ${{ secrets.TEST_APPROVAL_TOKEN }}

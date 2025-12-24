@@ -23,183 +23,192 @@ function guessDocType(filename, extractedText, routingConfig) {
 
 function matchEntity(extractedText, routingConfig) {
   const text = normalizeText(extractedText);
-  if (!routingConfig.entities) return null;
-  for (const id of Object.keys(routingConfig.entities)) {
-    const e = routingConfig.entities[id];
-    const names = (e.signals && e.signals.names) || [];
-    const addresses = (e.signals && e.signals.addresses) || [];
-    for (const n of names) {
-      if (n && text.includes(n.toLowerCase())) return id;
+  // Prefer explicit entity_signals map if present (names/addresses)
+  const signals = routingConfig.entity_signals || {};
+
+  // 1) Check for NAME/KEYWORD matches first across all entities and pick best (longest) match
+  let bestNameMatch = null; // { id, name }
+  for (const id of Object.keys(signals)) {
+    const s = signals[id] || {};
+    // collect candidate textual signals: singular 'name', array 'names', and 'keywords'
+    const candidates = [];
+    if (s.name) candidates.push(s.name);
+    if (Array.isArray(s.names)) candidates.push(...s.names);
+    if (Array.isArray(s.keywords)) candidates.push(...s.keywords);
+    for (const n of candidates) {
+      if (n && text.includes(n.toLowerCase())) {
+        if (!bestNameMatch || n.length > bestNameMatch.name.length) bestNameMatch = { id, name: n };
+      }
     }
+  }
+  if (bestNameMatch) return bestNameMatch.id;
+
+  // 2) If no name matches, check addresses and pick the first match (addresses are less specific)
+  for (const id of Object.keys(signals)) {
+    const s = signals[id] || {};
+    const addresses = s.addresses || [];
     for (const a of addresses) {
       if (a && text.includes(a.toLowerCase())) return id;
     }
   }
+  // 3) Tokenized word match against known aliases (names, addresses, or extra signals)
+  const tokenized = text.split(/\W+/).filter(Boolean);
+  for (const id of Object.keys(signals)) {
+    const s = signals[id] || {};
+    const aliases = [];
+    if (Array.isArray(s.names)) aliases.push(...s.names.map(x => x.toLowerCase()));
+    if (Array.isArray(s.addresses)) aliases.push(...s.addresses.map(x => x.toLowerCase()));
+    if (Array.isArray(s.signals)) aliases.push(...s.signals.map(x => x.toLowerCase()));
+    for (const alias of aliases) {
+      if (alias && tokenized.includes(alias)) return id;
+    }
+  }
+  // Backward-compatible: some configs may nest signals under routingConfig.entities[id].signals
+  if (routingConfig.entities) {
+    // Try name matches in nested signals
+    bestNameMatch = null;
+    for (const id of Object.keys(routingConfig.entities)) {
+      const e = routingConfig.entities[id];
+      const names = (e.signals && e.signals.names) || [];
+      for (const n of names) {
+        if (n && text.includes(n.toLowerCase())) {
+          if (!bestNameMatch || n.length > bestNameMatch.name.length) bestNameMatch = { id, name: n };
+        }
+      }
+    }
+    if (bestNameMatch) return bestNameMatch.id;
+
+    // Then addresses
+    for (const id of Object.keys(routingConfig.entities)) {
+      const e = routingConfig.entities[id];
+      const addresses = (e.signals && e.signals.addresses) || [];
+      for (const a of addresses) {
+        if (a && text.includes(a.toLowerCase())) return id;
+      }
+    }
+  }
+
   return null;
 }
 
+function detectFunction(text, routingConfig) {
+  const txt = normalizeText(text);
+  // First preference: new-style intent_definitions with keywords
+  if (routingConfig && routingConfig.intent_definitions) {
+    for (const [intentName, def] of Object.entries(routingConfig.intent_definitions || {})) {
+      const keywords = def.keywords || [];
+      for (const kw of keywords) {
+        if (kw && txt.includes(kw.toLowerCase())) return { function: intentName, reason: `Intent keyword: ${kw}` };
+      }
+    }
+  }
+
+  // Backward compatible: keywords_to_function mapping
+  if (routingConfig && routingConfig.keywords_to_function) {
+    for (const [func, keywords] of Object.entries(routingConfig.keywords_to_function || {})) {
+      for (const kw of keywords) {
+        if (kw && txt.includes(kw.toLowerCase())) return { function: func, reason: `Keyword: ${kw}` };
+      }
+    }
+  }
+
+  return { function: null, reason: 'No function keywords matched' };
+}
+
 function decideRoute(item, routingConfig) {
+  // New simplified routing per v2.0: intent-driven, no holds, no review_required, entity metadata-only
   // item: { filename, extractedText, detectedEntities: [{entity, confidence}], length, path }
-  const reasons = [];
   const extractedText = item.extractedText || '';
 
-  // entity by signals (explicit names/addresses)
-  let entityBySignal = matchEntity(extractedText, routingConfig);
-  if (entityBySignal) reasons.push(`Entity matched by signal: ${entityBySignal}`);
-
-  // doc type
+  // Determine intent (function in previous code)
+  let intent = null;
   const docType = guessDocType(item.filename, extractedText, routingConfig);
-  if (docType) reasons.push(`Doc type detected: ${docType}`);
-
-  // function mapping
-  let func = null;
-  if (docType && routingConfig.doc_type_to_function && routingConfig.doc_type_to_function[docType]) {
-    func = routingConfig.doc_type_to_function[docType];
-    reasons.push(`Mapped doc_type ${docType} -> function ${func}`);
+  if (docType) {
+    if (routingConfig.doc_type_to_function && routingConfig.doc_type_to_function[docType]) {
+      intent = routingConfig.doc_type_to_function[docType];
+    } else {
+      // Fallback mapping when explicit doc_type_to_function is not configured
+      const fallbackDocMap = { invoice: 'Finance', bill: 'Finance', receipt: 'Finance', contract: 'Legal' };
+      if (fallbackDocMap[docType]) intent = fallbackDocMap[docType];
+    }
+  }
+  if (!intent) {
+    const df = detectFunction(extractedText, routingConfig);
+    if (df && df.function) intent = df.function;
   }
 
-  // detectedEntities (AI)
+  // Top AI entity confidence (metadata only)
   const detected = Array.isArray(item.detectedEntities) ? item.detectedEntities.slice().sort((a,b)=> (b.confidence||0)-(a.confidence||0)) : [];
-  const top = detected[0] || null; // top is {entity, confidence}
-  const topName = top ? top.entity : null;
-  const topConf = top ? (top.confidence || 0) : 0; // 0..1 float
-  if (top) reasons.push(`Top AI entity: ${topName} (${Math.round(topConf*100)}%)`);
+  const top = detected[0] || null; // {entity, confidence}
+  const topConf = top ? (top.confidence || 0) : 0; // float 0..1
 
-  // thresholds from config
-  const rr = routingConfig.routing_rules || {};
-  const thresholdPct = (rr.confidence_threshold || 70) / 100.0;
-  const financeAutoThreshold = rr.finance_auto_route_threshold || 0.7;
-  const conflictThreshold = rr.conflict_top_entities_threshold || 0.6;
-  const autoRouteEntities = Array.isArray(rr.auto_route_entities) ? rr.auto_route_entities : [];
-  const legalEntities = Array.isArray(rr.legal_entities) ? rr.legal_entities : [];
+  // Use entity matching from text (metadata-only) if present; textual entity drives entity-scoped routes.
+  const textEntity = matchEntity(extractedText, routingConfig);
+  // Keep detected entity for metadata reporting, but do NOT use it to create entity-scoped routes
+  const detectedEntity = (top && top.entity) || null;
 
-  // routing audit object we'll populate with the rule that decided the route
-  const routing = { route: null, autoRoute: false, rule_id: null, rule_reason: null, conflict_reason: null, legal_blocked: false }; 
+  // Threshold from canonical routing_config
+  const threshold = (routingConfig && routingConfig.confidence && typeof routingConfig.confidence.auto_route_threshold === 'number') ? routingConfig.confidence.auto_route_threshold : 70;
 
-  // quick legal/risk override: if AI sees legal/risk signals above 50% -> require review
-  const legalHit = detected.find(d => legalEntities.includes(d.entity) && (d.confidence||0) >= 0.5);
-  if (legalHit) {
-    reasons.push('Legal/Risk signal present -> force review');
-    routing.route = 'mail_room.review_required';
-    routing.autoRoute = false;
-    routing.rule_id = 'REVIEW_REQUIRED_LEGAL_V1';
-    routing.rule_reason = `Legal entity ${legalHit.entity} ${Math.round((legalHit.confidence||0)*100)}% >= 50%`;
-    routing.legal_blocked = true;
+  // Resolve destination
+  function resolveDestination({ intent, confidence, config }) {
+    const t = config && config.confidence && typeof config.confidence.auto_route_threshold === 'number' ? config.confidence.auto_route_threshold : 70;
+    if (!intent || (confidence * 100) < t) {
+      return {
+        destination: 'EXEC',
+        autoRouted: false,
+        reason: 'low_confidence_or_unknown_intent'
+      };
+    }
 
     return {
-      entity: entityBySignal || rr.default_route || 'DESK',
-      function: func || null,
-      route: routing.route,
-      confidence: Math.round(topConf*100),
-      autoRoute: routing.autoRoute,
-      reasons,
+      destination: (config.intent_definitions && config.intent_definitions[intent] && config.intent_definitions[intent].office) || 'EXEC',
+      autoRouted: true,
+      reason: 'intent_match'
+    };
+  }
+
+  // Insurance filename heuristic: when extracted text is missing or confidence is below threshold,
+  // use filename/vendor signals for narrow insurance cases to route to CFO.
+  const fileLower = (item && item.filename) ? item.filename.toLowerCase() : '';
+  const insuranceKeywords = ['insurance','policy','premium','progressive','statefarm','geico','allstate'];
+  const lowConfidence = !top || ((topConf||0) * 100) < ((routingConfig && routingConfig.confidence && typeof routingConfig.confidence.auto_route_threshold === 'number') ? routingConfig.confidence.auto_route_threshold : 70);
+  const textEmpty = !(item.extractedText && item.extractedText.trim() && item.extractedText.trim().length >= 10);
+  if ((textEmpty || lowConfidence) && insuranceKeywords.some(k => fileLower.includes(k))) {
+    // Force Finance -> CFO with a clear heuristic reason
+    const routing = { rule_id: 'INSURANCE_FILENAME_HEURISTIC_V1', rule_reason: 'filename_insurance_heuristic' };
+    return {
+      entity: (top && top.entity) || null,
+      entityConfidence: Math.round((topConf||0) * 100),
+      function: 'Finance',
+      route: 'CFO',
+      confidence: Math.round((topConf||0) * 100),
+      autoRoute: true,
+      reasons: ['heuristic_filename_insurance'],
       routing
     };
   }
 
-  // conflict check: multiple strong entities -> require review
-  const strongEntities = detected.filter(d => (d.confidence||0) >= conflictThreshold);
-  if (strongEntities.length >= 2) {
-    reasons.push(`Conflict: ${strongEntities.length} strong entities (>= ${Math.round(conflictThreshold*100)}%) -> require review`);
-    routing.route = 'mail_room.review_required';
-    routing.autoRoute = false;
-    routing.rule_id = 'REVIEW_REQUIRED_CONFLICT_V1';
-    routing.rule_reason = `${strongEntities.length} entities >= ${Math.round(conflictThreshold*100)}%`;
-    routing.conflict_reason = 'ENTITY_CONFLICT';
+  const res = resolveDestination({ intent: intent, confidence: topConf, config: routingConfig });
 
-    return {
-      entity: entityBySignal || rr.default_route || 'DESK',
-      function: func || null,
-      route: routing.route,
-      confidence: Math.round(topConf*100),
-      autoRoute: routing.autoRoute,
-      reasons,
-      routing
-    };
-  }
+  // routing meta for auditability
+  const routing = {
+    rule_id: 'ROUTING_V2',
+    rule_reason: res.reason
+  };
 
-  // Finance-specific auto-route logic
-  let autoRoute = false;
-  let chosenEntity = entityBySignal || topName || (rr.default_route || 'DESK');
-  if (func === 'Finance') {
-    // prefer AI top entity if it's an auto-route candidate and confident
-    if (topName && autoRouteEntities.includes(topName) && topConf >= financeAutoThreshold) {
-      chosenEntity = topName;
-      autoRoute = true;
-      routing.rule_id = 'FINANCE_ENTITY_AUTOROUTE_V1';
-      routing.rule_reason = `doc_type=Finance, top_entity=${topName} (${Math.round(topConf*100)}%) >= ${Math.round(financeAutoThreshold*100)}%`;
-      routing.autoRoute = true;
-      reasons.push(`Finance auto-route via AI top entity ${topName} (${Math.round(topConf*100)}%) >= ${Math.round(financeAutoThreshold*100)}%`);
-    }
-    // fallback: signal-based entity with sufficient AI confidence on top
-    else if (entityBySignal && autoRouteEntities.includes(entityBySignal) && topConf >= financeAutoThreshold) {
-      chosenEntity = entityBySignal;
-      autoRoute = true;
-      routing.rule_id = 'FINANCE_ENTITY_AUTOROUTE_V1';
-      routing.rule_reason = `doc_type=Finance, signal=${entityBySignal}, top_entity ${topName} (${Math.round(topConf*100)}%) >= ${Math.round(financeAutoThreshold*100)}%`;
-      routing.autoRoute = true;
-      reasons.push(`Finance auto-route via signal ${entityBySignal} (AI top ${Math.round(topConf*100)}% >= ${Math.round(financeAutoThreshold*100)}%)`);
-    }
-    // special DDM vendor heuristic: if DDM signals and 'loric' or long numbers present, prefer DDM
-    else if (topName === 'DDM' && /loric|loric homes|account number|account no\.?|acct\b|\b\d{6,}\b/i.test(extractedText)) {
-      chosenEntity = 'DDM';
-      autoRoute = true;
-      routing.rule_id = 'FINANCE_DDM_VENDOR_AUTOROUTE_V1';
-      routing.rule_reason = 'DDM vendor heuristic matched (vendor keywords/account numbers)';
-      routing.autoRoute = true;
-      reasons.push('DDM vendor heuristic matched -> auto-route DDM.Finance');
-    }
-    // DESK fallback: strong DESK signal alone can route
-    else if (topName === 'DESK' && topConf >= financeAutoThreshold) {
-      chosenEntity = 'DESK';
-      autoRoute = true;
-      routing.rule_id = 'FINANCE_DESK_AUTOROUTE_V1';
-      routing.rule_reason = `DESK strong signal alone (${Math.round(topConf*100)}%) -> auto-route`;
-      routing.autoRoute = true;
-      reasons.push('DESK strong signal alone -> auto-route DESK.Finance');
-    }
-  }
-
-  // global fallback autoRoute check (legacy): keep original behavior if still valid
-  const allowLegacyRouting = !!(routingConfig.enable_mailroom_routing || rr.enable_mailroom_routing);
-  if (!autoRoute && allowLegacyRouting && top && (top.confidence || 0) >= thresholdPct && (entityBySignal || topName) && func) {
-    const e = entityBySignal || topName;
-    chosenEntity = e;
-    autoRoute = true;
-    routing.rule_id = 'LEGACY_THRESHOLD_AUTOROUTE_V1';
-    routing.rule_reason = `Legacy threshold auto-route: ${Math.round((top.confidence||0)*100)}% >= ${Math.round(thresholdPct*100)}%`;
-    routing.autoRoute = true;
-    reasons.push(routing.rule_reason);
-  }
-
-  let route;
-  if (autoRoute) {
-    route = `${chosenEntity}.${func}`;
-    if (!routing.rule_id) {
-      // If we reached an autoroute decision without an explicit rule id, set a generic one
-      routing.rule_id = 'UNKNOWN_AUTOROUTE_V1';
-      routing.rule_reason = `Auto-routed by unspecified rule (top ${topName||'N/A'} ${Math.round(topConf*100)}%)`;
-    }
-    routing.route = route;
-    routing.autoRoute = true;
-  } else {
-    route = 'mail_room.review_required';
-    routing.route = route;
-    routing.autoRoute = false;
-    if (!routing.rule_id) {
-      routing.rule_id = 'REVIEW_REQUIRED_DEFAULT_V1';
-      routing.rule_reason = 'No auto-route rules matched';
-    }
-    reasons.push(`Will require review (autoRoute=false)`);
-  }
+  // If a textual entity was resolved, prefer an entity-scoped route (e.g., 'LHI.Finance'), otherwise use function-level destination (e.g., 'CFO' or 'EXEC')
+  const finalRoute = (textEntity && intent) ? `${textEntity}.${intent}` : res.destination;
 
   return {
-    entity: chosenEntity || rr.default_route || 'DESK',
-    function: func || null,
-    route: routing.route,
-    confidence: Math.round(topConf*100),
-    autoRoute: routing.autoRoute,
-    reasons,
+    // Prefer textual entity extracted from content for reporting when present, otherwise report detected entity metadata
+    entity: textEntity || detectedEntity || null,
+    entityConfidence: Math.round((topConf||0) * 100),
+    function: intent || null,
+    route: finalRoute,
+    confidence: Math.round((topConf||0) * 100),
+    autoRoute: res.autoRouted,
+    reasons: [res.reason],
     routing
   };
 }
@@ -214,8 +223,16 @@ function getPathsForRoute(route, routingConfig) {
   const storage = storageRel ? path.normalize(path.join(naviRoot, storageRel)) : null;
 
   // map function (after dot) to office name
-  const func = (route || '').split('.')[1] || null;
-  const officeName = func && fp[func] ? fp[func] : null;
+  const parts = (route || '').split('.');
+  let func = parts[1] || null;
+  let officeName = null;
+
+  // If route is a single-agent token (e.g., 'EXEC'), treat that as the office directly
+  if (!func && route && fp[route]) {
+    officeName = fp[route] || route;
+  } else {
+    officeName = func && fp[func] ? fp[func] : null;
+  }
   const officeInbox = officeName ? path.normalize(path.join(naviRoot, 'offices', officeName, 'inbox')) : null;
 
   return { route, storage, storageRel, officeName, officeInbox };
@@ -225,5 +242,6 @@ module.exports = {
   decideRoute,
   matchEntity,
   guessDocType,
+  detectFunction,
   getPathsForRoute
 };
