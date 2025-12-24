@@ -10,10 +10,21 @@ const logDir = path.join(__dirname, '..', 'logs');
 
 // Ensure log dir exists
 if (!fs.existsSync(logDir)) fs.mkdirSync(logDir, { recursive: true });
-const accessLogStream = fs.createWriteStream(path.join(logDir, 'presenter.log'), { flags: 'a' });
+let accessLogStream;
+try {
+  accessLogStream = fs.createWriteStream(path.join(logDir, 'presenter.log'), { flags: 'a' });
+  accessLogStream.on('error', (e) => { console.warn('[SERVER] presenter.log write error', e && e.message); });
+} catch (e) {
+  console.warn('[SERVER] presenter.log locked/unavailable, falling back to console logging');
+  accessLogStream = null;
+}
 
-// Morgan: write both to console and to file
-app.use(morgan('combined', { stream: accessLogStream }));
+// Morgan: write both to console and to file (if file available)
+if (accessLogStream) {
+  app.use(morgan('combined', { stream: accessLogStream }));
+} else {
+  app.use(morgan('combined'));
+}
 app.use(morgan(':date[iso] :method :url :status :res[content-length] - :response-time ms'));
 
 // Redirect legacy design-approval to mail-room (catch multiple legacy paths)
@@ -23,8 +34,10 @@ app.get(['/presenter/design-approval.html', '/presenter/design-approval', '/desi
   res.redirect(302, '/presenter/mail-room.html');
 });
 
-// Serve static files under /presenter (disable directory indexing)
-app.use('/presenter', express.static(presenterDir, { index: false }));
+// Serve static files under /presenter (serve index.html for root)
+app.use('/presenter', express.static(presenterDir, { index: 'index.html' }));
+// Ensure a direct request to /presenter or /presenter/ returns the index
+app.get(['/presenter', '/presenter/'], (req, res) => res.sendFile(path.join(presenterDir, 'index.html')));
 
 // View engine for server-side render (EJS)
 app.set('views', presenterDir);
@@ -432,8 +445,23 @@ app.get('/approvals/audit', (req, res) => {
   }
 });
 
-// Catch-all redirect for root to presenter index
-app.get('/', (req, res) => res.redirect(302, '/presenter/mail-room.html'));
+// Expose presenter runtime config for front-end (e.g., read-only / allow_approvals)
+app.get('/presenter/config', (req, res) => {
+  try {
+    const cfgPath = path.join(__dirname, '..', 'config.json');
+    let cfg = {};
+    if (fs.existsSync(cfgPath)) {
+      try { cfg = JSON.parse(fs.readFileSync(cfgPath, 'utf8')); } catch (e) { /* ignore parse errors */ }
+    }
+    return res.json({ presenter: (cfg.presenter || { allow_approvals: true, read_only_mode: false }) });
+  } catch (err) {
+    console.error('[API] /presenter/config error', err);
+    return res.status(500).json({ error: 'failed to read config' });
+  }
+});
+
+// Catch-all redirect for root to presenter index (default observation summary)
+app.get('/', (req, res) => res.redirect(302, '/presenter/index.html'));
 
 // Crash / error handlers: capture uncaught errors to the log file
 process.on('uncaughtException', (err) => {
@@ -505,6 +533,8 @@ async function startServerWithFallback() {
             console.error('[SERVER] server error', err);
           }
         });
+        // Export the live server for test harnesses that import this module
+        try { module.exports.__testServer = server; } catch (e) { /* ignore */ }
         return server;
       } catch (err) {
         lastErr = err;
@@ -559,10 +589,21 @@ module.exports.startServer = startServerWithFallback;
 module.exports.stopServer = async () => {
   if (server && server.close) {
     return new Promise((resolve, reject) => {
+      let done = false;
       try {
-        server.close(() => { serverInfo.bound = false; serverInfo.started_at = null; serverInfo.pid = null; resolve(); });
-      } catch (e) { reject(e); }
+        const timer = setTimeout(() => {
+          if (!done) {
+            try { server && server.close && server.close(() => {}); } catch (e) { /* ignore */ }
+            serverInfo.bound = false; serverInfo.started_at = null; serverInfo.pid = null; server = null; resolve();
+          }
+        }, 2000);
+        server.close(() => { done = true; clearTimeout(timer); serverInfo.bound = false; serverInfo.started_at = null; serverInfo.pid = null; server = null; resolve(); });
+      } catch (e) { server = null; resolve(); }
     });
   }
+  return Promise.resolve();
 };
-module.exports.__testServer = server;
+// Default test export: provide the Express app so supertest(request(app)) works when the
+// module is required in unit tests. If the server is later started, startServerWithFallback
+// will update this to the live server instance above.
+module.exports.__testServer = app;
