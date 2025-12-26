@@ -1,193 +1,231 @@
 #!/usr/bin/env python3
-"""Simple mailroom runner stub for Beta-1.
+"""NAVI Mailroom Runner v2.0
 
-Behavior:
-- Finds the latest snapshot file under NAVI/snapshots/inbox
-- For each item listed, copies it from NAVI/inbox/<name> to NAVI/agents/agent1/inbox/
-- Outputs a short JSON to stdout with routing metadata
+Routes files to 9 offices ONLY:
+  CFO, CLO, COO, CSO, CMO, CTO, AIR, EXEC, COS
+
+Default route: EXEC (Clara handles unclear items)
+No legacy code. No agent1. No ghosts.
 """
 import json
 import os
 import shutil
 from datetime import datetime, timezone
 
+# === CONFIGURATION ===
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-SNAPSHOT_DIR = os.path.join(ROOT, 'NAVI', 'snapshots', 'inbox')
-INBOX_DIR = os.path.join(ROOT, 'NAVI', 'inbox')
-AGENT_DIR = os.path.join(ROOT, 'NAVI', 'agents', 'agent1', 'inbox')
+NAVI_ROOT = os.path.join(ROOT, 'NAVI')
+CONFIG_PATH = os.path.join(NAVI_ROOT, 'config', 'routing_config.json')
+PROCESSED_DIR = os.path.join(NAVI_ROOT, 'processed')
+OFFICES_DIR = os.path.join(NAVI_ROOT, 'offices')
+PACKAGES_DIR = os.path.join(NAVI_ROOT, 'packages')
 
-os.makedirs(AGENT_DIR, exist_ok=True)
+# The ONLY valid offices - nothing else exists
+VALID_OFFICES = ['CFO', 'CLO', 'COO', 'CSO', 'CMO', 'CTO', 'AIR', 'EXEC', 'COS']
+DEFAULT_OFFICE = 'EXEC'  # Clara handles unclear items
 
-def latest_snapshot():
-    try:
-        files = [f for f in os.listdir(SNAPSHOT_DIR) if f.endswith('.json')]
-    except Exception:
-        return None
-    if not files:
-        return None
-    files.sort()
-    return os.path.join(SNAPSHOT_DIR, files[-1])
 
-def load_snapshot(path):
-    with open(path, 'r', encoding='utf-8') as f:
-        return json.load(f)
-
-def route_snapshot(snap):
-    routed = []
-
-    # Load optional routing config to map function -> office when needed
-    cfg_path = os.path.join(ROOT, 'NAVI', 'config', 'routing_config.json')
-    function_to_office = {}
+def load_config():
+    """Load routing config (computed from ROOT at runtime)."""
+    navi_root = os.path.join(ROOT, 'NAVI')
+    cfg_path = os.path.join(navi_root, 'config', 'routing_config.json')
     if os.path.exists(cfg_path):
         try:
-            with open(cfg_path, 'r', encoding='utf-8') as c:
-                cfg = json.load(c)
-                function_to_office = cfg.get('function_to_office', {}) or {}
-        except Exception:
-            function_to_office = {}
-
-    # Helper: find file either in INBOX or processed/* directories (prefers processed newest)
-    def find_file(name):
-        # Check processed dirs (newest first)
-        proc_root = os.path.join(ROOT, 'NAVI', 'processed')
-        if os.path.exists(proc_root):
-            # list dirs sorted desc
-            dirs = sorted([d for d in os.listdir(proc_root) if os.path.isdir(os.path.join(proc_root, d))], reverse=True)
-            for d in dirs:
-                p = os.path.join(proc_root, d, name)
-                if os.path.exists(p):
-                    return p
-        # Fallback to INBOX
-        p = os.path.join(INBOX_DIR, name)
-        if os.path.exists(p):
-            return p
-        return None
-
-    for item in snap.get('items', []):
-        name = item.get('name')
-        src = find_file(name)
-        if not src:
-            # file not found where expected; skip
-            continue
-
-        # sidecar may live next to file (e.g., src + '.navi.json')
-        sidecar = src + '.navi.json'
-        route = None
-        if os.path.exists(sidecar):
-            try:
-                with open(sidecar, 'r', encoding='utf-8') as s:
-                    sc = json.load(s)
-                    route = sc.get('route') or sc.get('function') or None
-            except Exception:
-                route = None
-
-        dest = None
-        # If route is present, map it to an office inbox
-        if route:
-            # Normalize route: if dotted like 'LHI.Finance' prefer last segment
-            if '.' in route:
-                route_part = route.split('.')[-1]
-            else:
-                route_part = route
-            # If route_part matches an existing office dir, use it
-            office_dir = os.path.join(ROOT, 'NAVI', 'offices', route_part)
-            if os.path.exists(office_dir):
-                dest = os.path.join(office_dir, 'inbox')
-            else:
-                # Try mapping function -> office via config
-                mapped = function_to_office.get(route_part)
-                if mapped:
-                    dest = os.path.join(ROOT, 'NAVI', 'offices', mapped, 'inbox')
-                else:
-                    # Last resort: if route looks like a known office name, use it; otherwise fallback to agent1
-                    fallback_office = route_part if os.path.exists(os.path.join(ROOT, 'NAVI', 'offices', route_part)) else None
-                    if fallback_office:
-                        dest = os.path.join(ROOT, 'NAVI', 'offices', fallback_office, 'inbox')
-
-        # If we still don't have a dest, fallback to previous agent1 behavior
-        if not dest:
-            dest = AGENT_DIR
-
-        try:
-            os.makedirs(dest, exist_ok=True)
-            dst = os.path.join(dest, os.path.basename(src))
-            shutil.copy2(src, dst)
-            # also copy sidecar if present
-            if os.path.exists(sidecar):
-                try:
-                    shutil.copy2(sidecar, dst + '.navi.json')
-                except Exception:
-                    pass
-            routed.append(os.path.basename(dst))
+            with open(cfg_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
         except Exception:
             pass
+    return {}
 
-    # Fallback: if snapshot did not contain items that are sitting in processed/*, attempt to route them
-    processed_root = os.path.join(ROOT, 'NAVI', 'processed')
-    if os.path.exists(processed_root):
-        # Walk processed subdirs
-        for sub in sorted([d for d in os.listdir(processed_root) if os.path.isdir(os.path.join(processed_root, d))], reverse=True):
-            subdir = os.path.join(processed_root, sub)
-            for fname in os.listdir(subdir):
-                if fname.endswith('.navi.json'):
-                    sidecar_path = os.path.join(subdir, fname)
-                    base = fname[:-len('.navi.json')]
-                    # Avoid re-routing files already processed above
-                    if base in routed:
-                        continue
-                    src = os.path.join(subdir, base)
-                    if not os.path.exists(src):
-                        continue
-                    # read route
-                    try:
-                        with open(sidecar_path, 'r', encoding='utf-8') as s:
-                            sc = json.load(s)
-                            route = sc.get('route') or sc.get('function') or None
-                    except Exception:
-                        route = None
 
-                    dest = None
-                    if route:
-                        if '.' in route:
-                            route_part = route.split('.')[-1]
-                        else:
-                            route_part = route
-                        office_dir = os.path.join(ROOT, 'NAVI', 'offices', route_part)
-                        if os.path.exists(office_dir):
-                            dest = os.path.join(office_dir, 'inbox')
-                        else:
-                            mapped = function_to_office.get(route_part)
-                            if mapped:
-                                dest = os.path.join(ROOT, 'NAVI', 'offices', mapped, 'inbox')
-                    if not dest:
-                        dest = AGENT_DIR
+def get_office_from_route(route, config):
+    """
+    Map a route/function to a valid office.
+    Returns office name or DEFAULT_OFFICE.
+    """
+    if not route:
+        return DEFAULT_OFFICE
+    
+    # Normalize: if dotted like 'LHI.Finance', take last segment
+    if '.' in route:
+        route = route.split('.')[-1]
+    
+    # Direct match to valid office
+    if route.upper() in VALID_OFFICES:
+        return route.upper()
+    if route in VALID_OFFICES:
+        return route
+    
+    # Map function to office via config
+    function_to_office = config.get('function_to_office', {})
+    mapped = function_to_office.get(route)
+    if mapped and mapped in VALID_OFFICES:
+        return mapped
+    
+    # Default
+    return DEFAULT_OFFICE
 
-                    try:
-                        os.makedirs(dest, exist_ok=True)
-                        dst = os.path.join(dest, os.path.basename(src))
-                        shutil.copy2(src, dst)
-                        # copy sidecar
-                        shutil.copy2(sidecar_path, dst + '.navi.json')
-                        routed.append(os.path.basename(dst))
-                    except Exception:
-                        pass
 
-    return routed
+def check_filename_override(filename, config):
+    """
+    Check if filename matches an override pattern.
+    Returns office name or None.
+    """
+    overrides = config.get('filename_overrides', {})
+    for prefix, office in overrides.items():
+        if filename and filename.startswith(prefix):
+            if office in VALID_OFFICES:
+                return office
+    return None
+
+
+def deliver_to_office(src_path, sidecar_path, office):
+    """
+    Copy file and sidecar to office inbox.
+    Returns True on success.
+    """
+    if office not in VALID_OFFICES:
+        office = DEFAULT_OFFICE
+    
+    inbox = os.path.join(ROOT, 'NAVI', 'offices', office, 'inbox')
+    os.makedirs(inbox, exist_ok=True)
+    
+    filename = os.path.basename(src_path)
+    dst = os.path.join(inbox, filename)
+    
+    try:
+        shutil.copy2(src_path, dst)
+        if sidecar_path and os.path.exists(sidecar_path):
+            shutil.copy2(sidecar_path, dst + '.navi.json')
+        return True
+    except Exception as e:
+        print(f"Error delivering {filename} to {office}: {e}", file=__import__('sys').stderr)
+        return False
+
+
+def process_files():
+    """
+    Process all files in NAVI/processed subdirectories.
+    Routes each to the correct office based on sidecar or filename override.
+    """
+    config = load_config()
+    routed = []
+    routing_details = {}  # office -> [files]
+    
+    processed_dir = os.path.join(ROOT, 'NAVI', 'processed')
+    offices_dir = os.path.join(ROOT, 'NAVI', 'offices')
+
+    if not os.path.exists(processed_dir):
+        return routed, routing_details
+    
+    # Walk processed subdirs (newest first)
+    subdirs = sorted(
+        [d for d in os.listdir(processed_dir) if os.path.isdir(os.path.join(processed_dir, d))],
+        reverse=True
+    )
+    
+    for subdir in subdirs:
+        subdir_path = os.path.join(processed_dir, subdir)
+        
+        for fname in os.listdir(subdir_path):
+            # Skip sidecars, process base files only
+            if fname.endswith('.navi.json') or fname.endswith('.meta.json'):
+                continue
+            
+            src = os.path.join(subdir_path, fname)
+            if not os.path.isfile(src):
+                continue
+            
+            sidecar = src + '.navi.json'
+            
+            # 1. Check filename override FIRST
+            office = check_filename_override(fname, config)
+            
+            # 2. If no override, check sidecar
+            if not office and os.path.exists(sidecar):
+                try:
+                    with open(sidecar, 'r', encoding='utf-8') as f:
+                        sc = json.load(f)
+                        route = sc.get('route') or sc.get('function')
+                        office = get_office_from_route(route, config)
+                except Exception:
+                    office = DEFAULT_OFFICE
+            
+            # 3. Default to EXEC
+            if not office:
+                office = DEFAULT_OFFICE
+            
+            # Deliver
+            if deliver_to_office(src, sidecar, office):
+                routed.append(fname)
+                if office not in routing_details:
+                    routing_details[office] = []
+                routing_details[office].append(fname)
+    
+    return routed, routing_details
+
+
+def process_packages():
+    """
+    Deliver packages from NAVI/packages to office inboxes.
+    Package naming: OFFICE_BATCH-XXXX_YYYYMMDD
+    """
+    packages_dir = os.path.join(ROOT, 'NAVI', 'packages')
+    if not os.path.exists(packages_dir):
+        return []
+    
+    delivered = []
+    
+    for name in os.listdir(packages_dir):
+        pkg_path = os.path.join(packages_dir, name)
+        if not os.path.isdir(pkg_path):
+            continue
+        
+        # Parse office from package name
+        if '_BATCH-' not in name:
+            continue
+        
+        office = name.split('_BATCH-')[0]
+        if office not in VALID_OFFICES:
+            continue
+        
+        inbox = os.path.join(ROOT, 'NAVI', 'offices', office, 'inbox')
+        os.makedirs(inbox, exist_ok=True)
+        
+        dest = os.path.join(inbox, name)
+        if os.path.exists(dest):
+            # Already delivered
+            delivered.append(name)
+            continue
+        
+        try:
+            shutil.copytree(pkg_path, dest)
+            delivered.append(name)
+        except Exception:
+            continue
+    
+    return delivered
+
 
 def main():
-    snap_file = latest_snapshot()
-    if not snap_file:
-        print(json.dumps({'routed_to': 'agent1', 'routed_files': [], 'snapshot': None}))
-        return
-    snap = load_snapshot(snap_file)
-    routed = route_snapshot(snap)
-    out = {
-        'routed_to': 'agent1',
+    """Main entry point."""
+    # Process packages first
+    packages = process_packages()
+    
+    # Process individual files
+    routed, routing_details = process_files()
+    
+    # Output summary
+    output = {
+        'status': 'success',
         'routed_files': routed,
-        'snapshot': os.path.basename(snap_file),
+        'packages_delivered': packages,
+        'routing_summary': routing_details,
         'timestamp': datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
     }
-    print(json.dumps(out))
+    
+    print(json.dumps(output, indent=2))
+
 
 if __name__ == '__main__':
     main()
