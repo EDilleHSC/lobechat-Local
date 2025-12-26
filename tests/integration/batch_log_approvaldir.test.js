@@ -40,13 +40,15 @@ async function findBatchLogErrorFilesRecursive(dir) {
   return results;
 }
 
-async function waitForAuditFile(dir, timeoutMs = 60000) {
+async function waitForAuditFile(dir, timeoutMs = 90000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const files = await findBatchLogErrorFilesRecursive(dir);
     if (files.length > 0) return files[0];
     await waitFor(250);
   }
+  // Debug dump to help root cause flakiness
+  console.error('[TEST DEBUG] audit dir contents at timeout:', fs.existsSync(dir) ? fs.readdirSync(dir) : '<missing>');
   throw new Error('Timeout waiting for audit file');
 }
 

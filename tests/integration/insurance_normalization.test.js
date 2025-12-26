@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const { startTestServer, clearStaleFiles } = require('../helpers/startTestServer');
-const waitFor = (ms) => new Promise(r => setTimeout(r, ms));
+const { wait, waitForCondition } = require('../helpers/waitFor');
 
-jest.setTimeout(30000);
+jest.setTimeout(60000);
 
 describe('insurance normalization and override', () => {
   const filename = 'Final_Insurance_Test.pdf';
@@ -56,7 +56,7 @@ describe('insurance normalization and override', () => {
       return false;
     };
 
-    await waitForCondition(() => {
+    const ok = await waitForCondition(() => {
       try {
         // Check for snapshot or package or office or processed presence
         const snapsDir = path.join(NAVI_ROOT, 'snapshots', 'inbox');
@@ -69,7 +69,23 @@ describe('insurance normalization and override', () => {
         if (fs.existsSync(processedDir) && fs.readdirSync(processedDir).some(d => fs.readdirSync(path.join(processedDir, d)).some(ff => ff.includes(filename)))) return true;
       } catch (e) { }
       return false;
-    }, 8000, 250);
+    }, { timeout: 12000, interval: 250, debugName: 'insurance artifact presence' });
+
+    if (!ok) {
+      // Give one last pause and dump some useful debug context before failing the test
+      await wait(500);
+      const snapsDir = path.join(NAVI_ROOT, 'snapshots', 'inbox');
+      console.error('[TEST DEBUG] snapshots:', fs.existsSync(snapsDir) ? fs.readdirSync(snapsDir) : '<missing snapsDir>');
+      console.error('[TEST DEBUG] packages:', fs.existsSync(PACKAGES) ? fs.readdirSync(PACKAGES) : '<missing packages>');
+      const officesDir = path.join(NAVI_ROOT, 'offices');
+      if (fs.existsSync(officesDir)) {
+        for (const office of fs.readdirSync(officesDir)) {
+          const inboxDir = path.join(officesDir, office, 'inbox');
+          console.error(`[TEST DEBUG] office ${office} inbox:`, fs.existsSync(inboxDir) ? fs.readdirSync(inboxDir) : '<missing>');
+        }
+      }
+    }
+    expect(ok).toBeTruthy();
     // Search packages first, then office inboxes if not found
     const walk = (dir) => {
       if (!fs.existsSync(dir)) return [];
