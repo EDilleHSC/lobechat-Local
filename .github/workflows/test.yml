@@ -5,6 +5,8 @@ on: [push, pull_request]
 jobs:
   node-tests:
     runs-on: windows-latest
+    env:
+      TEST_SERVER_STRICT: '1'
     steps:
       - uses: actions/checkout@v4
       - name: Setup Node
