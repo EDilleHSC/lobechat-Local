@@ -26,10 +26,12 @@ DEFAULT_OFFICE = 'EXEC'  # Clara handles unclear items
 
 
 def load_config():
-    """Load routing config."""
-    if os.path.exists(CONFIG_PATH):
+    """Load routing config (computed from ROOT at runtime)."""
+    navi_root = os.path.join(ROOT, 'NAVI')
+    cfg_path = os.path.join(navi_root, 'config', 'routing_config.json')
+    if os.path.exists(cfg_path):
         try:
-            with open(CONFIG_PATH, 'r', encoding='utf-8') as f:
+            with open(cfg_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception:
             pass
@@ -85,7 +87,7 @@ def deliver_to_office(src_path, sidecar_path, office):
     if office not in VALID_OFFICES:
         office = DEFAULT_OFFICE
     
-    inbox = os.path.join(OFFICES_DIR, office, 'inbox')
+    inbox = os.path.join(ROOT, 'NAVI', 'offices', office, 'inbox')
     os.makedirs(inbox, exist_ok=True)
     
     filename = os.path.basename(src_path)
@@ -110,17 +112,20 @@ def process_files():
     routed = []
     routing_details = {}  # office -> [files]
     
-    if not os.path.exists(PROCESSED_DIR):
+    processed_dir = os.path.join(ROOT, 'NAVI', 'processed')
+    offices_dir = os.path.join(ROOT, 'NAVI', 'offices')
+
+    if not os.path.exists(processed_dir):
         return routed, routing_details
     
     # Walk processed subdirs (newest first)
     subdirs = sorted(
-        [d for d in os.listdir(PROCESSED_DIR) if os.path.isdir(os.path.join(PROCESSED_DIR, d))],
+        [d for d in os.listdir(processed_dir) if os.path.isdir(os.path.join(processed_dir, d))],
         reverse=True
     )
     
     for subdir in subdirs:
-        subdir_path = os.path.join(PROCESSED_DIR, subdir)
+        subdir_path = os.path.join(processed_dir, subdir)
         
         for fname in os.listdir(subdir_path):
             # Skip sidecars, process base files only
@@ -165,13 +170,14 @@ def process_packages():
     Deliver packages from NAVI/packages to office inboxes.
     Package naming: OFFICE_BATCH-XXXX_YYYYMMDD
     """
-    if not os.path.exists(PACKAGES_DIR):
+    packages_dir = os.path.join(ROOT, 'NAVI', 'packages')
+    if not os.path.exists(packages_dir):
         return []
     
     delivered = []
     
-    for name in os.listdir(PACKAGES_DIR):
-        pkg_path = os.path.join(PACKAGES_DIR, name)
+    for name in os.listdir(packages_dir):
+        pkg_path = os.path.join(packages_dir, name)
         if not os.path.isdir(pkg_path):
             continue
         
@@ -183,7 +189,7 @@ def process_packages():
         if office not in VALID_OFFICES:
             continue
         
-        inbox = os.path.join(OFFICES_DIR, office, 'inbox')
+        inbox = os.path.join(ROOT, 'NAVI', 'offices', office, 'inbox')
         os.makedirs(inbox, exist_ok=True)
         
         dest = os.path.join(inbox, name)
