@@ -18,6 +18,8 @@ const validateApproval = ajv.compile(approvalSchema);
 const { logBatch, writeBatchLogSafe } = require('./lib/batch_log');
 // Applier utility to atomically move files and create packages for offices
 const { applyRoute } = require('./lib/applier');
+// AI classifier (local model wrapper)
+const { classifyWithAI } = require('../../src/ai/classifier');
 
 // Explicit Python runtime for predictable execution
 const PYTHON = 'D:\\02_SOFTWARE\\Python312\\python.exe';
@@ -648,10 +650,55 @@ async function takeSnapshot() {
             }
         }
 
+        // AI-first classification (prototype): call local model for each item and attach classification to item.ai.ai_classification
+        for (const item of items) {
+            try {
+                const aiRes = await classifyWithAI(item.filename, item.ai.extracted_text_snippet);
+                if (!aiRes) {
+                    // Model down or returned nothing
+                    item.ai.ai_classification = { error: 'model_unavailable' };
+                } else {
+                    item.ai.ai_classification = aiRes;
+                }
+            } catch (e) {
+                log(`[AI] classification error for ${item.filename}: ${e.message}`);
+                item.ai.ai_classification = { error: 'model_error', message: e.message };
+            }
+        }
+
         // Route based on confidence and risk
         const autoRouted = [];
         const reviewRequired = [];
         const thresholds = config.confidence_thresholds;
+
+        // Ensure sidecar metadata is persisted for every routed file so snapshots, packages and audits
+        // contain a stable, queryable record of routing decisions and AI signals.
+        function writeSidecarForItem(item, route, routingMeta) {
+            try {
+                const scPath = item.sidecarPath;
+                const sc = item.sidecar || { navi: { suggested_filename: item.filename }, routing: {} };
+                sc.routing = sc.routing || {};
+                sc.routing.destination = route;
+                sc.routing.confidence = Number(item.ai.confidence || item.ai.entity_confidence || 0);
+                sc.routing.reasons = item.ai.reasons || [];
+                // Reflect whether this is an auto-route decision (helps downstream auditing and presenter flags)
+                sc.routing.autoRoute = (item.ai && item.ai.action === 'auto_routed');
+                if (routingMeta && routingMeta.snapshot_id) sc.routing.snapshot_id = routingMeta.snapshot_id;
+                sc.routing.applied_at = new Date().toISOString();
+                // Include AI classification (if present) so sidecars capture model reasoning
+                sc.ai_classification = (item.ai && item.ai.ai_classification) ? item.ai.ai_classification : (sc.ai_classification || null);
+                try {
+                    fs.writeFileSync(scPath + '.tmp', JSON.stringify(sc, null, 2), 'utf8');
+                    fs.renameSync(scPath + '.tmp', scPath);
+                } catch (e) {
+                    // best-effort: log but do not fail routing
+                    log(`[SIDECAR] Warning: failed to persist sidecar for ${item.filename} at ${scPath}: ${e.message}`);
+                }
+                item.sidecar = sc;
+            } catch (e) {
+                log(`[SIDECAR] Failed to compose sidecar for ${item.filename}: ${e.message}`);
+            }
+        }
 
         for (const item of items) {
             const conf = item.ai.confidence / 100; // Convert to 0-1
@@ -677,6 +724,17 @@ async function takeSnapshot() {
             let office = item.ai.entity || 'DESK';
             let entityConf = Number(item.ai.entity_confidence || 0);
 
+            // AI suggestion override (prototype): if the model suggests a department and we don't already
+            // have a strong entity confidence, let AI suggest the office. Rules (e.g., insurance heuristic)
+            // will still take precedence later.
+            if (item.ai && item.ai.ai_classification && item.ai.ai_classification.department) {
+                const suggested = String(item.ai.ai_classification.department);
+                if (!entityConf || entityConf < 85) {
+                    office = suggested;
+                    item.ai.reasons = Array.from(new Set((item.ai.reasons || []).concat([`ai_suggestion:${suggested}`])));
+                }
+            }
+
             // Delivery rule: High entity confidence (>=85%) allows auto-delivery unless there are real risk flags.
             // We allow a high-confidence entity to override 'unclear_ownership' and 'low_confidence' but not strong risk flags like 'executable'.
             const effectiveRiskFlags = item.ai.risk_flags.filter(f => !( (f === 'unclear_ownership' || f === 'low_confidence') && entityConf >= 85));
@@ -700,6 +758,8 @@ async function takeSnapshot() {
                 try {
                     const route = item.sidecar && item.sidecar.routing && item.sidecar.routing.destination ? item.sidecar.routing.destination : office;
                     const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
+                    // Persist sidecar before applying route so applier can move it and package can be updated
+                    writeSidecarForItem(item, route, routingMeta);
                     const result = await applyRoute({ srcPath: src, sidecarPath: item.sidecarPath, route, routingMeta, config });
 
                     // Mark moved
@@ -739,6 +799,8 @@ async function takeSnapshot() {
                     try {
                         const route = office;
                         const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
+                        // Persist sidecar before applying route so applier can move it and package can be updated
+                        writeSidecarForItem(item, route, routingMeta);
                         const result = await applyRoute({ srcPath: src, sidecarPath: item.sidecarPath, route, routingMeta, config });
 
                         // Mark moved but keep review_required semantics
@@ -765,8 +827,14 @@ async function takeSnapshot() {
                     try {
                         const route = 'CFO';
                         const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
-                        const result = await applyRoute({ srcPath: src, sidecarPath: item.sidecarPath, route, routingMeta, config });
-
+                    // Mark as auto-routed to align with router override (confidence high)
+                    item.ai.action = 'auto_routed';
+                    item.ai.confidence = 90;
+                    if (!Array.isArray(item.ai.reasons)) item.ai.reasons = [];
+                    item.ai.reasons = Array.from(new Set(item.ai.reasons.concat(['insurance_override'])));
+                    // Persist sidecar before applying route so applier can move it and package can be updated
+                    writeSidecarForItem(item, route, routingMeta);
+                    const result = await applyRoute({ srcPath: src, sidecarPath: item.sidecarPath, route, routingMeta, config });
                         item.state = STATES.FINAL.MOVED;
                         item.final_state = STATES.FINAL.MOVED;
                         item.timestamps.moved = new Date().toISOString();
