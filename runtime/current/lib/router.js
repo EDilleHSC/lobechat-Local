@@ -147,10 +147,31 @@ function decideRoute(item, routingConfig) {
   // Keep detected entity for metadata reporting, but do NOT use it to create entity-scoped routes
   const detectedEntity = (top && top.entity) || null;
 
-  // Threshold from canonical routing_config
+  // Compute an intent-derived confidence so keyword/doc-type matches can drive routing even when
+  // AI entity confidence is missing or low.
+  // DocType matches are high-confidence for invoices/bills (0.95), but receipts are noisy and
+  // should be treated as lower-confidence (0.50) to avoid misrouting. Keyword-based intent matches
+  // remain moderate-confidence (0.80).
+  let intentConfidence = 0;
+  if (docType) {
+    if (docType === 'receipt') {
+      // receipts are common and often low-value; avoid auto-routing unless entity confidence
+      // independently supports it
+      intentConfidence = 0.50;
+    } else {
+      intentConfidence = 0.95;
+    }
+  } else if (intent) {
+    intentConfidence = 0.80;
+  }
+
+  // Combined confidence used for auto-route decisions (0..1)
+  const combinedConf = Math.max(topConf || 0, intentConfidence || 0);
+
+  // Threshold from canonical routing_config (percent)
   const threshold = (routingConfig && routingConfig.confidence && typeof routingConfig.confidence.auto_route_threshold === 'number') ? routingConfig.confidence.auto_route_threshold : 70;
 
-  // Resolve destination
+  // Resolve destination (use combined confidence rather than only entity confidence)
   function resolveDestination({ intent, confidence, config }) {
     const t = config && config.confidence && typeof config.confidence.auto_route_threshold === 'number' ? config.confidence.auto_route_threshold : 70;
     if (!intent || (confidence * 100) < t) {
@@ -161,18 +182,19 @@ function decideRoute(item, routingConfig) {
       };
     }
 
+    const officeDest = (config.intent_definitions && config.intent_definitions[intent] && config.intent_definitions[intent].office) || (config.function_to_office && config.function_to_office[intent]) || 'EXEC';
     return {
-      destination: (config.intent_definitions && config.intent_definitions[intent] && config.intent_definitions[intent].office) || 'EXEC',
+      destination: officeDest,
       autoRouted: true,
       reason: 'intent_match'
     };
   }
 
-  // Insurance filename heuristic: when extracted text is missing or confidence is below threshold,
+  // Insurance filename heuristic: when extracted text is missing or combined confidence is below threshold,
   // use filename/vendor signals for narrow insurance cases to route to CFO.
   const fileLower = (item && item.filename) ? item.filename.toLowerCase() : '';
   const insuranceKeywords = ['insurance','policy','premium','progressive','statefarm','geico','allstate'];
-  const lowConfidence = !top || ((topConf||0) * 100) < ((routingConfig && routingConfig.confidence && typeof routingConfig.confidence.auto_route_threshold === 'number') ? routingConfig.confidence.auto_route_threshold : 70);
+  const lowConfidence = ((combinedConf||0) * 100) < threshold;
   const textEmpty = !(item.extractedText && item.extractedText.trim() && item.extractedText.trim().length >= 10);
   if ((textEmpty || lowConfidence) && insuranceKeywords.some(k => fileLower.includes(k))) {
     // Force Finance -> CFO with a clear heuristic reason
@@ -182,14 +204,14 @@ function decideRoute(item, routingConfig) {
       entityConfidence: Math.round((topConf||0) * 100),
       function: 'Finance',
       route: 'CFO',
-      confidence: Math.round((topConf||0) * 100),
+      confidence: Math.round((combinedConf||0) * 100),
       autoRoute: true,
       reasons: ['heuristic_filename_insurance'],
       routing
     };
   }
 
-  const res = resolveDestination({ intent: intent, confidence: topConf, config: routingConfig });
+  const res = resolveDestination({ intent: intent, confidence: combinedConf, config: routingConfig });
 
   // routing meta for auditability
   const routing = {
@@ -204,9 +226,10 @@ function decideRoute(item, routingConfig) {
     // Prefer textual entity extracted from content for reporting when present, otherwise report detected entity metadata
     entity: textEntity || detectedEntity || null,
     entityConfidence: Math.round((topConf||0) * 100),
+    intentConfidence: Math.round((intentConfidence||0) * 100),
     function: intent || null,
     route: finalRoute,
-    confidence: Math.round((topConf||0) * 100),
+    confidence: Math.round((combinedConf||0) * 100),
     autoRoute: res.autoRouted,
     reasons: [res.reason],
     routing
