@@ -11,6 +11,9 @@ describe('approval handler (unit)', () => {
   beforeEach(async () => {
     tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'approval-test-'));
     logDir = path.join(tmpDir, 'NAVI', 'approvals');
+    // Ensure the approvals/log directory exists so tests are not reliant on environment-specific
+    // directory creation semantics in CI/Windows runners.
+    await fs.mkdir(logDir, { recursive: true });
     app = express();
     app.use(express.json());
     app.post('/approval', makeHandler({ logDir }));

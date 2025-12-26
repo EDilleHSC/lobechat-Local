@@ -29,6 +29,17 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, approvalDir = APPROVAL_DIR_DEFA
 
   return async function approvalHandler(req, res) {
     try {
+      // Ensure log dir and approval dir exist (tests may pass only one of them)
+      await ensureDir(logDir);
+      approvalDir = approvalDir || logDir;
+      await ensureDir(approvalDir);
+
+      // Token validation (do this early to fail fast before expensive ops)
+      const token = req.headers['x-mcp-approval-token'];
+      if (requiredToken && token !== requiredToken) {
+        return res.status(403).json({ error: 'Invalid approval token' });
+      }
+
       // Support legacy payloads ({ approvedBy, status, snapshot, file, notes }) by converting
       // them into the newer structured payload the approval pipeline expects. Mark legacy payloads
       // so we can short-circuit schema validation and retain the original audit-format behavior.
@@ -38,10 +49,17 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, approvalDir = APPROVAL_DIR_DEFA
         legacy = true;
         const reviewer = payload.approvedBy || 'UNKNOWN';
         const status = payload.status;
-        const snapshot_id = payload.snapshot || payload.snapshot_id || 'legacy-' + (new Date().toISOString());
+        const rawSnapshot = payload.snapshot || payload.snapshot_id || new Date().toISOString();
+        const snapshot_id = ('legacy-' + String(rawSnapshot)).replace(/[:]/g, '-');
         const timestamp = payload.timestamp || new Date().toISOString();
         const items = payload.file ? [{ file: payload.file, notes: payload.notes || '' }] : [];
         payload = { reviewer, status, snapshot_id, timestamp, items, _legacy: true };
+
+        // Validate legacy status against allowed legacy actions
+        const allowed = ['Track', 'Approve'];
+        if (!allowed.includes(status)) {
+          return res.status(400).json({ error: 'Invalid legacy status' });
+        }
       }
 
       // Load schema (for non-legacy payloads)
@@ -57,8 +75,6 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, approvalDir = APPROVAL_DIR_DEFA
         console.log('Payload valid');
       }
 
-      await ensureDir(approvalDir);
-
       const { reviewer, status, snapshot_id, timestamp, items } = payload;
       const dateDir = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
       const approvalDirPath = path.join(approvalDir, dateDir);
@@ -66,14 +82,22 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, approvalDir = APPROVAL_DIR_DEFA
 
       const approvalFile = `${snapshot_id}.approval.json`;
       const approvalPath = path.join(approvalDirPath, approvalFile);
-      await fs.writeFile(approvalPath, JSON.stringify(payload, null, 2), 'utf8');
+      try {
+        await fs.writeFile(approvalPath, JSON.stringify(payload, null, 2), 'utf8');
+      } catch (err) {
+        if (err && err.code === 'ENOENT') {
+          await ensureDir(path.dirname(approvalPath));
+          await fs.writeFile(approvalPath, JSON.stringify(payload, null, 2), 'utf8');
+        } else {
+          throw err;
+        }
+      }
       console.log('Approval file written to:', approvalPath);
-      await fs.appendFile('debug.log', 'Approval file written to: ' + approvalPath + '\n');
 
       // Append to audit log (legacy format or structured message)
       const auditPath = path.join(logDir, 'audit.log');
       if (legacy) {
-        const targetFile = payload.items && payload.items[0] && payload.items[0].file ? payload.items[0].file : 'UNKNOWN_FILE.docx';
+        const targetFile = payload.items && payload.items[0] && payload.items[0].file ? payload.items[0].file : (payload.snapshot_id ? `${payload.snapshot_id}.docx` : 'UNKNOWN_FILE.docx');
         const line = `[${new Date().toISOString()}] ${reviewer} marked ${targetFile} → ${status}${payload.items && payload.items[0] && payload.items[0].notes ? ` — ${payload.items[0].notes}` : ''}\n`;
         try {
           await fs.appendFile(auditPath, line, 'utf8');
@@ -84,9 +108,10 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, approvalDir = APPROVAL_DIR_DEFA
           try {
             await ensureDir(logDir);
             await fs.appendFile(errPath, errEntry, 'utf8');
+            console.log('Audit error logged to:', errPath);
           } catch (ee) {
-            // As a last resort, write to debug.log (do not mask original error)
-            try { await fs.appendFile('debug.log', 'Failed to write audit.err.log: ' + ee.message + '\n'); } catch (__) { }
+            // As a last resort, try writing the error to the same log dir debug file
+            try { await ensureDir(logDir); await fs.appendFile(path.join(logDir, 'debug.log'), 'Failed to write audit.err.log: ' + ee.message + '\n'); } catch (__) { }
           }
           throw e;
         }
@@ -101,17 +126,24 @@ function makeHandler({ logDir = LOG_DIR_DEFAULT, approvalDir = APPROVAL_DIR_DEFA
           try {
             await ensureDir(logDir);
             await fs.appendFile(errPath, errEntry, 'utf8');
+            console.log('Audit error logged to:', errPath);
           } catch (ee) {
-            try { await fs.appendFile('debug.log', 'Failed to write audit.err.log: ' + ee.message + '\n'); } catch (__) { }
+            try { await ensureDir(logDir); await fs.appendFile(path.join(logDir, 'debug.log'), 'Failed to write audit.err.log: ' + ee.message + '\n'); } catch (__) { }
           }
           throw e;
         }
       }
 
-      return res.status(201).json({ ok: true, file: approvalPath });
+      return res.status(201).json({ ok: true, file: auditPath, logged: true });
     } catch (err) {
       console.error('Failed to process approval:', err);
-      await fs.appendFile('debug.log', 'Error: ' + err.message + '\n');
+      // Try to write a short entry to audit.err.log in the configured logDir; fall back to file in repo root
+      try {
+        await ensureDir(logDir);
+        await fs.appendFile(path.join(logDir, 'audit.err.log'), `Handler failure: ${err.message}\n`, 'utf8');
+      } catch (ee) {
+        try { await fs.appendFile('debug.log', 'Error: ' + err.message + '\n'); } catch (__) { }
+      }
       return res.status(500).json({ error: 'Could not process approval' });
     }
   };

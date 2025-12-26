@@ -31,6 +31,7 @@
     "serve:presenter": "node scripts/serve_presenter.js",
     "test:integration": "jest --config jest.config.cjs --runInBand --testPathPattern=tests/integration",
     "test:ci": "npx playwright test --reporter=line",
+    "check:mcp": "node scripts/check_mcp.js",
     "test": "npm run test:unit && npm run test:e2e"
   }
 }

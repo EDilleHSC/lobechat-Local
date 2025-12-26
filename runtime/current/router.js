@@ -1,10 +1,13 @@
 // Lightweight router CLI used by mcp_server to produce routing suggestions
 const fs = require('fs');
 const path = require('path');
-const { decideRoute } = require('./lib/router');
+const { decideRoute, shouldSkipFile } = require('./lib/router');
 const { writeSidecar } = require('./lib/sidecar');
 const { computeFileHash } = require('../../tools/file_hash');
 const { appendSeenEntry, getEntryByHash, ensureMetadataDir } = require('../../tools/seen_files');
+// applier exposes applyRoute for moving files into office inboxes
+let applyRoute = null;
+try { applyRoute = require(path.join(__dirname, 'lib', 'applier')).applyRoute; } catch (e) { /* applyRoute may not be available in some test environments */ }
 
 // PROJECT_ROOT should point to repo root (two levels up from runtime/current)
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
@@ -83,6 +86,20 @@ if (limitArgIndex !== -1 && argv[limitArgIndex+1]) {
   let processed = 0;
   for (const f of files) {
     if (processed >= limit) break;
+
+    // Pre-filter via lib/router.shouldSkipFile: skip test artifacts (filenames like _trigger.txt or bf_test*)
+    try {
+      const base = path.basename(f);
+      if (shouldSkipFile(base)) {
+        out.routed_files.push({ src: f, route: 'ignored_test_artifact', autoRoute: false, sidecar: null, note: 'pre_filter_test_artifact' });
+        processed += 1;
+        if (processed >= limit) break;
+        continue;
+      }
+    } catch (e) {
+      // if skip check errors, continue processing normally
+    }
+
     // If a sidecar exists and contains extracted text or detectedEntities, prefer it
     const sidecarPath = f + '.navi.json';
     let extractedText = null;

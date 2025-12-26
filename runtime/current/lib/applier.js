@@ -52,7 +52,7 @@ module.exports.applyRoute = async function applyRoute(opts) {
   }
 
   // Write meta file
-  const meta = {
+  let meta = {
     filename: filename,
     routed_from: path.relative(naviRoot, path.dirname(srcPath)),
     routed_to: path.relative(naviRoot, destDir),
@@ -63,6 +63,54 @@ module.exports.applyRoute = async function applyRoute(opts) {
   const metaPath = destPath + '.meta.json';
   await fs.writeFile(metaPath + '.tmp', JSON.stringify(meta, null, 2), 'utf8');
   await fs.rename(metaPath + '.tmp', metaPath);
+
+  // If this route targets an OFFICE (e.g., CFO, CLO, CTO, EXEC), assemble package and deliver
+  try {
+    const officeMatch = typeof route === 'string' && /^[A-Z]{3,4}$/.test(route);
+    if (officeMatch) {
+      const { assemblePackage } = require('./package');
+      // pass repository root (parent of NAVI root) as naviRoot so package uses correct NAVI/packages under test/alt roots
+      const repoRoot = path.resolve(naviRoot, '..');
+      const pkgResult = await assemblePackage({ office: route, files: [destPath], naviRoot: repoRoot });
+
+      // copy package to office inbox
+      const officeInbox = path.join(naviRoot, 'offices', route, 'inbox');
+      await ensureDir(officeInbox);
+      const destPkgPath = path.join(officeInbox, path.basename(pkgResult.packagePath));
+      // copy recursively
+      await fs.cp(pkgResult.packagePath, destPkgPath, { recursive: true });
+
+      // update sidecar inside package to include batch info
+      const sidecarName = path.basename(destSidecar || (destPath + '.navi.json'));
+      const sidecarInPackage = path.join(pkgResult.packagePath, sidecarName);
+      try {
+        const raw = await fs.readFile(sidecarInPackage, 'utf8');
+        const sc = JSON.parse(raw);
+        if (!sc.routing) sc.routing = {};
+        sc.routing.batch_id = pkgResult.batchSeq;
+        sc.routing.package = pkgResult.packageName;
+        sc.routing.routed_at = new Date().toISOString();
+        await fs.writeFile(sidecarInPackage + '.tmp', JSON.stringify(sc, null, 2), 'utf8');
+        await fs.rename(sidecarInPackage + '.tmp', sidecarInPackage);
+      } catch (err) {
+        // ignore if sidecar missing or not JSON
+      }
+
+      // update meta with package info
+      meta.package = pkgResult.packageName;
+      meta.batch_id = pkgResult.batchSeq;
+      await fs.writeFile(metaPath + '.tmp', JSON.stringify(meta, null, 2), 'utf8');
+      await fs.rename(metaPath + '.tmp', metaPath);
+
+      // remove original moved file and sidecar (they are copied into package)
+      try { await fs.unlink(destPath); } catch (e) {}
+      try { if (destSidecar) await fs.unlink(destSidecar); } catch (e) {}
+
+      return { applied: true, package: pkgResult.packageName, packagePath: pkgResult.packagePath, delivered_to: destPkgPath, metaPath };
+    }
+  } catch (err) {
+    // non-fatal: log elsewhere; fallback to simple move
+  }
 
   return { applied: true, destPath, metaPath, sidecar: destSidecar };
 };
