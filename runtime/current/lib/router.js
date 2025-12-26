@@ -5,6 +5,16 @@ function normalizeText(s) {
   return (s || '').toString().replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
+function checkFilenameOverride(filename, routingConfig) {
+  const overrides = routingConfig.filename_overrides || {};
+  for (const prefix of Object.keys(overrides)) {
+    if (filename && filename.startsWith(prefix)) {
+      return overrides[prefix];
+    }
+  }
+  return null;
+}
+
 function guessDocType(filename, extractedText, routingConfig) {
   const name = (filename || '').toLowerCase();
   for (const dt of Object.keys(routingConfig.doc_type_to_function || {})) {
@@ -120,6 +130,22 @@ function decideRoute(item, routingConfig) {
   // item: { filename, extractedText, detectedEntities: [{entity, confidence}], length, path }
   const extractedText = item.extractedText || '';
 
+  // Check filename overrides first
+  const filenameOverride = checkFilenameOverride(item.filename, routingConfig);
+  if (filenameOverride) {
+    return {
+      entity: null,
+      entityConfidence: 0,
+      intentConfidence: 100,
+      function: null,
+      route: filenameOverride,
+      confidence: 100,
+      autoRoute: true,
+      reasons: ['filename_override'],
+      routing: { rule_id: 'FILENAME_OVERRIDE', rule_reason: 'filename_override' }
+    };
+  }
+
   // Determine intent (function in previous code)
   let intent = null;
   const docType = guessDocType(item.filename, extractedText, routingConfig);
@@ -142,10 +168,60 @@ function decideRoute(item, routingConfig) {
   const top = detected[0] || null; // {entity, confidence}
   const topConf = top ? (top.confidence || 0) : 0; // float 0..1
 
+  // Threshold from canonical routing_config (percent) - needed by rules below
+  const autoRouteThreshold = (routingConfig && routingConfig.confidence && typeof routingConfig.confidence.auto_route_threshold === 'number') ? routingConfig.confidence.auto_route_threshold : 70;
+
   // Use entity matching from text (metadata-only) if present; textual entity drives entity-scoped routes.
   const textEntity = matchEntity(extractedText, routingConfig);
-  // Keep detected entity for metadata reporting, but do NOT use it to create entity-scoped routes
+  // Keep detected entity for metadata reporting
   const detectedEntity = (top && top.entity) || null;
+
+  // 1) Special rules: conflict detection, legal override, and high-confidence entity autoroute
+  // Conflict: if two strong entities are present -> review
+  if (Array.isArray(detected) && detected.length >= 2) {
+    const a = detected[0].confidence || 0;
+    const b = detected[1].confidence || 0;
+    if (a >= 0.6 && b >= 0.6 && detected[0].entity !== detected[1].entity) {
+      return {
+        entity: null,
+        entityConfidence: Math.round((topConf||0) * 100),
+        function: intent || null,
+        route: 'mail_room.review_required',
+        confidence: Math.round((Math.max(a,b)||0) * 100),
+        autoRoute: false,
+        reasons: ['entity_conflict'],
+        routing: { rule_id: 'REVIEW_REQUIRED_CONFLICT_V1', rule_reason: 'ENTITY_CONFLICT', conflict_reason: 'ENTITY_CONFLICT' }
+      };
+    }
+  }
+
+  // Legal override: LEGAL entity with moderate confidence should force review and marking
+  if (detectedEntity === 'LEGAL' && topConf >= 0.5) {
+    return {
+      entity: detectedEntity,
+      entityConfidence: Math.round((topConf||0) * 100),
+      function: intent || null,
+      route: 'mail_room.review_required',
+      confidence: Math.round((topConf||0) * 100),
+      autoRoute: false,
+      reasons: ['legal_override'],
+      routing: { rule_id: 'REVIEW_REQUIRED_LEGAL_V1', rule_reason: 'LEGAL_BLOCK', legal_blocked: true }
+    };
+  }
+
+  // Entity autoroute: if there is a high-confidence detected entity and an intent, route to <ENTITY>.<Intent>
+  if (detectedEntity && (topConf * 100) >= autoRouteThreshold && intent) {
+    return {
+      entity: detectedEntity,
+      entityConfidence: Math.round((topConf||0) * 100),
+      function: intent || null,
+      route: `${detectedEntity}.${intent}`,
+      confidence: Math.round((topConf||0) * 100),
+      autoRoute: true,
+      reasons: ['entity_auto_route'],
+      routing: { rule_id: 'FINANCE_ENTITY_AUTOROUTE_V1', rule_reason: 'entity_auto_route' }
+    };
+  }
 
   // Compute an intent-derived confidence so keyword/doc-type matches can drive routing even when
   // AI entity confidence is missing or low.
@@ -213,6 +289,20 @@ function decideRoute(item, routingConfig) {
 
   const res = resolveDestination({ intent: intent, confidence: combinedConf, config: routingConfig });
 
+  // If there's no textual entity derived from content and no detected entity metadata, require human review
+  if (!textEntity && !detectedEntity) {
+    return {
+      entity: null,
+      entityConfidence: Math.round((topConf||0) * 100),
+      function: intent || null,
+      route: 'mail_room.review_required',
+      confidence: Math.round((combinedConf||0) * 100),
+      autoRoute: false,
+      reasons: ['no_entity_review_required'],
+      routing: { rule_id: 'ROUTING_V2', rule_reason: 'no_entity_review_required' }
+    };
+  }
+
   // routing meta for auditability
   const routing = {
     rule_id: 'ROUTING_V2',
@@ -242,7 +332,20 @@ function getPathsForRoute(route, routingConfig) {
   const fp = routingConfig.function_to_office || {};
   const naviRoot = routingConfig.navi_root || path.resolve(__dirname, '..', '..', 'NAVI');
 
-  const storageRel = rp[route] || null;
+  let storageRel = rp[route] || null;
+  // default storage layout when explicit route mapping missing
+  if (!storageRel) {
+    if (route === 'mail_room.review_required') {
+      storageRel = 'mail_room/review_required';
+    } else {
+      const parts = (route || '').split('.');
+      if (parts.length === 2 && parts[0] && parts[1]) {
+        storageRel = `sorted/${parts[0]}/${parts[1]}/INBOX`;
+      } else {
+        storageRel = null;
+      }
+    }
+  }
   const storage = storageRel ? path.normalize(path.join(naviRoot, storageRel)) : null;
 
   // map function (after dot) to office name
@@ -256,6 +359,12 @@ function getPathsForRoute(route, routingConfig) {
   } else {
     officeName = func && fp[func] ? fp[func] : null;
   }
+
+  // Normalize office naming expected by tests (append _OFFICE if not present)
+  if (officeName && !officeName.endsWith('_OFFICE')) {
+    officeName = `${officeName}_OFFICE`;
+  }
+
   const officeInbox = officeName ? path.normalize(path.join(naviRoot, 'offices', officeName, 'inbox')) : null;
 
   return { route, storage, storageRel, officeName, officeInbox };

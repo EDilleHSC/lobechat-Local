@@ -1,0 +1,69 @@
+# Compliance: Root Structure Check
+# Runs the tools/check_root_structure.py script on PRs and nightly to ensure
+# only approved top-level directories and files exist.
+name: "Compliance — Root Structure Check"
+
+on:
+  pull_request:
+    paths:
+      - 'README_COMPLIANCE.md'
+      - 'tools/**'
+      - '.github/**'
+      - '**/*'
+  schedule:
+    - cron: '0 6 * * *' # daily at 06:00 UTC
+
+jobs:
+  check-root-structure:
+    name: compliance/check-root-structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run root structure check (informational)
+        id: root-check
+        run: |
+          # Run checker and capture output to unexpected.txt; do not fail the job
+          python tools/check_root_structure.py --root "${{ github.workspace }}" --compliance README_COMPLIANCE.md > unexpected.txt || true
+          if [ -s unexpected.txt ]; then
+            echo "==== Unexpected items found in repo root (non-blocking) ====" >&2
+            cat unexpected.txt >&2
+          else
+            echo "OK: no unexpected items found"
+          fi
+
+      - name: Upload report (informational)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: root-structure-report
+          path: unexpected.txt
+
+      - name: Friendly guidance (informational)
+        if: always()
+        run: |
+          if [ -s unexpected.txt ]; then
+            echo "❌ Repository root structure check found unexpected items" >&2
+            echo "" >&2
+            echo "One or more unexpected files or folders were found at the repository root." >&2
+            echo "" >&2
+            echo "Why this matters:" >&2
+            echo "The repo root is intentionally kept clean to prevent drift, accidental artifacts, and tooling issues." >&2
+            echo "" >&2
+            echo "What to do:" >&2
+            echo "- Review the reported paths in the 'root-structure-report' artifact" >&2
+            echo "- Move them into an appropriate subdirectory, or" >&2
+            echo "- If the item is intentional, add it to README_COMPLIANCE.md and explain in this PR" >&2
+            echo "" >&2
+            echo "This check is currently non-blocking while we validate coverage. It will become required after a short stabilization period." >&2
+            echo "" >&2
+            echo "📄 See README_COMPLIANCE.md for the allowed root structure." >&2
+          else
+            echo "No unexpected items; compliance check passed." >&2
+          fi
