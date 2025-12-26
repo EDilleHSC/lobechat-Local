@@ -1,0 +1,50 @@
+name: E2E Package Smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  e2e-package-smoke:
+    name: E2E Package Smoke (Linux)
+    runs-on: ubuntu-latest
+    env:
+      PORT: 8005
+      WRITE_PORT_FILE: '1'
+      FAIL_ON_PORT_CONFLICT: '0'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Determine python path
+        id: pythonpath
+        run: echo "path=$(python -c 'import sys;print(sys.executable)')" >> "$GITHUB_OUTPUT"
+
+      - name: Run E2E package flow smoke test
+        env:
+          MAILROOM_PYTHON: ${{ steps.pythonpath.outputs.path }}
+        run: |
+          echo "Using MAILROOM_PYTHON=${MAILROOM_PYTHON}"
+          npx jest --runInBand --testPathPattern=tests/integration/e2e_package_flow.test.js --testTimeout=30000
+
+      - name: Upload logs/artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-package-smoke-artifacts
+          path: |
+            NAVI/approvals/run_start.json
+            logs/**
