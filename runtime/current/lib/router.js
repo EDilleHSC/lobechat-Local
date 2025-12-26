@@ -15,14 +15,29 @@ function checkFilenameOverride(filename, routingConfig) {
   return null;
 }
 
+function shouldSkipFile(filename) {
+  // Filenames that begin with underscore (e.g., _trigger.txt, _touch_for_watch.txt) or BF test artifacts
+  // (bf_test*) should not be routed or packaged.
+  const base = (filename || '').toString();
+  if (/^_+/.test(base)) return true;
+  if (/^bf_test/i.test(base)) return true;
+  return false;
+}
+
 function guessDocType(filename, extractedText, routingConfig) {
   const name = (filename || '').toLowerCase();
+  const txt = (extractedText || '').toLowerCase();
+
   for (const dt of Object.keys(routingConfig.doc_type_to_function || {})) {
-    if (name.includes(dt) || (extractedText || '').toLowerCase().includes(dt)) return dt;
+    if (name.includes(dt) || txt.includes(dt)) return dt;
   }
+
+  // Insurance detection
+  const insuranceSignals = ['insurance', 'ins.', 'policy', 'premium', 'progressive', 'progresive', 'geico', 'allstate', 'statefarm'];
+  if (insuranceSignals.some(s => name.includes(s) || txt.includes(s))) return 'insurance';
+
   // fallback heuristics
   if (name.match(/\.pdf$|\.docx?$|\.txt$/)) {
-    const txt = (extractedText || '').toLowerCase();
     if (txt.includes('invoice') || name.includes('invoice')) return 'invoice';
     if (txt.includes('bill') || name.includes('bill')) return 'bill';
     if (txt.includes('receipt') || name.includes('receipt')) return 'receipt';
@@ -154,14 +169,14 @@ function decideRoute(item, routingConfig) {
       intent = routingConfig.doc_type_to_function[docType];
     } else {
       // Fallback mapping when explicit doc_type_to_function is not configured
-      const fallbackDocMap = { invoice: 'Finance', bill: 'Finance', receipt: 'Finance', contract: 'Legal' };
+      const fallbackDocMap = { invoice: 'Finance', bill: 'Finance', receipt: 'Finance', contract: 'Legal', insurance: 'Finance' };
       if (fallbackDocMap[docType]) intent = fallbackDocMap[docType];
     }
   }
-  if (!intent) {
-    const df = detectFunction(extractedText, routingConfig);
-    if (df && df.function) intent = df.function;
-  }
+
+  // Run content-based intent detection and prefer explicit content intent when present
+  const df = detectFunction(extractedText, routingConfig);
+  if (df && df.function) intent = df.function;
 
   // Top AI entity confidence (metadata only)
   const detected = Array.isArray(item.detectedEntities) ? item.detectedEntities.slice().sort((a,b)=> (b.confidence||0)-(a.confidence||0)) : [];
@@ -209,7 +224,31 @@ function decideRoute(item, routingConfig) {
     };
   }
 
-  // Entity autoroute: if there is a high-confidence detected entity and an intent, route to <ENTITY>.<Intent>
+  // Insurance override: if filename or content contains insurance signals and the intent is NOT explicitly Tech,
+  // force route to CFO to avoid misrouting financial documents to Tech.
+  const fileLower = (item && item.filename) ? item.filename.toLowerCase() : '';
+  const txtLower = (extractedText || '').toLowerCase();
+  const insuranceKeywords = [
+    'insurance', 'ins', 'ins.', 'policy', 'premium', 'coverage', 'claim', 'deductible',
+    'progressive', 'progresive', 'statefarm', 'state farm', 'geico', 'allstate',
+    'nationwide', 'liberty mutual', 'usaa', 'auto insurance', 'home insurance', 'liability'
+  ];
+  const containsInsurance = insuranceKeywords.some(k => fileLower.includes(k) || txtLower.includes(k));
+  const explicitTech = (intent && intent.toLowerCase && intent.toLowerCase() === 'tech') || false;
+
+  if (containsInsurance && !explicitTech) {
+    return {
+      entity: (top && top.entity) || null,
+      entityConfidence: Math.round((topConf||0) * 100),
+      function: 'Finance',
+      route: 'CFO',
+      confidence: 90,
+      autoRoute: true,
+      reasons: ['insurance_override'],
+      routing: { rule_id: 'INSURANCE_OVERRIDE_V1', rule_reason: 'insurance_detected' }
+    };
+  }
+
   if (detectedEntity && (topConf * 100) >= autoRouteThreshold && intent) {
     return {
       entity: detectedEntity,
@@ -266,41 +305,25 @@ function decideRoute(item, routingConfig) {
     };
   }
 
-  // Insurance filename heuristic: when extracted text is missing or combined confidence is below threshold,
-  // use filename/vendor signals for narrow insurance cases to route to CFO.
-  const fileLower = (item && item.filename) ? item.filename.toLowerCase() : '';
-  const insuranceKeywords = ['insurance','policy','premium','progressive','statefarm','geico','allstate'];
-  const lowConfidence = ((combinedConf||0) * 100) < threshold;
-  const textEmpty = !(item.extractedText && item.extractedText.trim() && item.extractedText.trim().length >= 10);
-  if ((textEmpty || lowConfidence) && insuranceKeywords.some(k => fileLower.includes(k))) {
-    // Force Finance -> CFO with a clear heuristic reason
-    const routing = { rule_id: 'INSURANCE_FILENAME_HEURISTIC_V1', rule_reason: 'filename_insurance_heuristic' };
-    return {
-      entity: (top && top.entity) || null,
-      entityConfidence: Math.round((topConf||0) * 100),
-      function: 'Finance',
-      route: 'CFO',
-      confidence: Math.round((combinedConf||0) * 100),
-      autoRoute: true,
-      reasons: ['heuristic_filename_insurance'],
-      routing
-    };
-  }
+  // Insurance override moved earlier (above) to take precedence over entity autoroute.
 
   const res = resolveDestination({ intent: intent, confidence: combinedConf, config: routingConfig });
 
   // If there's no textual entity derived from content and no detected entity metadata, require human review
+  // Exception: if intent-derived destination passed the auto-route threshold (res.autoRouted and destination != 'EXEC'), allow intent routing
   if (!textEntity && !detectedEntity) {
-    return {
-      entity: null,
-      entityConfidence: Math.round((topConf||0) * 100),
-      function: intent || null,
-      route: 'mail_room.review_required',
-      confidence: Math.round((combinedConf||0) * 100),
-      autoRoute: false,
-      reasons: ['no_entity_review_required'],
-      routing: { rule_id: 'ROUTING_V2', rule_reason: 'no_entity_review_required' }
-    };
+    if (!(res && res.autoRouted && res.destination && res.destination !== 'EXEC')) {
+      return {
+        entity: null,
+        entityConfidence: Math.round((topConf||0) * 100),
+        function: intent || null,
+        route: 'mail_room.review_required',
+        confidence: Math.round((combinedConf||0) * 100),
+        autoRoute: false,
+        reasons: ['no_entity_review_required'],
+        routing: { rule_id: 'ROUTING_V2', rule_reason: 'no_entity_review_required' }
+      };
+    }
   }
 
   // routing meta for auditability
@@ -375,5 +398,6 @@ module.exports = {
   matchEntity,
   guessDocType,
   detectFunction,
-  getPathsForRoute
+  getPathsForRoute,
+  shouldSkipFile
 };
