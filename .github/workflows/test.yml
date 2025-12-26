@@ -20,6 +20,24 @@ jobs:
       - name: Determine python path
         id: pythonpath
         run: echo "path=$(python -c 'import sys;print(sys.executable)')" >> "$GITHUB_OUTPUT"
+      - name: Debug git context
+        shell: bash
+        run: |
+          echo "Git version:"
+          git --version || true
+
+          echo "HEAD ref:"
+          git rev-parse --abbrev-ref HEAD || echo "(no branch)"
+
+          echo "Commit:"
+          git rev-parse --short HEAD || true
+
+          echo "Repo status:"
+          git status --porcelain || true
+
+          echo "Is shallow clone?"
+          git rev-parse --is-shallow-repository || true
+
       - name: Run Jest tests
         env:
           MAILROOM_PYTHON: ${{ steps.pythonpath.outputs.path }}
