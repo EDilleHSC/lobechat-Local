@@ -19,7 +19,6 @@
 
   "agents": {
     "GYFOLE": { "name": "Gyfole", "title": "AI Partner", "level": 0 },
-    "COS": { "name": "Alex", "title": "Chief of Staff", "level": 1 },
     "AIR": { "name": "Air", "title": "Chief Knowledge Officer", "level": 2 },
     "EXEC": { "name": "Clara", "title": "Executive Secretary", "level": 3 },
     "CFO": { "name": "Finn", "title": "Chief Financial Officer", "level": 3 },
@@ -27,9 +26,7 @@
     "COO": { "name": "Omar", "title": "Chief Operating Officer", "level": 3 },
     "CSO": { "name": "Sage", "title": "Chief Sales Officer", "level": 3 },
     "CMO": { "name": "Maya", "title": "Chief Marketing Officer", "level": 3 },
-    "CTO": { "name": "Tara", "title": "Chief Technology Officer", "level": 3 },
-    "NAVI": { "name": "NAVI", "title": "Intake Agent", "level": 4 },
-    "DREW": { "name": "Drew", "title": "DevOps Engineer", "level": 4 }
+    "CTO": { "name": "Tara", "title": "Chief Technology Officer", "level": 3 }
   },
 
   "entities": {
@@ -65,10 +62,10 @@
     "Sales": "CSO",
     "Marketing": "CMO",
     "Tech": "CTO",
-    "DevOps": "DREW",
+    "DevOps": "CTO",
     "Exec": "EXEC",
     "Knowledge": "AIR",
-    "DESK": "COS"
+    "DESK": "EXEC"
   },
 
   "doc_type_to_function": {
