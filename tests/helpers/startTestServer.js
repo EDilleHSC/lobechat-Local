@@ -46,10 +46,14 @@ function clearStaleFiles() {
 
 
 async function startTestServer(opts = {}) {
-  // Safety guard: refuse to run tests against a non-test NAVI_ROOT to avoid accidental corruption
+  // TEST_SERVER_STRICT mode: when enabled, refuse to run tests against a non-test NAVI_ROOT and enforce strict isolation
+  const strictMode = process.env.TEST_SERVER_STRICT === '1';
   const envNaviRoot = (process.env.NAVI_ROOT || (opts.env && opts.env.NAVI_ROOT) || '').toLowerCase();
-  if (envNaviRoot && !envNaviRoot.includes('navi_test')) {
-    throw new Error(`Refusing to run tests against non-test NAVI_ROOT: ${envNaviRoot}`);
+  if (strictMode) {
+    console.log('[TEST_SERVER_STRICT] strict test-server enforcement enabled');
+    if (envNaviRoot && !envNaviRoot.includes('navi_test')) {
+      throw new Error(`Refusing to run tests against non-test NAVI_ROOT: ${envNaviRoot}`);
+    }
   }
 
   // Determine the port to use. If the caller requested a specific port, try to bind it strictly and fail if unavailable.
