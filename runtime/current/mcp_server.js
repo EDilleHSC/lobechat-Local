@@ -20,6 +20,7 @@ const { logBatch, writeBatchLogSafe } = require('./lib/batch_log');
 const { applyRoute } = require('./lib/applier');
 // AI classifier (local model wrapper)
 const { classifyWithAI } = require('../../src/ai/classifier');
+const { normalizeRouting } = require('../../src/ai/normalizer');
 
 // Explicit Python runtime for predictable execution
 const PYTHON = 'D:\\02_SOFTWARE\\Python312\\python.exe';
@@ -651,6 +652,8 @@ async function takeSnapshot() {
         }
 
         // AI-first classification (prototype): call local model for each item and attach classification to item.ai.ai_classification
+        // normalizeRouting() moved to src/ai/normalizer.js — imported above to keep behavior testable
+
         for (const item of items) {
             try {
                 const aiRes = await classifyWithAI(item.filename, item.ai.extracted_text_snippet);
@@ -658,7 +661,16 @@ async function takeSnapshot() {
                     // Model down or returned nothing
                     item.ai.ai_classification = { error: 'model_unavailable' };
                 } else {
-                    item.ai.ai_classification = aiRes;
+                    // Post-process AI results: normalize & apply insurance override using filename + snippet + AI reasoning
+                    const normalized = normalizeRouting(aiRes, item.filename, item.ai.extracted_text_snippet || '');
+                    item.ai.ai_classification = Object.assign({}, aiRes, {
+                        department: normalized.department,
+                        confidence: normalized.confidence,
+                        normalization: normalized.reason
+                    });
+                    // Record normalization in reasons
+                    if (!Array.isArray(item.ai.reasons)) item.ai.reasons = [];
+                    item.ai.reasons = Array.from(new Set(item.ai.reasons.concat([normalized.reason])));
                 }
             } catch (e) {
                 log(`[AI] classification error for ${item.filename}: ${e.message}`);
@@ -786,7 +798,7 @@ async function takeSnapshot() {
 
                 // Insurance filename/text heuristic: when filename or extracted text strongly indicates insurance, move to CFO even if entity is DESK
                 const fileLower = (item.filename || '').toLowerCase();
-                const txtLower = (item.extractedText || '').toLowerCase();
+                const txtLower = (item.ai && (item.ai.extracted_text_snippet || (item.ai.ai_classification && item.ai.ai_classification.reasoning) || item.extractedText) || '').toLowerCase();
                 const insuranceKeywords = [
                   'insurance', 'ins', 'ins.', 'policy', 'premium', 'coverage', 'claim', 'deductible',
                   'progressive', 'progresive', 'statefarm', 'state farm', 'geico', 'allstate',
@@ -794,7 +806,40 @@ async function takeSnapshot() {
                 ];
                 const insuranceHeuristic = insuranceKeywords.some(k => fileLower.includes(k) || txtLower.includes(k));
 
-                if (canMoveToOffice) {
+                // Aggressive insurance override: if normalization flagged insurance, force CFO auto-route regardless of inferred office
+                if (item.ai && Array.isArray(item.ai.reasons) && item.ai.reasons.includes('insurance_override') && !item.ai.risk_flags.includes('executable')) {
+                    const src = item.source_path || path.join(inboxPath, item.filename);
+                    try {
+                        const route = 'CFO';
+                        const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
+                        item.ai.action = 'auto_routed';
+                        item.ai.confidence = 95;
+                        if (!Array.isArray(item.ai.reasons)) item.ai.reasons = [];
+                        item.ai.reasons = Array.from(new Set(item.ai.reasons.concat(['insurance_override'])));
+                        // Ensure sidecar reflects the override even if model is unavailable
+                        item.ai.ai_classification = Object.assign({}, (item.ai.ai_classification || {}), { department: 'CFO', normalization: 'insurance_override', confidence: 95 });
+                        // Persist sidecar before applying route so applier can move it and package can be updated
+                        writeSidecarForItem(item, route, routingMeta);
+                        const result = await applyRoute({ srcPath: src, sidecarPath: item.sidecarPath, route, routingMeta, config });
+
+                        // Mark moved
+                        item.state = STATES.FINAL.MOVED;
+                        item.final_state = STATES.FINAL.MOVED;
+                        item.timestamps.moved = new Date().toISOString();
+                        item.ai.routing_note = `Insurance override: auto-routed to ${route}`;
+                        item.ai.destination = result.package ? result.delivered_to || result.packagePath : (result.destPath || null);
+                        item.review_required = false;
+                        autoRouted.push(item);
+                        log(`[INSURANCE OVERRIDE] ${item.filename} → ${route} (auto-routed)`);
+                    } catch (err) {
+                        console.error(`[DELIVERY ERROR] Failed to move insurance ${item.filename}:`, err.message);
+                        item.state = STATES.DECISION.REVIEW_REQUIRED;
+                        item.ai.routing_note = `Move failed: ${err.message}`;
+                        item.ai.action = 'move_failed';
+                        item.ai.destination = null;
+                        reviewRequired.push(item);
+                    }
+                } else if (canMoveToOffice) {
                     const src = item.source_path || path.join(inboxPath, item.filename);
                     try {
                         const route = office;
@@ -829,9 +874,11 @@ async function takeSnapshot() {
                         const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
                     // Mark as auto-routed to align with router override (confidence high)
                     item.ai.action = 'auto_routed';
-                    item.ai.confidence = 90;
+                    item.ai.confidence = 95;
                     if (!Array.isArray(item.ai.reasons)) item.ai.reasons = [];
                     item.ai.reasons = Array.from(new Set(item.ai.reasons.concat(['insurance_override'])));
+                    // Ensure sidecar reflects the override even if model is unavailable
+                    item.ai.ai_classification = Object.assign({}, (item.ai.ai_classification || {}), { department: 'CFO', normalization: 'insurance_override', confidence: 95 });
                     // Persist sidecar before applying route so applier can move it and package can be updated
                     writeSidecarForItem(item, route, routingMeta);
                     const result = await applyRoute({ srcPath: src, sidecarPath: item.sidecarPath, route, routingMeta, config });
