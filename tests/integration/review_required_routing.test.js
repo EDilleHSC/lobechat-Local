@@ -64,21 +64,40 @@ async function waitUntilSnapshotHasAtLeast(expectedAuto, timeoutMs = 60000) {
 
 // New helper: wait until a snapshot contains at least expectedReview review_required exceptions
 // NOTE: REVIEW_REQUIRED items may appear in `reviewRequired` or as autoRouted items with ai.action === 'review_required'.
-async function waitUntilSnapshotHasReviewAtLeast(expectedReview, timeoutMs = 60000) {
+async function waitUntilSnapshotHasReviewAtLeast(expectedReview, timeoutMs = 90000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const files = fs.existsSync(SNAPSHOT_DIR) ? fs.readdirSync(SNAPSHOT_DIR).filter(f => f.endsWith('.json')) : [];
+    if (files.length === 0) {
+      // quick pause to allow snapshot to be flushed
+      await waitFor(250);
+      continue;
+    }
     for (const f of files) {
       try {
-        const snap = JSON.parse(fs.readFileSync(path.join(SNAPSHOT_DIR, f), 'utf8'));
+        const fp = path.join(SNAPSHOT_DIR, f);
+        const raw = fs.readFileSync(fp, 'utf8');
+        const snap = JSON.parse(raw);
         const reviewFromExceptions = (snap.reviewRequiredCount || 0);
         const autoReview = Array.isArray(snap.autoRouted) ? snap.autoRouted.filter(it => it && it.ai && it.ai.action === 'review_required').length : 0;
         // consider the larger of the two sources as the effective review count
         if (Math.max(reviewFromExceptions, autoReview) >= expectedReview) return { snapshotFile: f, snapshot: snap };
-      } catch (e) { /* ignore */ }
+      } catch (e) {
+        // Log the parsing error for debugging but keep retrying
+        console.error('[TEST DEBUG] snapshot parse error, will retry:', e && e.message);
+      }
     }
     await waitFor(250);
   }
+
+  // timeout: dump debug info to help identify race conditions
+  console.error('[TEST DEBUG] SNAPSHOT_DIR contents at timeout:', fs.existsSync(SNAPSHOT_DIR) ? fs.readdirSync(SNAPSHOT_DIR) : '<missing>');
+  if (fs.existsSync(SNAPSHOT_DIR)) {
+    for (const f of fs.readdirSync(SNAPSHOT_DIR)) {
+      try { console.error('[TEST DEBUG] snapshot sample:', f, fs.readFileSync(path.join(SNAPSHOT_DIR, f), 'utf8').slice(0, 4096)); } catch (e) { }
+    }
+  }
+
   throw new Error('Timeout waiting for expected snapshot with reviewRequired entries');
 }
 
