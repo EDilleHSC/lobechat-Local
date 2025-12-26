@@ -13,6 +13,10 @@
     "escalation_route": "COS"
   },
 
+  "filename_overrides": {
+    "Navi_": "CTO"
+  },
+
   "agents": {
     "GYFOLE": { "name": "Gyfole", "title": "AI Partner", "level": 0 },
     "COS": { "name": "Alex", "title": "Chief of Staff", "level": 1 },

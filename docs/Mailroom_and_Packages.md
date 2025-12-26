@@ -25,3 +25,17 @@ PR checklist (short)
 
 Notes
 - This doc is a concise runbook for reviewers and CI maintainers. Put questions or improvements in the PR description if anything looks risky.
+
+Auto-processing (optional)
+- A PowerShell watcher script is available at `scripts/enable_auto_processing.ps1`.
+- The watcher monitors `NAVI/inbox` for new file drops and will:
+  1. Run `node runtime/current/router.js --apply --force` to process new drops
+  2. Run the mailroom via `MAILROOM_PYTHON` (or `C:\Users\PC\anaconda3\python.exe` if `MAILROOM_PYTHON` is not set)
+  3. Log actions to `NAVI/logs/auto_process.log`
+- To start the watcher run (PowerShell):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\enable_auto_processing.ps1
+```
+
+- The watcher is intended for local/dev usage. For production, run it as a managed background service and ensure `MAILROOM_PYTHON` is configured in environment variables.

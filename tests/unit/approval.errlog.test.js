@@ -11,6 +11,8 @@ describe('audit.err.log behavior on write failure', () => {
   beforeEach(async () => {
     tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'approval-err-'));
     logDir = path.join(tmpDir, 'NAVI', 'approvals');
+    // Create log dir up-front to make behavior deterministic across CI runners
+    await fs.promises.mkdir(logDir, { recursive: true });
     app = express();
     app.use(express.json());
     app.post('/approval', makeHandler({ logDir }));

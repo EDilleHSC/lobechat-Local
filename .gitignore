@@ -33,3 +33,9 @@ NAVI/archive/**/LM-Studio-0.334-1-x64.exe
 containers/.env
 
 
+NAVI/packages/*
+NAVI/processed/*
+NAVI/offices/*/inbox/*
+runtime/current/job_*
+tmp/*
+test-results/*
