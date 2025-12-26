@@ -14,6 +14,10 @@ addFormats(ajv);
 const chokidar = require('chokidar');
 const approvalSchema = require('./schemas/approval.schema.json');
 const validateApproval = ajv.compile(approvalSchema);
+// Batch logging helper (write per-batch JSON for auditing)
+const { logBatch, writeBatchLogSafe } = require('./lib/batch_log');
+// Applier utility to atomically move files and create packages for offices
+const { applyRoute } = require('./lib/applier');
 
 // Explicit Python runtime for predictable execution
 const PYTHON = 'D:\\02_SOFTWARE\\Python312\\python.exe';
@@ -309,7 +313,8 @@ function takeSnapshot(dirPath) {
 }
 
 // PID-file path and helper exposed at module scope so request handlers and signal handlers can access it
-const pidFile = path.join(__dirname, 'mcp_server.pid');
+const pidFile = process.env.MCP_PID_FILE || path.join(__dirname, 'mcp_server.pid');
+if (process.env.MCP_PID_FILE) console.log('[MCP] Using custom MCP_PID_FILE:', process.env.MCP_PID_FILE);
 function removePidFile() {
     try {
         if (fs.existsSync(pidFile)) {
@@ -510,7 +515,7 @@ function detectEntityFromText(text) {
     return { entity: found, confidence };
 }
 
-function takeSnapshot() {
+async function takeSnapshot() {
     try {
         // Create snapshot of inbox
         const inboxPath = INBOX_DIR;
@@ -591,10 +596,23 @@ function takeSnapshot() {
 
             const id = crypto.createHash('sha256').update(filename + stats.mtime.toISOString()).digest('hex');
 
+            // Check for sidecar (.navi.json) and attach if present
+            const sidecarPath = path.join(inboxPath, `${filename}.navi.json`);
+            let sidecar = null;
+            if (fs.existsSync(sidecarPath)) {
+                try {
+                    sidecar = JSON.parse(fs.readFileSync(sidecarPath, 'utf8'));
+                } catch (e) {
+                    log(`[SIDECAR] Failed to read sidecar for ${filename}: ${e.message}`);
+                }
+            }
+
             return {
                 id,
                 filename,
                 source_path: path.join(inboxPath, filename),
+                sidecarPath: sidecarPath,
+                sidecar: sidecar,
                 state: STATES.LIFECYCLE.ANALYZED,
                 ai: {
                     guess: guessedDept,
@@ -656,8 +674,8 @@ function takeSnapshot() {
             }
             
             // Determine which office (entity) this box belongs to
-            const office = item.ai.entity || 'DESK';
-            const entityConf = Number(item.ai.entity_confidence || 0);
+            let office = item.ai.entity || 'DESK';
+            let entityConf = Number(item.ai.entity_confidence || 0);
 
             // Delivery rule: High entity confidence (>=85%) allows auto-delivery unless there are real risk flags.
             // We allow a high-confidence entity to override 'unclear_ownership' and 'low_confidence' but not strong risk flags like 'executable'.
@@ -666,29 +684,35 @@ function takeSnapshot() {
             item.ai.effective_risk_flags = effectiveRiskFlags;
             log(`[DELIVERY CHECK] ${item.filename}: entity=${office}, entityConf=${entityConf}%, original_risks=${item.ai.risk_flags.join(', ')}, effective_risks=${effectiveRiskFlags.join(', ')}`);
 
-            if (entityConf >= 85 && effectiveRiskFlags.length === 0) {
-                // Create the office folder if it doesn't exist
-                const destDir = path.join(NAVI_DIR, 'sorted', office);
-                if (!fs.existsSync(destDir)) {
-                    fs.mkdirSync(destDir, { recursive: true });
-                }
+            // Respect sidecar routing overrides (if present) and allow them to force delivery when confidence high
+            const forcedBySidecar = item.sidecar && item.sidecar.routing && item.sidecar.routing.destination && (Number(item.sidecar.routing.confidence || 0) >= 85);
+            if (forcedBySidecar) {
+                // Apply sidecar overrides
+                office = item.sidecar.routing.destination;
+                entityConf = Number(item.sidecar.routing.confidence || 0);
+                item.ai.entity = office;
+                item.ai.entity_confidence = entityConf;
+            }
 
-                // Move the box to the office
+            if ((entityConf >= 85 && effectiveRiskFlags.length === 0) || forcedBySidecar) {
+                // Use applier to perform canonical delivery into offices and packages (async)
                 const src = item.source_path || path.join(inboxPath, item.filename);
-                const destPath = path.join(destDir, item.filename);
                 try {
-                    fs.renameSync(src, destPath);
-                    // Use canonical final state
+                    const route = item.sidecar && item.sidecar.routing && item.sidecar.routing.destination ? item.sidecar.routing.destination : office;
+                    const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
+                    const result = await applyRoute({ srcPath: src, sidecarPath: item.sidecarPath, route, routingMeta, config });
+
+                    // Mark moved
                     item.state = STATES.FINAL.MOVED;
                     item.final_state = STATES.FINAL.MOVED;
                     item.timestamps.moved = new Date().toISOString();
-                    item.ai.routing_note = `Auto-delivered to ${office} office (entity confidence: ${entityConf}%)`;
+                    item.ai.routing_note = `Auto-delivered to ${route} via applier (entity confidence: ${entityConf}%)`;
                     item.ai.action = 'auto_routed';
-                    item.ai.destination = `sorted/${office}/`;
+                    item.ai.destination = result.package ? result.delivered_to || result.packagePath : (result.destPath || null);
                     autoRouted.push(item);
-                    log(`[DELIVERY] ${item.filename} → sorted/${office}/`);
+                    log(`[DELIVERY] ${item.filename} → ${route} via applier`);
                 } catch (err) {
-                    console.error(`[DELIVERY ERROR] Failed to move ${item.filename}:`, err.message);
+                    console.error(`[DELIVERY ERROR] Failed to apply route for ${item.filename}:`, err.message);
                     item.state = STATES.DECISION.REVIEW_REQUIRED;
                     item.ai.routing_note = `Move failed: ${err.message}`;
                     item.ai.action = 'move_failed';
@@ -696,17 +720,83 @@ function takeSnapshot() {
                     reviewRequired.push(item);
                 }
             } else {
-                // Leave on loading dock for human review
-                item.state = STATES.DECISION.REVIEW_REQUIRED;
-                item.ai.action = 'review_required';
-                item.ai.destination = null;
-                if (entityConf >= 85) {
-                    item.ai.routing_note = `High entity confidence (${entityConf}%) but risk flags present: ${item.ai.risk_flags.join(', ')}; holding for manual review.`;
+                // Decision: where review is required we should still move files out of NAVI/inbox to the inferred office
+                // when an office/entity can be determined (e.g., FINANCE) unless the file is quarantined (executable) or KB mode.
+                const canMoveToOffice = office && office !== 'DESK' && !item.ai.risk_flags.includes('executable') && CURRENT_PROCESS_MODE !== 'KB';
+
+                // Insurance filename heuristic: when filename strongly indicates insurance, move to CFO even if entity is DESK
+                const insuranceKeywords = ['insurance','policy','premium','progressive','statefarm','geico','allstate'];
+                const fileLower = (item.filename || '').toLowerCase();
+                const insuranceHeuristic = insuranceKeywords.some(k => fileLower.includes(k));
+
+                if (canMoveToOffice) {
+                    const src = item.source_path || path.join(inboxPath, item.filename);
+                    try {
+                        const route = office;
+                        const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
+                        const result = await applyRoute({ srcPath: src, sidecarPath: item.sidecarPath, route, routingMeta, config });
+
+                        // Mark moved but keep review_required semantics
+                        item.state = STATES.FINAL.MOVED;
+                        item.final_state = STATES.FINAL.MOVED;
+                        item.timestamps.moved = new Date().toISOString();
+                        item.ai.routing_note = `Moved to ${route} for manual review (entityConf: ${entityConf}%)`;
+                        item.ai.action = 'review_required';
+                        item.ai.destination = result.package ? result.delivered_to || result.packagePath : (result.destPath || null);
+                        item.review_required = true;
+                        autoRouted.push(item);
+                        log(`[MOVE_FOR_REVIEW] ${item.filename} → ${route} (review required)`);
+                    } catch (err) {
+                        console.error(`[DELIVERY ERROR] Failed to move-for-review ${item.filename}:`, err.message);
+                        item.state = STATES.DECISION.REVIEW_REQUIRED;
+                        item.ai.routing_note = `Move failed: ${err.message}`;
+                        item.ai.action = 'move_failed';
+                        item.ai.destination = null;
+                        reviewRequired.push(item);
+                    }
+                } else if (!canMoveToOffice && insuranceHeuristic && !item.ai.risk_flags.includes('executable')) {
+                    // Apply insurance heuristic to move DESK insurance-like files to CFO and auto-route (per routing policy)
+                    const src = item.source_path || path.join(inboxPath, item.filename);
+                    try {
+                        const route = 'CFO';
+                        const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
+                        const result = await applyRoute({ srcPath: src, sidecarPath: item.sidecarPath, route, routingMeta, config });
+
+                        item.state = STATES.FINAL.MOVED;
+                        item.final_state = STATES.FINAL.MOVED;
+                        item.timestamps.moved = new Date().toISOString();
+                        item.ai.routing_note = `Insurance heuristic: auto-routed to ${route}`;
+                        // Mark as auto-routed to align with router override (confidence high)
+                        item.ai.action = 'auto_routed';
+                        item.ai.confidence = 90;
+                        if (!Array.isArray(item.ai.reasons)) item.ai.reasons = [];
+                        item.ai.reasons = Array.from(new Set(item.ai.reasons.concat(['insurance_override'])));
+                        item.ai.destination = result.package ? result.delivered_to || result.packagePath : (result.destPath || null);
+                        // Ensure review_required flag is not set for auto-routed items
+                        item.review_required = false;
+                        autoRouted.push(item);
+                        log(`[INSURANCE] ${item.filename} → ${route} via heuristic (auto-routed)`);
+                    } catch (err) {
+                        console.error(`[DELIVERY ERROR] Failed to move insurance ${item.filename}:`, err.message);
+                        item.state = STATES.DECISION.REVIEW_REQUIRED;
+                        item.ai.routing_note = `Move failed: ${err.message}`;
+                        item.ai.action = 'move_failed';
+                        item.ai.destination = null;
+                        reviewRequired.push(item);
+                    }
                 } else {
-                    item.ai.routing_note = `Low entity confidence (${entityConf}%) or risk flags present; holding for manual review.`;
+                    // Leave on loading dock for human review
+                    item.state = STATES.DECISION.REVIEW_REQUIRED;
+                    item.ai.action = 'review_required';
+                    item.ai.destination = null;
+                    if (entityConf >= 85) {
+                        item.ai.routing_note = `High entity confidence (${entityConf}%) but risk flags present: ${item.ai.risk_flags.join(', ')}; holding for manual review.`;
+                    } else {
+                        item.ai.routing_note = `Low entity confidence (${entityConf}%) or risk flags present; holding for manual review.`;
+                    }
+                    reviewRequired.push(item);
+                    log(`[HOLD] ${item.filename} needs review (entity: ${office}, conf: ${entityConf}%, risk_flags: ${item.ai.risk_flags.join(', ')}, effective_risks: ${effectiveRiskFlags.join(', ')})`);
                 }
-                reviewRequired.push(item);
-                log(`[HOLD] ${item.filename} needs review (entity: ${office}, conf: ${entityConf}%, risk_flags: ${item.ai.risk_flags.join(', ')}, effective_risks: ${effectiveRiskFlags.join(', ')})`);
             }
         }
 
@@ -759,13 +849,24 @@ function takeSnapshot() {
             });
         }
 
-        // Write the batch log
-        try {
-            const batchLogPath = logBatch(batchStats);
-            snapshot.batch_log = batchLogPath;
-        } catch (e) {
-            log('[BATCH LOG] Failed to write batch log: ' + e.message);
-        }
+        // Write the batch log (attempt but do not block snapshot creation)
+        (async () => {
+            try {
+                const batchLogPath = await writeBatchLogSafe(batchStats, { timeout: 5000 });
+                snapshot.batch_log = batchLogPath;
+            } catch (e) {
+                log('[BATCH LOG] Failed to write batch log: ' + e.message);
+                // Fallback: write emergency audit record (best-effort, synchronous)
+                try {
+                    const auditDir = path.join(APPROVAL_DIR || NAVI_ROOT, 'audit');
+                    fs.mkdirSync(auditDir, { recursive: true });
+                    const auditPath = path.join(auditDir, `batch_log_error_${Date.now()}.json`);
+                    fs.writeFileSync(auditPath, JSON.stringify({ error: e.message, batch: batchStats, timestamp: new Date().toISOString() }, null, 2));
+                } catch (er) {
+                    log('[BATCH LOG] Emergency audit write failed: ' + er.message);
+                }
+            }
+        })();
 
         // Save snapshot
         const snapshotFilename = `${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
@@ -921,7 +1022,7 @@ function serveStaticFile(req, res, baseDir, urlPath) {
 // NOTE: Startup messages are emitted by startServer() so they only appear when the HTTP server
 // is actually started (guards prevent duplicate listen() calls and noisy logs when this module
 // is required by other code).
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
     // Process inbox endpoint - triggers full pipeline
     if (req.method === 'POST' && req.url && req.url.split('?')[0] === '/process') {
         // Allow mode selection via query param: /process?mode=KB
@@ -963,7 +1064,7 @@ const server = http.createServer((req, res) => {
         try {
             // 1. Take snapshot (simulate MCP list_directory call)
             console.log('[SNAPSHOT] Taking snapshot...');
-            const snapshotResult = takeSnapshot();
+            const snapshotResult = await takeSnapshot();
             console.log('[SNAPSHOT] Snapshot taken:', snapshotResult);
 
             // 2. Regenerate presenter from snapshot immediately (Beta-0 trust mode)
@@ -1813,54 +1914,82 @@ function startServer() {
             tryConnect('::1');
 
             console.log('[MCP] Server connected and ready');
-            
-            // 🚨 INBOX WATCHER - Auto-trigger snapshots when files arrive
-            console.log('[WATCHER] Starting inbox watcher...');
-            const watcher = chokidar.watch(INBOX_DIR, {
-                persistent: true,
-                ignoreInitial: false,     // 🔴 force initial adds
-                depth: 0,
-                usePolling: true,         // 🔴 Windows-safe
-                interval: 500
-            });
 
-            watcher
-                .on('add', (filePath) => {
-                    const fileName = path.basename(filePath);
-                    const ingestLock = path.join(NAVI_DIR, '.ingest.lock');
-                    if (fs.existsSync(ingestLock)) {
-                        log('[WATCHER] Ingest lock present — skipping auto-trigger');
-                        return;
-                    }
-                    log(`[WATCHER] ADD: ${filePath}`);
-                    processInbox('watcher:add');
-                })
-                .on('change', (filePath) => {
-                    const ingestLock = path.join(NAVI_DIR, '.ingest.lock');
-                    if (fs.existsSync(ingestLock)) {
-                        log('[WATCHER] Ingest lock present — skipping change-trigger');
-                        return;
-                    }
-                    const fileName = path.basename(filePath);
-                    log(`[WATCHER] CHANGE: ${filePath}`);
-                })
-                .on('unlink', (filePath) => {
-                    const fileName = path.basename(filePath);
-                    console.log(`[WATCHER] UNLINK: ${filePath}`);
-                })
-                .on('error', (err) => {
-                    console.error('[WATCHER] ERROR:', err);
-                })
-                .on('ready', () => {
-                    console.log('[WATCHER] READY — initial scan complete');
+            // Optional HTTP health shim to accommodate CI/HTTP health checks for MCP (disabled by default)
+            if ((process.env.MCP_HTTP_HEALTH || 'false') === 'true') {
+                try {
+                    const http = require('http');
+                    const healthPort = parseInt(process.env.MCP_HTTP_HEALTH_PORT, 10) || (PORT + 1);
+                    const healthServer = http.createServer((req, res) => {
+                        if (req.method === 'GET' && req.url === '/health') {
+                            res.writeHead(200, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ ok: true, pid: process.pid, uptime: process.uptime(), timestamp: new Date().toISOString() }));
+                        } else {
+                            res.writeHead(404); res.end();
+                        }
+                    });
+                    healthServer.listen(healthPort, '127.0.0.1', () => {
+                        console.log(`[MCP] HTTP health shim listening on http://127.0.0.1:${healthPort}/health`);
+                    });
+                    server.healthServer = healthServer;
+                } catch (e) {
+                    console.warn('[MCP] Failed to start HTTP health shim:', e && e.message);
+                }
+            }
+
+            // 🚨 INBOX WATCHER - Auto-trigger snapshots when files arrive
+            // Disable the watcher in CI/tests to avoid initial-scan churn that can block the event loop
+            if (process.env.CI === 'true' || process.env.NODE_ENV === 'test' || process.env.DISABLE_WATCHER === '1') {
+                console.log('[WATCHER] Disabled in test/CI environment');
+                console.log("=== NAVI READY: server listening, watcher disabled ===");
+            } else {
+                console.log('[WATCHER] Starting inbox watcher...');
+                const watcher = chokidar.watch(INBOX_DIR, {
+                    persistent: true,
+                    ignoreInitial: false,     // 🔴 force initial adds
+                    depth: 0,
+                    usePolling: true,         // 🔴 Windows-safe
+                    interval: 500
                 });
 
-            console.log(`[WATCHER] Watching: ${INBOX_DIR}`);
-            
-            // Store watcher reference for cleanup
-            server.watcher = watcher;
+                watcher
+                    .on('add', (filePath) => {
+                        const fileName = path.basename(filePath);
+                        const ingestLock = path.join(NAVI_DIR, '.ingest.lock');
+                        if (fs.existsSync(ingestLock)) {
+                            log('[WATCHER] Ingest lock present — skipping auto-trigger');
+                            return;
+                        }
+                        log(`[WATCHER] ADD: ${filePath}`);
+                        processInbox('watcher:add');
+                    })
+                    .on('change', (filePath) => {
+                        const ingestLock = path.join(NAVI_DIR, '.ingest.lock');
+                        if (fs.existsSync(ingestLock)) {
+                            log('[WATCHER] Ingest lock present — skipping change-trigger');
+                            return;
+                        }
+                        const fileName = path.basename(filePath);
+                        log(`[WATCHER] CHANGE: ${filePath}`);
+                    })
+                    .on('unlink', (filePath) => {
+                        const fileName = path.basename(filePath);
+                        console.log(`[WATCHER] UNLINK: ${filePath}`);
+                    })
+                    .on('error', (err) => {
+                        console.error('[WATCHER] ERROR:', err);
+                    })
+                    .on('ready', () => {
+                        console.log('[WATCHER] READY — initial scan complete');
+                    });
 
-            console.log("=== NAVI READY: server listening, watcher active ===");
+                console.log(`[WATCHER] Watching: ${INBOX_DIR}`);
+                
+                // Store watcher reference for cleanup
+                server.watcher = watcher;
+
+                console.log("=== NAVI READY: server listening, watcher active ===");
+            }
         });
     } catch (e) {
         // Synchronous listen errors (e.g., EADDRINUSE) will be handled here as backup
@@ -1883,6 +2012,14 @@ function gracefulShutdown(reason, exitCode = 0, timeoutMs = 5000) {
         if (server && server.watcher) {
             console.log('[MCP] Stopping file watcher...');
             server.watcher.close();
+        }
+
+        // Close optional HTTP health shim if present
+        if (server && server.healthServer) {
+            try {
+                console.log('[MCP] Closing HTTP health shim...');
+                server.healthServer.close();
+            } catch (e) { /* best-effort */ }
         }
         
         if (server && typeof server.close === 'function') {
