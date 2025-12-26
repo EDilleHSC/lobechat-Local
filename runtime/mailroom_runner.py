@@ -226,6 +226,29 @@ def main():
     
     print(json.dumps(output, indent=2))
 
+    # Regenerate present page for humans
+    try:
+        import subprocess, sys
+        py = sys.executable or 'python'
+        gen = os.path.join(ROOT, 'scripts', 'generate_present_page.py')
+        if os.path.exists(gen):
+            # run generator from repo root and capture output
+            res = subprocess.run([py, gen], cwd=ROOT, capture_output=True, text=True)
+            log_path = os.path.join(NAVI_ROOT, 'logs', 'present_gen.log')
+            try:
+                os.makedirs(os.path.dirname(log_path), exist_ok=True)
+                with open(log_path, 'a', encoding='utf-8') as lf:
+                    lf.write(f"[{datetime.now(timezone.utc).isoformat()}] generator returncode={res.returncode}\n")
+                    lf.write(res.stdout or '')
+                    lf.write(res.stderr or '')
+            except Exception:
+                pass
+            if res.returncode != 0:
+                # surface failure to stderr so CI can detect failures
+                print(f"Present page generator failed with returncode={res.returncode}", file=__import__('sys').stderr)
+    except Exception:
+        pass
+
 
 if __name__ == '__main__':
     main()
