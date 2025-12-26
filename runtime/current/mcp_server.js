@@ -724,10 +724,15 @@ async function takeSnapshot() {
                 // when an office/entity can be determined (e.g., FINANCE) unless the file is quarantined (executable) or KB mode.
                 const canMoveToOffice = office && office !== 'DESK' && !item.ai.risk_flags.includes('executable') && CURRENT_PROCESS_MODE !== 'KB';
 
-                // Insurance filename heuristic: when filename strongly indicates insurance, move to CFO even if entity is DESK
-                const insuranceKeywords = ['insurance','policy','premium','progressive','statefarm','geico','allstate'];
+                // Insurance filename/text heuristic: when filename or extracted text strongly indicates insurance, move to CFO even if entity is DESK
                 const fileLower = (item.filename || '').toLowerCase();
-                const insuranceHeuristic = insuranceKeywords.some(k => fileLower.includes(k));
+                const txtLower = (item.extractedText || '').toLowerCase();
+                const insuranceKeywords = [
+                  'insurance', 'ins', 'ins.', 'policy', 'premium', 'coverage', 'claim', 'deductible',
+                  'progressive', 'progresive', 'statefarm', 'state farm', 'geico', 'allstate',
+                  'nationwide', 'liberty mutual', 'usaa', 'auto insurance', 'home insurance', 'liability'
+                ];
+                const insuranceHeuristic = insuranceKeywords.some(k => fileLower.includes(k) || txtLower.includes(k));
 
                 if (canMoveToOffice) {
                     const src = item.source_path || path.join(inboxPath, item.filename);
