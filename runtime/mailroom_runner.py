@@ -14,7 +14,8 @@ from datetime import datetime, timezone
 
 # === CONFIGURATION ===
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-NAVI_ROOT = os.path.join(ROOT, 'NAVI')
+# Allow overriding NAVI_ROOT via environment (used by tests/CI)
+NAVI_ROOT = os.environ.get('NAVI_ROOT') or os.path.join(ROOT, 'NAVI')
 CONFIG_PATH = os.path.join(NAVI_ROOT, 'config', 'routing_config.json')
 PROCESSED_DIR = os.path.join(NAVI_ROOT, 'processed')
 OFFICES_DIR = os.path.join(NAVI_ROOT, 'offices')
@@ -87,7 +88,7 @@ def deliver_to_office(src_path, sidecar_path, office):
     if office not in VALID_OFFICES:
         office = DEFAULT_OFFICE
     
-    inbox = os.path.join(ROOT, 'NAVI', 'offices', office, 'inbox')
+    inbox = os.path.join(NAVI_ROOT, 'offices', office, 'inbox')
     os.makedirs(inbox, exist_ok=True)
     
     filename = os.path.basename(src_path)
@@ -112,8 +113,8 @@ def process_files():
     routed = []
     routing_details = {}  # office -> [files]
     
-    processed_dir = os.path.join(ROOT, 'NAVI', 'processed')
-    offices_dir = os.path.join(ROOT, 'NAVI', 'offices')
+    processed_dir = PROCESSED_DIR
+    offices_dir = os.path.join(NAVI_ROOT, 'offices')
 
     if not os.path.exists(processed_dir):
         return routed, routing_details
@@ -170,7 +171,7 @@ def process_packages():
     Deliver packages from NAVI/packages to office inboxes.
     Package naming: OFFICE_BATCH-XXXX_YYYYMMDD
     """
-    packages_dir = os.path.join(ROOT, 'NAVI', 'packages')
+    packages_dir = PACKAGES_DIR
     if not os.path.exists(packages_dir):
         return []
     
