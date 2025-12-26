@@ -46,8 +46,20 @@ jobs:
       - name: Friendly guidance (failure only)
         if: failure()
         run: |
-          echo "Compliance check failed: unexpected items exist at repository root." >&2
-          echo "Fix options:" >&2
-          echo "  - Move files/directories into one of the approved top-level folders listed in README_COMPLIANCE.md" >&2
-          echo "  - If a new top-level folder is intentional, update README_COMPLIANCE.md and explain the change in this PR" >&2
+          echo "❌ Repository root structure check failed" >&2
+          echo "" >&2
+          echo "One or more unexpected files or folders were found at the repository root." >&2
+          echo "" >&2
+          echo "Why this matters:" >&2
+          echo "The repo root is intentionally kept clean to prevent drift, accidental artifacts, and tooling issues." >&2
+          echo "" >&2
+          echo "What to do:" >&2
+          echo "- Review the reported paths below" >&2
+          echo "- Move them into an appropriate subdirectory, or" >&2
+          echo "- If the item is intentional, add it to README_COMPLIANCE.md" >&2
+          echo "" >&2
+          echo "This check is currently non-blocking while we validate coverage. It will become required after a short stabilization period." >&2
+          echo "" >&2
+          echo "📄 See README_COMPLIANCE.md for the allowed root structure." >&2
+          echo "" >&2
           echo "The artifact 'root-structure-report' contains the detailed output." >&2
