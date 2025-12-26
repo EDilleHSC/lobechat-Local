@@ -2,17 +2,33 @@ const { spawn } = require('child_process');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const net = require('net');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 const RUNTIME_DIR = path.join(PROJECT_ROOT, 'runtime', 'current');
 
-function waitForHealth(port = 8005, timeoutMs = 15000) {
+// Allocate a free ephemeral TCP port safely
+async function getFreePort() {
+  return await new Promise((resolve, reject) => {
+    const s = net.createServer();
+    s.once('error', reject);
+    s.listen(0, '127.0.0.1', () => {
+      const port = s.address().port;
+      s.close(() => resolve(port));
+    });
+  });
+}
+
+function waitForHealth(port, timeoutMs = 60000) {
+  if (!port) throw new Error('waitForHealth requires a port');
   const deadline = Date.now() + timeoutMs;
   return new Promise((resolve, reject) => {
     (async function poll() {
       if (Date.now() > deadline) return reject(new Error('health check timeout'));
       try {
+        // Use a 2s socket timeout but poll more aggressively for faster detection
         http.get({ hostname: '127.0.0.1', port, path: '/health', timeout: 2000 }, res => {
+          // Only validate that the server responds 200 OK — do not treat /health as a deep system check
           if (res.statusCode === 200) return resolve();
           setTimeout(poll, 200);
         }).on('error', () => setTimeout(poll, 200));
@@ -26,51 +42,34 @@ function clearStaleFiles() {
   try { fs.unlinkSync(path.join(RUNTIME_DIR, 'mcp_server.pid')); } catch (e) { }
 }
 
-function spawnServer(port = 8005, env = {}) {
-  const envVars = Object.assign({}, process.env, env, { PORT: String(port) });
-  const node = process.execPath;
-  const child = spawn(node, [path.join(RUNTIME_DIR, 'mcp_server.js')], { env: envVars, stdio: ['ignore', 'pipe', 'pipe'] });
-  return child;
-}
+// spawnServer helper removed — tests must always spawn a strictly-isolated server using getFreePort()
+
 
 async function startTestServer(opts = {}) {
-  const port = opts.port || 0; // 0 => let OS choose; but we prefer explicit port for tests
-  const actualPort = opts.port || 8005;
-
-  // If a server is already running and healthy on the desired port, prefer to reuse it
-  try {
-    await waitForHealth(actualPort, 2000);
-    console.log('startTestServer: existing server healthy on port', actualPort);
-    return { port: actualPort, proc: null, async stop() { /* no-op for shared server */ } };
-  } catch (e) {
-    // not up yet — proceed to try starting a local instance
+  // Safety guard: refuse to run tests against a non-test NAVI_ROOT to avoid accidental corruption
+  const envNaviRoot = (process.env.NAVI_ROOT || (opts.env && opts.env.NAVI_ROOT) || '').toLowerCase();
+  if (envNaviRoot && !envNaviRoot.includes('navi_test')) {
+    throw new Error(`Refusing to run tests against non-test NAVI_ROOT: ${envNaviRoot}`);
   }
 
-  // If there's a PID file for an existing server, try to discover its listening port from logs and reuse it
-  try {
-    const pidFile = path.join(RUNTIME_DIR, 'mcp_server.pid');
-    if (fs.existsSync(pidFile)) {
-      const logPath = path.join(RUNTIME_DIR, 'server_out.log');
-      if (fs.existsSync(logPath)) {
-        const tail = fs.readFileSync(logPath, 'utf8').split(/\r?\n/).slice(-200).join('\n');
-        const m = tail.match(/Server will listen on port (\d+)/i);
-        if (m && m[1]) {
-          const detectedPort = Number(m[1]);
-          try {
-            await waitForHealth(detectedPort, 2000);
-            console.log('startTestServer: reusing existing server found from logs on port', detectedPort);
-            return { port: detectedPort, proc: null, async stop() { /* no-op for shared server */ } };
-          } catch (e) {
-            // existing server not healthy; fall through to spawn attempt
-          }
-        }
-      }
-    }
-  } catch (e) {
-    // ignore failures in this discovery step
+  // Determine the port to use. If the caller requested a specific port, try to bind it strictly and fail if unavailable.
+  let actualPort;
+  if (opts && typeof opts.port === 'number' && opts.port > 0) {
+    // Verify the requested port is free by attempting to listen on it briefly. If it's in use, fail immediately (no guessing).
+    await new Promise((resolve, reject) => {
+      const tester = net.createServer();
+      tester.once('error', (err) => { tester.close(() => reject(new Error(`Requested port ${opts.port} appears in use: ${err && err.message}`))); });
+      tester.listen(opts.port, '127.0.0.1', () => { actualPort = opts.port; tester.close(resolve); });
+    });
+  } else {
+    // Allocate an ephemeral free port
+    actualPort = await getFreePort();
   }
-
   clearStaleFiles();
+
+  // Always start a new, isolated server for tests to avoid accidental reuse of global instances.
+  // Do NOT attempt to scan logs, probe other ports, or reuse an existing server — fail fast instead.
+
 
   // Ensure an isolated NAVI_ROOT for this test server instance to avoid cross-test interference
   // If caller provided NAVI_ROOT in opts.env, use it; otherwise create a temporary NAVI_ROOT and
@@ -91,58 +90,98 @@ async function startTestServer(opts = {}) {
 
     // Expose this NAVI_ROOT to the test process so tests use the same directory
     process.env.NAVI_ROOT = naviRoot;
-    // Also ensure opts.env will be passed to child
-    opts.env = Object.assign({}, opts.env || {}, { NAVI_ROOT: naviRoot });
   } else {
-    // ensure the caller-provided NAVI_ROOT is present in child env
-    opts.env = Object.assign({}, opts.env || {}, { NAVI_ROOT: naviRoot });
+    // ensure the caller-provided NAVI_ROOT is present in child env and set
+    process.env.NAVI_ROOT = naviRoot;
   }
 
-  const child = spawnServer(actualPort, opts.env || {});
+  // Ensure tests run in NODE_ENV=test and disable the watcher to avoid startup churn
+  process.env.NODE_ENV = process.env.NODE_ENV || 'test';
+  process.env.DISABLE_WATCHER = '1';
 
-  // expose logs for debugging
-  child.stdout.on('data', d => process.stdout.write('[mcp stdout] ' + d.toString()));
-  child.stderr.on('data', d => process.stderr.write('[mcp stderr] ' + d.toString()));
+  // Provide a unique PID file per spawned instance so multiple test servers can run concurrently without colliding
+  const pidPath = path.join(naviRoot, 'mcp_server.pid');
+  opts.env = Object.assign({}, opts.env || {}, {
+    NAVI_ROOT: naviRoot,
+    NODE_ENV: process.env.NODE_ENV,
+    DISABLE_WATCHER: '1',
+    WATCHER_DISABLED: '1',
+    MCP_TEST_MODE: '1',
+    MCP_PID_FILE: pidPath
+  });
 
-  // wait for health endpoint (with diagnostics on failure)
+  const nodePath = process.execPath;
+  const child = spawn(nodePath, [path.join(RUNTIME_DIR, 'mcp_server.js')], {
+    cwd: RUNTIME_DIR,
+    env: Object.assign({}, process.env, opts.env || {}, { PORT: String(actualPort) }),
+    stdio: ['ignore', 'pipe', 'pipe']
+  });
+
+  // Capture a small tail of child's stdout/stderr for better diagnostics in case of early exit
+  let childStdoutBuf = '';
+  let childStderrBuf = '';
+  child.stdout.on('data', d => {
+    const s = d.toString();
+    childStdoutBuf = (childStdoutBuf + s).slice(-2000);
+    process.stdout.write('[mcp stdout] ' + s);
+  });
+  child.stderr.on('data', d => {
+    const s = d.toString();
+    childStderrBuf = (childStderrBuf + s).slice(-2000);
+    process.stderr.write('[mcp stderr] ' + s);
+  });
+
+  // Fail FAST if the child exits at any point — do not wait for /health when the child dies
+  const exitPromise = new Promise((_, reject) => {
+    child.once('exit', (code, signal) => {
+      const logPath = path.join(RUNTIME_DIR, 'server_out.log');
+      let tail = '';
+      try { if (fs.existsSync(logPath)) tail = fs.readFileSync(logPath, 'utf8').split(/\r?\n/).slice(-200).join('\n'); } catch (e) { }
+      reject(new Error(`startTestServer: mcp_server exited early (code=${code}, signal=${signal})\n${tail}\n=== child stdout ===\n${childStdoutBuf}\n=== child stderr ===\n${childStderrBuf}`));
+    });
+  });
+
+  // If the child already exited synchronously (rare), fail immediately with diagnostics
+  if (typeof child.exitCode !== 'undefined' && child.exitCode !== null) {
+    const logPath = path.join(RUNTIME_DIR, 'server_out.log');
+    let tail = '';
+    try { if (fs.existsSync(logPath)) tail = fs.readFileSync(logPath, 'utf8').split(/\r?\n/).slice(-200).join('\n'); } catch (e) { }
+    throw new Error('mcp_server child exited prematurely with code ' + child.exitCode + '\n' + tail.slice(-1000) + '\n=== child stdout ===\n' + (childStdoutBuf || '') + '\n=== child stderr ===\n' + (childStderrBuf || ''));
+  }
+
+
+
+  // wait for health endpoint (with diagnostics on failure) — race against early child exit
   try {
-    await waitForHealth(actualPort, opts.timeoutMs || 20000);
+    const healthPromise = waitForHealth(actualPort, opts.timeoutMs || 60000);
+
+    // Race health check against the exitPromise (which rejects immediately if child dies)
+    await Promise.race([healthPromise, exitPromise]);
+    // Ensure health actually resolved (this will re-throw if waitForHealth rejected)
+    await healthPromise;
   } catch (err) {
-    // If health check fails, make a best-effort scan for any healthy server on common ports for the remainder of the timeout
-    const timeout = opts.timeoutMs || 20000;
-    const deadline = Date.now() + timeout;
-    const candidates = Array.from(new Set([actualPort, 8007, 8005, 8020]));
-    let foundPort = null;
-    while (Date.now() < deadline && !foundPort) {
-      for (const p of candidates) {
-        try {
-          await waitForHealth(p, 2000);
-          foundPort = p;
-          break;
-        } catch (e) {
-          // ignore and try next
-        }
-      }
-      if (!foundPort) await new Promise(r => setTimeout(r, 250));
-    }
-
-    if (foundPort) {
-      console.log('startTestServer: detected existing server on port', foundPort);
-      return { port: foundPort, proc: null, async stop() { /* no-op for shared server */ } };
-    }
-
-    // Diagnostic output and fail
+    // Diagnostic output and fail — do NOT try to reuse or detect other servers
     console.error('startTestServer: health check failed:', err && err.message ? err.message : err);
+    let serverOutTail = '';
     try {
       const logPath = path.join(RUNTIME_DIR, 'server_out.log');
       if (fs.existsSync(logPath)) {
-        const tail = fs.readFileSync(logPath, 'utf8').split(/\r?\n/).slice(-100).join('\n');
-        console.error('--- server_out.log (last 100 lines) ---\n', tail);
+        const tail = fs.readFileSync(logPath, 'utf8').split(/\r?\n/).slice(-200).join('\n');
+        serverOutTail = tail;
+        console.error('--- server_out.log (last 200 lines) ---\n', tail);
       } else {
         console.error('server_out.log not found at', logPath);
       }
     } catch (e) { console.error('failed to read server_out.log', e); }
     try { console.error('Runtime dir listing:', fs.readdirSync(RUNTIME_DIR).slice(-50)); } catch (e) { }
+    try { if (child && typeof child.exitCode !== 'undefined') console.error('child.exitCode:', child.exitCode); } catch (e) { }
+
+    // Heuristic: if server_out.log shows the server is 'ready' or '[BIND] server.listening: true', try to extract a port and reuse it
+    // Do not attempt to reuse any running server — we intentionally fail fast. The diagnostics printed above
+    // (server_out.log, child stdout/stderr) are for the test author to analyze.
+
+
+    // No reuse or scanning — fail fast and let the caller inspect the diagnostics above.
     throw err;
   }
 
