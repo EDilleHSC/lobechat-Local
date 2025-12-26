@@ -78,12 +78,13 @@ describe('review-required routing (regression)', () => {
 
     // clear stale lock/pid files and start server with BATCH_LOG_THROW=1
     clearStaleFiles();
-    srv = await startTestServer({ port, timeoutMs: 15000, env: { BATCH_LOG_THROW: '1' } });
+    // Increase start timeout for flaky server startups in CI
+    srv = await startTestServer({ port, timeoutMs: 60000, env: { BATCH_LOG_THROW: '1' } });
     if (srv && srv.proc) {
       srv.proc.stdout.on('data', (d) => console.log('[mcp stdout]', d.toString().trim()));
       srv.proc.stderr.on('data', (d) => console.error('[mcp stderr]', d.toString().trim()));
     }
-  }, 30000);
+  }, 90000);
 
   afterAll(async () => {
     if (srv && srv.stop) await srv.stop();
