@@ -1,0 +1,53 @@
+# Compliance: Root Structure Check
+# Runs the tools/check_root_structure.py script on PRs and nightly to ensure
+# only approved top-level directories and files exist.
+name: "Compliance — Root Structure Check"
+
+on:
+  pull_request:
+    paths:
+      - 'README_COMPLIANCE.md'
+      - 'tools/**'
+      - '.github/**'
+      - '**/*'
+  schedule:
+    - cron: '0 6 * * *' # daily at 06:00 UTC
+
+jobs:
+  check-root-structure:
+    name: compliance/check-root-structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Run root structure check
+        id: root-check
+        run: |
+          python tools/check_root_structure.py --root "${{ github.workspace }}" --compliance README_COMPLIANCE.md --fail-on-violation > unexpected.txt || true
+          if [ -s unexpected.txt ]; then
+            echo "==== Unexpected items found in repo root ====" >&2
+            cat unexpected.txt >&2
+            exit 1
+          fi
+
+      - name: Upload report (failure only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: root-structure-report
+          path: unexpected.txt
+
+      - name: Friendly guidance (failure only)
+        if: failure()
+        run: |
+          echo "Compliance check failed: unexpected items exist at repository root." >&2
+          echo "Fix options:" >&2
+          echo "  - Move files/directories into one of the approved top-level folders listed in README_COMPLIANCE.md" >&2
+          echo "  - If a new top-level folder is intentional, update README_COMPLIANCE.md and explain the change in this PR" >&2
+          echo "The artifact 'root-structure-report' contains the detailed output." >&2
