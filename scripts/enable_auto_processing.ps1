@@ -15,6 +15,13 @@ if (-not (Test-Path $inbox)) {
 
 Write-Output "Starting NAVI auto-processing watcher. Inbox: $inbox" | Tee-Object -FilePath $log -Append
 
+# Guard: do not run watcher inside CI (GitHub Actions or other CI providers)
+if ($env:GITHUB_ACTIONS -eq 'true' -or $env:CI -eq 'true') {
+    "CI environment detected; exiting watcher." | Tee-Object -FilePath $log -Append
+    Write-Output "CI environment detected; exiting watcher."
+    exit 0
+}
+
 $fsw = New-Object System.IO.FileSystemWatcher $inbox -Property @{IncludeSubdirectories = $false; NotifyFilter = [IO.NotifyFilters]'FileName, LastWrite'; Filter='*.*'}
 
 # debounce helper
@@ -62,8 +69,8 @@ if (-not (Test-Path $logDir)) { New-Item -ItemType Directory -Path $logDir -Forc
 
 $global:fsw = $fsw
 
-# Register events with explicit logging (use absolute log path for event runspaces)
-$absLog = 'D:\05_AGENTS-AI\01_RUNTIME\VBoarder\NAVI\logs\auto_process.log'
+# Register events with explicit logging (use computed log path for event runspaces)
+$absLog = $log
 Register-ObjectEvent -InputObject $global:fsw -EventName Created -Action {
     $ts = Get-Date -Format u
     $name = $Event.SourceEventArgs.Name

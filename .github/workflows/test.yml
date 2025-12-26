@@ -13,7 +13,16 @@ jobs:
           node-version: '20'
       - name: Install deps
         run: npm ci
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Determine python path
+        id: pythonpath
+        run: echo "path=$(python -c 'import sys;print(sys.executable)')" >> "$GITHUB_OUTPUT"
       - name: Run Jest tests
+        env:
+          MAILROOM_PYTHON: ${{ steps.pythonpath.outputs.path }}
         run: npm test --silent
 
   pwsh-tests:

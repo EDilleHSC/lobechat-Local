@@ -21,6 +21,13 @@ $startupMsg = "Starting NAVI polling watcher. RepoRoot: $repoRoot, Inbox: $inbox
 $startupMsg | Out-File -FilePath $log -Append
 Write-Output $startupMsg
 
+# Guard: do not run watcher inside CI (GitHub Actions or other CI providers)
+if ($env:GITHUB_ACTIONS -eq 'true' -or $env:CI -eq 'true') {
+    "CI environment detected; exiting watcher." | Out-File -FilePath $log -Append
+    Write-Output "CI environment detected; exiting watcher."
+    exit 0
+}
+
 # state
 $global:lastSnapshot = @{}
 function Build-Snapshot {
