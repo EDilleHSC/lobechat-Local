@@ -1,0 +1,76 @@
+name: E2E Router-Mailroom Smoke
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  router-mailroom-smoke:
+    name: Router → Mailroom smoke (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: npm ci --silent
+
+      - name: Prepare temporary NAVI
+        run: |
+          TMP="$RUNNER_TEMP/navi-smoke"
+          rm -rf "$TMP" || true
+          mkdir -p "$TMP/NAVI/inbox"
+          mkdir -p "$TMP/NAVI/offices/CTO/inbox"
+          mkdir -p "$TMP/NAVI/processed"
+          mkdir -p "$TMP/NAVI/packages"
+          cat > "$TMP/NAVI/config/routing_config.json" <<'JSON'
+          {
+            "filename_overrides": { "Navi_": "CTO" },
+            "function_to_office": { "Finance": "CFO" }
+          }
+          JSON
+          echo "smoke content" > "$TMP/NAVI/inbox/Navi_smoke_test.txt"
+
+      - name: Run router CLI
+        run: |
+          export NAVI_ROOT="$RUNNER_TEMP/navi-smoke/NAVI"
+          node runtime/current/router.js --apply --force --limit 1
+
+      - name: Determine python path
+        id: pythonpath
+        run: echo "path=$(python -c 'import sys;print(sys.executable)')" >> "$GITHUB_OUTPUT"
+
+      - name: Run mailroom
+        env:
+          MAILROOM_PYTHON: ${{ steps.pythonpath.outputs.path }}
+        run: |
+          export NAVI_ROOT="$RUNNER_TEMP/navi-smoke/NAVI"
+          echo "Using MAILROOM_PYTHON=${MAILROOM_PYTHON}"
+          ${MAILROOM_PYTHON} runtime/mailroom_runner.py
+
+      - name: Verify delivery
+        run: |
+          if [ -f "$RUNNER_TEMP/navi-smoke/NAVI/offices/CTO/inbox/Navi_smoke_test.txt" ]; then
+            echo "DELIVERED to CTO";
+          else
+            echo "MISSING in CTO inbox"; ls -la "$RUNNER_TEMP/navi-smoke/NAVI/offices" || true; exit 1;
+          fi
+
+      - name: Upload artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: router-mailroom-smoke-artifacts
+          path: |
+            $RUNNER_TEMP/navi-smoke/NAVI/offices/**
+            $RUNNER_TEMP/navi-smoke/NAVI/config/routing_config.json
