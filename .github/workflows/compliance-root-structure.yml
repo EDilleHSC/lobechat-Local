@@ -26,40 +26,44 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Run root structure check
+      - name: Run root structure check (informational)
         id: root-check
         run: |
-          python tools/check_root_structure.py --root "${{ github.workspace }}" --compliance README_COMPLIANCE.md --fail-on-violation > unexpected.txt || true
+          # Run checker and capture output to unexpected.txt; do not fail the job
+          python tools/check_root_structure.py --root "${{ github.workspace }}" --compliance README_COMPLIANCE.md > unexpected.txt || true
           if [ -s unexpected.txt ]; then
-            echo "==== Unexpected items found in repo root ====" >&2
+            echo "==== Unexpected items found in repo root (non-blocking) ====" >&2
             cat unexpected.txt >&2
-            exit 1
+          else
+            echo "OK: no unexpected items found"
           fi
 
-      - name: Upload report (failure only)
-        if: failure()
+      - name: Upload report (informational)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: root-structure-report
           path: unexpected.txt
 
-      - name: Friendly guidance (failure only)
-        if: failure()
+      - name: Friendly guidance (informational)
+        if: always()
         run: |
-          echo "❌ Repository root structure check failed" >&2
-          echo "" >&2
-          echo "One or more unexpected files or folders were found at the repository root." >&2
-          echo "" >&2
-          echo "Why this matters:" >&2
-          echo "The repo root is intentionally kept clean to prevent drift, accidental artifacts, and tooling issues." >&2
-          echo "" >&2
-          echo "What to do:" >&2
-          echo "- Review the reported paths below" >&2
-          echo "- Move them into an appropriate subdirectory, or" >&2
-          echo "- If the item is intentional, add it to README_COMPLIANCE.md" >&2
-          echo "" >&2
-          echo "This check is currently non-blocking while we validate coverage. It will become required after a short stabilization period." >&2
-          echo "" >&2
-          echo "📄 See README_COMPLIANCE.md for the allowed root structure." >&2
-          echo "" >&2
-          echo "The artifact 'root-structure-report' contains the detailed output." >&2
+          if [ -s unexpected.txt ]; then
+            echo "❌ Repository root structure check found unexpected items" >&2
+            echo "" >&2
+            echo "One or more unexpected files or folders were found at the repository root." >&2
+            echo "" >&2
+            echo "Why this matters:" >&2
+            echo "The repo root is intentionally kept clean to prevent drift, accidental artifacts, and tooling issues." >&2
+            echo "" >&2
+            echo "What to do:" >&2
+            echo "- Review the reported paths in the 'root-structure-report' artifact" >&2
+            echo "- Move them into an appropriate subdirectory, or" >&2
+            echo "- If the item is intentional, add it to README_COMPLIANCE.md and explain in this PR" >&2
+            echo "" >&2
+            echo "This check is currently non-blocking while we validate coverage. It will become required after a short stabilization period." >&2
+            echo "" >&2
+            echo "📄 See README_COMPLIANCE.md for the allowed root structure." >&2
+          else
+            echo "No unexpected items; compliance check passed." >&2
+          fi
