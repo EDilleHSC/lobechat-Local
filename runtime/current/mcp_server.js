@@ -811,6 +811,7 @@ async function takeSnapshot() {
                     const src = item.source_path || path.join(inboxPath, item.filename);
                     try {
                         const route = 'CFO';
+                        office = route;
                         const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
                         item.ai.action = 'auto_routed';
                         item.ai.confidence = 95;
@@ -871,6 +872,7 @@ async function takeSnapshot() {
                     const src = item.source_path || path.join(inboxPath, item.filename);
                     try {
                         const route = 'CFO';
+                        office = route;
                         const routingMeta = { snapshot_id: new Date().toISOString().replace(/[:.]/g, '-') };
                     // Mark as auto-routed to align with router override (confidence high)
                     item.ai.action = 'auto_routed';

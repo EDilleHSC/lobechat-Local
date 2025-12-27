@@ -71,7 +71,8 @@ module.exports.applyRoute = async function applyRoute(opts) {
       const { assemblePackage } = require('./package');
       // pass repository root (parent of NAVI root) as naviRoot so package uses correct NAVI/packages under test/alt roots
       const repoRoot = path.resolve(naviRoot, '..');
-      const pkgResult = await assemblePackage({ office: route, files: [destPath], naviRoot: repoRoot });
+      const relFiles = [path.relative(repoRoot, destPath)];
+      const pkgResult = await assemblePackage({ office: route, files: relFiles, naviRoot: repoRoot });
 
       // copy package to office inbox
       const officeInbox = path.join(naviRoot, 'offices', route, 'inbox');
@@ -109,7 +110,8 @@ module.exports.applyRoute = async function applyRoute(opts) {
       return { applied: true, package: pkgResult.packageName, packagePath: pkgResult.packagePath, delivered_to: destPkgPath, metaPath };
     }
   } catch (err) {
-    // non-fatal: log elsewhere; fallback to simple move
+    // non-fatal: log and surface error for diagnostics; fallback to simple move
+    console.error(`[APPLIER] assemblePackage failed for ${route}:`, err && err.message ? err.message : err);
   }
 
   return { applied: true, destPath, metaPath, sidecar: destSidecar };
