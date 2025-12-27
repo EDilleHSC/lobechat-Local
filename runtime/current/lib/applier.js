@@ -71,7 +71,8 @@ module.exports.applyRoute = async function applyRoute(opts) {
       const { assemblePackage } = require('./package');
       // pass repository root (parent of NAVI root) as naviRoot so package uses correct NAVI/packages under test/alt roots
       const repoRoot = path.resolve(naviRoot, '..');
-      const pkgResult = await assemblePackage({ office: route, files: [destPath], naviRoot: repoRoot });
+      const relFiles = [path.relative(repoRoot, destPath)];
+      const pkgResult = await assemblePackage({ office: route, files: relFiles, naviRoot: repoRoot });
 
       // copy package to office inbox
       const officeInbox = path.join(naviRoot, 'offices', route, 'inbox');
