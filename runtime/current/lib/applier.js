@@ -110,7 +110,8 @@ module.exports.applyRoute = async function applyRoute(opts) {
       return { applied: true, package: pkgResult.packageName, packagePath: pkgResult.packagePath, delivered_to: destPkgPath, metaPath };
     }
   } catch (err) {
-    // non-fatal: log elsewhere; fallback to simple move
+    // non-fatal: log and surface error for diagnostics; fallback to simple move
+    console.error(`[APPLIER] assemblePackage failed for ${route}:`, err && err.message ? err.message : err);
   }
 
   return { applied: true, destPath, metaPath, sidecar: destSidecar };
